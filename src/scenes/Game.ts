@@ -1,6 +1,7 @@
 import { Input, Scene, Textures, Tilemaps } from 'phaser';
 import { Math } from 'phaser';
 import { Player } from '../objects/Player';
+import { PCControls } from '../controls/PCControls';
 
 
 export class Game extends Scene
@@ -27,16 +28,18 @@ export class Game extends Scene
         this.generatePlayer();
         this.input.setDefaultCursor("url(assets/cursor.png), pointer")
         document.addEventListener('contextmenu', event => event.preventDefault());
+        PCControls.player = this.player;
+        PCControls.input = this.input;
     }
 
     update(time:number, delta:number){
-        console.log(this.player.idle);
-        this.input.on("pointerdown", (p:Input.Pointer) => {this.player.idle = false, this.movePlayer(p, delta);})
+        /*this.input.on("pointerdown", (p:Input.Pointer) => {this.player.idle = false, this.movePlayer(p, delta);})
         this.input.on("pointermove",  (p:Input.Pointer) => {
             this.movePlayer(p, delta)
         })
         this.input.on("pointerup", ()=>{this.player.setVelocity(0,0), this.player.idle = true})
-        this.input.mousePointer.active = false;
+        this.input.mousePointer.active = false;*/
+        PCControls.update(delta);
     }
 
     generateMap(){
@@ -72,7 +75,7 @@ export class Game extends Scene
         this.cameras.main.centerOn(this.player.x, this.player.y)
     }
 
-    movePlayer(p:Input.Pointer, delta: number){
+    /*movePlayer(p:Input.Pointer, delta: number){
         {   
             if(!this.player.idle && p.button === 0){
                 const direction = new Math.Vector2(p.worldX - this.player.getCenter().x, p.worldY - this.player.getCenter().y);
@@ -80,5 +83,5 @@ export class Game extends Scene
                 this.player.setVelocity(direction.x*delta/1000*this.player.speed, direction.y*delta/1000*this.player.speed)
             }
         }
-    }
+    }*/
 }

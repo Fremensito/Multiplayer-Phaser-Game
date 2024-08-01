@@ -1,4 +1,4 @@
-import { GameObjects, Physics, Scene } from "phaser";
+import { GameObjects, Input, Physics, Scene, Math } from "phaser";
 
 
 export class Player extends Physics.Arcade.Sprite{
@@ -19,7 +19,11 @@ export class Player extends Physics.Arcade.Sprite{
         scene.physics.add.existing(this)
     }
 
-    something(){
-       
+    move(p:Input.Pointer, delta: number){
+        if(!this.idle && p.button === 0){
+            const direction = new Math.Vector2(p.worldX - this.getCenter().x, p.worldY - this.getCenter().y);
+            direction.normalize()
+            this.setVelocity(direction.x*delta/1000*this.speed, direction.y*delta/1000*this.speed)
+        }
     }
 }
