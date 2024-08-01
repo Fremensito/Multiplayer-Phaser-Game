@@ -33,13 +33,8 @@ export class Game extends Scene
     }
 
     update(time:number, delta:number){
-        /*this.input.on("pointerdown", (p:Input.Pointer) => {this.player.idle = false, this.movePlayer(p, delta);})
-        this.input.on("pointermove",  (p:Input.Pointer) => {
-            this.movePlayer(p, delta)
-        })
-        this.input.on("pointerup", ()=>{this.player.setVelocity(0,0), this.player.idle = true})
-        this.input.mousePointer.active = false;*/
-        PCControls.update(delta);
+        PCControls.update();
+        this.player.update(delta);
     }
 
     generateMap(){
@@ -74,14 +69,4 @@ export class Game extends Scene
         this.cameras.main.zoom = 3;
         this.cameras.main.centerOn(this.player.x, this.player.y)
     }
-
-    /*movePlayer(p:Input.Pointer, delta: number){
-        {   
-            if(!this.player.idle && p.button === 0){
-                const direction = new Math.Vector2(p.worldX - this.player.getCenter().x, p.worldY - this.player.getCenter().y);
-                direction.normalize()
-                this.player.setVelocity(direction.x*delta/1000*this.player.speed, direction.y*delta/1000*this.player.speed)
-            }
-        }
-    }*/
 }

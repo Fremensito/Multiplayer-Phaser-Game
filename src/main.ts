@@ -11,7 +11,9 @@ const config: Types.Core.GameConfig = {
     backgroundColor: "ffffff",
     physics: {
         default: "arcade",
-
+        arcade: {
+            debug: true
+        }
     },
     scale: {
         mode: Scale.NONE,
