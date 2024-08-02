@@ -6,9 +6,11 @@ export class PCControls{
     static input: Input.InputPlugin;
     private static mouseLeft = false;
     static Q: Input.Keyboard.Key;
+    static W: Input.Keyboard.Key;
 
     public static setInput(){
         this.Q = this.input.keyboard!.addKey(Input.Keyboard.KeyCodes.Q)
+        this.W = this.input.keyboard!.addKey(Input.Keyboard.KeyCodes.W)
     }
     
     public static update(){
@@ -22,11 +24,16 @@ export class PCControls{
                 "basic right attack"
             ], 0)
         }
+
+        if(Input.Keyboard.JustDown(this.W)){
+            this.player.attacking = true;
+            this.player.play({key: "W", repeat: 0});
+        }
         
         this.input.on("pointerdown", (p:Input.Pointer) => {
             this.player.idle = false;
             this.player.changeDirectionInput(p);
-            this.mouseLeft = true
+            this.mouseLeft = true;
         });
 
         this.input.on("pointermove",  (p:Input.Pointer) => {

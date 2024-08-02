@@ -41,6 +41,8 @@ export class Player extends Physics.Arcade.Sprite{
         this.generateAnimations("basic right attack", "player basic attack", 5, 9, this.attackSpeed);
         this.generateAnimations("basic left attack", "player basic attack", 10, 14, this.attackSpeed);
         this.generateAnimations("basic back attack", "player basic attack", 15, 19, this.attackSpeed);
+
+        this.generateAnimations("W", "player w", 0, 4, 12)
     }
 
     generateAnimations(name: string, texture: string, start:number, end: number, frameRate: number){

@@ -21,6 +21,7 @@ export class Game extends Scene
         this.load.spritesheet("player", "scythe-girl-walking.png", {frameWidth:64, frameHeight:64});
         this.load.spritesheet("player idle", "scythe-girl-idle.png", {frameWidth:64, frameHeight:64});
         this.load.spritesheet("player basic attack", "scythe-girl-basic-attack.png", {frameWidth:64, frameHeight:64})
+        this.load.spritesheet("player w", "scythe-girl-W.png", {frameWidth:64, frameHeight:64})
     }
 
     create ()
