@@ -11,7 +11,7 @@ export class Game extends Scene
 
     constructor ()
     {
-        super('Game');
+        super("Game");
     }
 
     preload ()
@@ -20,16 +20,18 @@ export class Game extends Scene
         this.load.image('tile-map', 'first-lv-tilemap.png');
         this.load.spritesheet("player", "scythe-girl-walking.png", {frameWidth:64, frameHeight:64});
         this.load.spritesheet("player idle", "scythe-girl-idle.png", {frameWidth:64, frameHeight:64});
+        this.load.spritesheet("player basic attack", "scythe-girl-basic-attack.png", {frameWidth:64, frameHeight:64})
     }
 
     create ()
-    {   
+    {      
         this.generateMap();
         this.generatePlayer();
         this.input.setDefaultCursor("url(assets/cursor.png), pointer")
         document.addEventListener('contextmenu', event => event.preventDefault());
         PCControls.player = this.player;
         PCControls.input = this.input;
+        PCControls.setInput();
     }
 
     update(time:number, delta:number){
