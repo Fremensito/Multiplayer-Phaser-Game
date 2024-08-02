@@ -4,12 +4,12 @@ import {Input, Physics, Scene, Math } from "phaser";
 export class Player extends Physics.Arcade.Sprite{
     speed:number;
     idle: boolean;
-    directions = {
+    /*directions = {
         up:  {x:0, y:1},
         right: {x:1, y: 0},
         down: {x:0, y: -1},
         left: {x: -1, y: 0}
-    }
+    }*/
     direction = Math.Vector2.ZERO;
     pointToMove = Math.Vector2.ZERO;
     PI = Math.PI2/2;
@@ -22,20 +22,25 @@ export class Player extends Physics.Arcade.Sprite{
         scene.physics.add.existing(this)
         this.body?.setSize(20, 20)
 
-        this.generateAnimations("walk front", 0, 5);
-        this.generateAnimations("walk right", 6, 11);
-        this.generateAnimations("walk left", 12, 17);
-        this.generateAnimations("walk back", 18, 23);
+        this.generateAnimations("walk front", "player", 0, 5, 8);
+        this.generateAnimations("walk right",  "player", 6, 11, 8);
+        this.generateAnimations("walk left",  "player", 12, 17, 8);
+        this.generateAnimations("walk back",  "player", 18, 23, 8);
+
+        this.generateAnimations("idle front", "player idle", 0, 1, 2);
+        this.generateAnimations("idle right", "player idle", 2, 3, 2);
+        this.generateAnimations("idle left", "player idle", 4 ,5 ,2);
+        this.generateAnimations("idle back", "player idle", 6, 7, 2);
     }
 
-    generateAnimations(name: string, start:number, end: number){
+    generateAnimations(name: string, texture: string, start:number, end: number, frameRate: number){
         this.scene.anims.create({
             key: name,
-            frames: this.scene.anims.generateFrameNumbers("player", {
+            frames: this.scene.anims.generateFrameNumbers(texture, {
                 start: start,
                 end: end
             }),
-            frameRate: 8,
+            frameRate: frameRate,
         })
     }
 
@@ -44,39 +49,46 @@ export class Player extends Physics.Arcade.Sprite{
         if(!this.idle){
             this.setVelocityX(this.direction.x * delta/1000 * this.speed);
             this.setVelocityY(this.direction.y * delta/1000 * this.speed);
-            this.updateWalkingAnimation();
         }
         if(this.checkPositionGoal()){
             this.idle = true;
             this.setVelocity(0,0);
         }
-
+        this.updateMovement()
     }
 
-    updateWalkingAnimation(){
+    updateBasicAnimation(animations: Array<string>){
         if(this.direction.angle() >= this.PI/4 && this.direction.angle() < 3*this.PI/4){
-            if(this.anims.getName() != "walk front"){
-                this.play({key: "walk front", repeat: -1});
+            if(this.anims.getName() != animations[0]){
+                this.play({key: animations[0], repeat: -1});
             }
         }
         if(this.direction.angle() >= 3*this.PI/4 && this.direction.angle() < 5*this.PI/4){
-            if(this.anims.getName() != "walk left"){
-                this.play({key: "walk left", repeat: -1});
+            if(this.anims.getName() != animations[1]){
+                this.play({key: animations[1], repeat: -1});
             }
         }
 
         if(this.direction.angle() >= 5*this.PI/4 && this.direction.angle() < 7*this.PI/4){
-            if(this.anims.getName() != "walk back"){
-                this.play({key: "walk back", repeat: -1});
+            if(this.anims.getName() != animations[2]){
+                this.play({key: animations[2], repeat: -1});
             }
         }
 
         if(this.direction.angle() >= 7*this.PI/4 || this.direction.angle() < this.PI/4){
-            if(this.anims.getName() != "walk right"){
-                this.play({key: "walk right", repeat: -1});
+            if(this.anims.getName() != animations[3]){
+                this.play({key: animations[3], repeat: -1});
             }
         }
     }
+
+    updateMovement(){
+        if(!this.idle)
+            this.updateBasicAnimation(["walk front", "walk left", "walk back", "walk right"]);
+        else
+            this.updateBasicAnimation(["idle front", "idle left", "idle back", "idle right"])
+    }
+
 
     changeDirectionInput(p:Input.Pointer){
         if(!this.idle && p.button === 0){
@@ -87,11 +99,13 @@ export class Player extends Physics.Arcade.Sprite{
         }
     }
 
+    //Updates the direction to the last point indicated by cursor
     updateDirection(){
         const direction = new Math.Vector2(this.pointToMove.x - this.getCenter().x, this.pointToMove.y - this.getCenter().y);
         this.direction = direction.normalize();
     }
 
+    //Checks if the player arrived to the position of the cursor
     checkPositionGoal(){
         return(
             (this.x >=this.pointToMove.x -2 && this.x <= this.pointToMove.x +2) &&

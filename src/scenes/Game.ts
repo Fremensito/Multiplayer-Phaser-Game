@@ -1,4 +1,4 @@
-import { Input, Scene, Textures, Tilemaps } from 'phaser';
+import { Scene, Tilemaps } from 'phaser';
 import { Math } from 'phaser';
 import { Player } from '../objects/Player';
 import { PCControls } from '../controls/PCControls';
@@ -65,6 +65,10 @@ export class Game extends Scene
 
         this.player.x = this.layer.getCenter().x;
         this.player.y = this.layer.getCenter().y;
+
+        //Makes the player look front
+        this.player.pointToMove.y = this.player.y + 10;
+        this.player.pointToMove.x = this.player.x;
         
         this.cameras.main.zoom = 3;
         this.cameras.main.centerOn(this.player.x, this.player.y)
