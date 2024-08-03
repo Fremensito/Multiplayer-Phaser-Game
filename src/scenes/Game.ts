@@ -32,7 +32,7 @@ export class Game extends Scene
         document.addEventListener('contextmenu', event => event.preventDefault());
         PCControls.player = this.player;
         PCControls.input = this.input;
-        PCControls.setInput();
+        PCControls.setInput(); 
     }
 
     update(time:number, delta:number){

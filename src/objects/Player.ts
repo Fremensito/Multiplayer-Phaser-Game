@@ -20,7 +20,7 @@ export class Player extends Physics.Arcade.Sprite{
     constructor(scene:Scene,x:number,y:number){
         super(scene, x, y, "player", 0);
         scene.add.existing(this);
-        this.speed = 2300;
+        this.speed = 40;
         this.idle = true;
         this.attacking = false;
         this.attackSpeed = 8
@@ -59,8 +59,8 @@ export class Player extends Physics.Arcade.Sprite{
     update(delta: number){
         this.updateDirection();
         if(!this.idle && !this.attacking){
-            this.setVelocityX(this.direction.x * delta/1000 * this.speed);
-            this.setVelocityY(this.direction.y * delta/1000 * this.speed);
+            this.setVelocityX(this.direction.x * this.speed);
+            this.setVelocityY(this.direction.y * this.speed);
         }
         else{
             this.setVelocity(0,0)
