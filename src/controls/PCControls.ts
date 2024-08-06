@@ -1,8 +1,8 @@
 import { Input } from "phaser";
-import { Player } from "../objects/Player";
+import { Character } from "../objects/Character";
 
 export class PCControls{
-    static player: Player;
+    static character: Character;
     static input: Input.InputPlugin;
     private static mouseLeft = false;
     static Q: Input.Keyboard.Key;
@@ -16,8 +16,8 @@ export class PCControls{
     public static update(){
 
         if(Input.Keyboard.JustDown(this.Q)){
-            this.player.attacking = true;
-            this.player.updateBasicAnimation([
+            this.character.attacking = true;
+            this.character.updateBasicAnimation([
                 "basic front attack",
                 "basic left attack",
                 "basic back attack",
@@ -26,22 +26,22 @@ export class PCControls{
         }
 
         if(Input.Keyboard.JustDown(this.W)){
-            this.player.attacking = true;
-            this.player.play({key: "W", repeat: 0});
+            this.character.attacking = true;
+            this.character.play({key: "W", repeat: 0});
         }
         
         this.input.on("pointerdown", (p:Input.Pointer) => {
-            this.player.idle = false;
-            this.player.changeDirectionInput(p);
+            this.character.idle = false;
+            this.character.changeDirectionInput(p);
             this.mouseLeft = true;
         });
 
         this.input.on("pointermove",  (p:Input.Pointer) => {
-            this.player.changeDirectionInput(p)
+            this.character.changeDirectionInput(p)
             if(this.mouseLeft)
-                this.player.idle = false;
+                this.character.idle = false;
         })
 
-        this.input.on("pointerup", ()=>{this.player.setVelocity(0,0), this.player.idle = true, this.mouseLeft = false})
+        this.input.on("pointerup", ()=>{this.character.setVelocity(0,0), this.character.idle = true, this.mouseLeft = false})
     }
 }

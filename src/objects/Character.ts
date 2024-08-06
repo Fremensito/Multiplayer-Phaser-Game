@@ -1,29 +1,26 @@
 import {Input, Physics, Scene, Math } from "phaser";
 import { PCControls } from "../controls/PCControls";
+import { Ability } from "../classes/Ability";
+import { ICharacter } from "../interfaces/Character";
 
-
-export class Player extends Physics.Arcade.Sprite{
+export class Character extends Physics.Arcade.Sprite{
     speed:number;
     idle: boolean;
     attacking: boolean;
-    /*directions = {
-        up:  {x:0, y:1},
-        right: {x:1, y: 0},
-        down: {x:0, y: -1},
-        left: {x: -1, y: 0}
-    }*/
     direction = Math.Vector2.ZERO;
     pointToMove = Math.Vector2.ZERO;
     PI = Math.PI2/2;
-    attackSpeed: number
+    attackSpeed: number;
+    abilities: Map<string, Ability>;
+    //TO DO: ADD TEXTURES ANIMATIONS DEPENDING OF THE CHARACTAR CLASS NAME
+    char_class: string;
 
-    constructor(scene:Scene,x:number,y:number){
-        super(scene, x, y, "player", 0);
+    constructor(scene: Scene, data:ICharacter){
+        super(scene, data.x, data.y, "player", 0);
         scene.add.existing(this);
-        this.speed = 40;
+        this.speed = data.speed;
         this.idle = true;
         this.attacking = false;
-        this.attackSpeed = 8
         scene.physics.add.existing(this)
         this.body?.setSize(20, 20)
 
@@ -37,12 +34,14 @@ export class Player extends Physics.Arcade.Sprite{
         this.generateAnimations("idle left", "player idle", 4 ,5 ,2);
         this.generateAnimations("idle back", "player idle", 6, 7, 2);
 
-        this.generateAnimations("basic front attack", "player basic attack", 0, 4, this.attackSpeed);
-        this.generateAnimations("basic right attack", "player basic attack", 5, 9, this.attackSpeed);
-        this.generateAnimations("basic left attack", "player basic attack", 10, 14, this.attackSpeed);
-        this.generateAnimations("basic back attack", "player basic attack", 15, 19, this.attackSpeed);
+        this.generateAnimations("basic front attack", "player basic attack", 0, 4, data.abilities[0].speed);
+        this.generateAnimations("basic right attack", "player basic attack", 5, 9, data.abilities[0].speed);
+        this.generateAnimations("basic left attack", "player basic attack", 10, 14, data.abilities[0].speed);
+        this.generateAnimations("basic back attack", "player basic attack", 15, 19, data.abilities[0].speed);
 
         this.generateAnimations("W", "player w", 0, 4, 12)
+        this.abilities = new Map<string, Ability>;
+        this.abilities.set("Q", new Ability(data.abilities[0]))
     }
 
     generateAnimations(name: string, texture: string, start:number, end: number, frameRate: number){

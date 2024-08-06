@@ -1,27 +1,32 @@
 import { Scene, Tilemaps } from 'phaser';
 import { Math } from 'phaser';
-import { Player } from '../objects/Player';
+import { Player } from '../classes/Player';
 import { PCControls } from '../controls/PCControls';
+import { UI } from './UI';
+import { Character } from '../objects/Character';
+import { NETManager } from '../managers/NETManager';
 
 
 export class Game extends Scene
 {   
-    player:Player;
+    character:Character;
+    player: Player
     layer: Tilemaps.TilemapLayer;
 
     constructor ()
     {
         super("Game");
+        this.player = NETManager.getPlayer("s", "s");
     }
 
     preload ()
-    {
+    {   
         this.load.setPath('assets');
         this.load.image('tile-map', 'first-lv-tilemap.png');
-        this.load.spritesheet("player", "scythe-girl-walking.png", {frameWidth:64, frameHeight:64});
-        this.load.spritesheet("player idle", "scythe-girl-idle.png", {frameWidth:64, frameHeight:64});
-        this.load.spritesheet("player basic attack", "scythe-girl-basic-attack.png", {frameWidth:64, frameHeight:64})
-        this.load.spritesheet("player w", "scythe-girl-W.png", {frameWidth:64, frameHeight:64})
+        this.load.spritesheet("player", "classes/scythe-girl/walking.png", {frameWidth:64, frameHeight:64});
+        this.load.spritesheet("player idle", "classes/scythe-girl/idle.png", {frameWidth:64, frameHeight:64});
+        this.load.spritesheet("player basic attack", "classes/scythe-girl/basic-attack.png", {frameWidth:64, frameHeight:64})
+        this.load.spritesheet("player w", "classes/scythe-girl/W.png", {frameWidth:64, frameHeight:64})
     }
 
     create ()
@@ -30,14 +35,16 @@ export class Game extends Scene
         this.generatePlayer();
         this.input.setDefaultCursor("url(assets/cursor.png), pointer")
         document.addEventListener('contextmenu', event => event.preventDefault());
-        PCControls.player = this.player;
+        PCControls.character = this.character;
         PCControls.input = this.input;
         PCControls.setInput(); 
+        const ui = new UI(this.character);
+        this.game.scene.add("UI", ui, true);
     }
 
     update(time:number, delta:number){
         PCControls.update();
-        this.player.update(delta);
+        this.character.update(delta);
     }
 
     generateMap(){
@@ -61,19 +68,19 @@ export class Game extends Scene
     }
 
     generatePlayer(){
-        this.player = new Player(
+        this.character = new Character(
             this, 
-            this.game.config.width as number/2,
-            this.game.config.height as number/2);
+            this.player.character
+        );
 
-        this.player.x = this.layer.getCenter().x;
-        this.player.y = this.layer.getCenter().y;
+        this.character.x = this.layer.getCenter().x;
+        this.character.y = this.layer.getCenter().y;
 
-        //Makes the player look front
-        this.player.pointToMove.y = this.player.y + 10;
-        this.player.pointToMove.x = this.player.x;
+        //Makes the.character look front
+        this.character.pointToMove.y = this.character.y + 10;
+        this.character.pointToMove.x = this.character.x;
         
         this.cameras.main.zoom = 3;
-        this.cameras.main.centerOn(this.player.x, this.player.y)
+        this.cameras.main.centerOn(this.character.x, this.character.y)
     }
 }

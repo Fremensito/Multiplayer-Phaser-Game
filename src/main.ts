@@ -21,8 +21,7 @@ const config: Types.Core.GameConfig = {
         autoRound: true
     },
     scene: [
-        MainGame,
-        UI,
+        MainGame
     ],
     pixelArt: true,
 };

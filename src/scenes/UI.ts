@@ -1,4 +1,6 @@
 import { Display, GameObjects, Math, Scene, Textures } from "phaser";
+import { Character } from "../objects/Character";
+import { AbilitiesContainer } from "../UI/AbilitiesContainer";
 
 const shader = `
 precision mediump float;
@@ -23,8 +25,8 @@ float angleBetweenPoints(vec2 p1, vec2 p2) {
 }
 
 void main() {
+    vec4 color = texture2D(uTexture, vec2(outTexCoord.x, 1.0 - outTexCoord.y));
     if(cooldown_time >= 0.0){
-        vec4 color = texture2D(uTexture, vec2(outTexCoord.x, 1.0 - outTexCoord.y));
         vec4 cooldown_color = vec4(color.r*0.5, color.g*0.5, color.b*0.9, color.a);
         float angle = angleBetweenPoints(vec2(0.5,0.5), vec2(outTexCoord.x, outTexCoord.y));
         if(angle < cooldown_time){
@@ -34,67 +36,64 @@ void main() {
             gl_FragColor = cooldown_color;
         }
     }
+    else
+        gl_FragColor = color;
 }
 `
 const PI = Math.PI2/2;
 
 export class UI extends Scene{
-
-    abilityWidth: number;
-    abilityHeight: number;
-    shader_1: GameObjects.Shader
-    shader_2: GameObjects.Shader
-    testShader: Display.BaseShader
-    cooldown = 4000;
-    cooldown_time = 0;
+    character: Character;
+    abilitiesContainer: AbilitiesContainer;
+    abilityWidth = 32;
+    abilityHeight = 32;
     
-    constructor ()
+    constructor (character: Character)
     {
         super({key: "UI", active: true});
-        this.abilityWidth = this.abilityHeight = 32;
+        this.character = character;
     }
 
     preload(){
         this.load.setPath('assets');
-        this.load.image("hability", "ui/hability.png"); 
-        this.load.image("scythe hability", "ui/scythe_hability.png")
+        this.load.image("ability", "ui/hability.png"); 
+        this.load.image("scythe ability", "ui/scythe_hability.png")
     }
 
     create(){
-        this.testShader = new Display.BaseShader("XD", shader, undefined, {cooldown_time: {type: "1f", value: 0}});
-        this.shader_1 = this.add.shader(
-            this.testShader, 
-            this.game.config.width as number/2 - this.abilityWidth*2, 
-            this.game.config.height as number - this.abilityHeight, 
-            this.abilityWidth, 
-            this.abilityHeight, 
-            ["hability"],
+        this.cache.shader.add("ability shader", new Display.BaseShader("ability shader", shader, undefined, { cooldown_time: { type: "1f", value: -1.0 } }))
+
+        this.abilitiesContainer = new AbilitiesContainer(
+            this.abilityWidth * 4, 
+            this.abilityHeight,
+            new Math.Vector2(this.game.config.width as number /2, this.game.config.height as number - this.abilityHeight)
         )
 
-        console.log(this.shader_1)
-
-        this.textures.get("hability").setFilter(Textures.FilterMode.NEAREST);
-
-        this.shader_1.scale = 2;
-
-        this.shader_2 = this.add.shader(
-            this.testShader, 
-            this.game.config.width as number/2 - this.abilityWidth*2, 
-            this.game.config.height as number - this.abilityHeight, 
-            this.abilityWidth, 
-            this.abilityHeight, 
-            ["scythe hability"] 
-        )
-
-        this.textures.get("scythe hability").setFilter(Textures.FilterMode.NEAREST);
-
-        this.shader_2.scale = 2;
-
-        this.shader_1.setUniform("cooldown_time.value", 6.2)
-        this.shader_2.setUniform("cooldown_time.value", 6.2)
+        this.character.abilities.forEach(a => {
+            a.addShaders(
+                this.makeAbilityShader("ability"), 
+                this.makeAbilityShader("scythe ability")
+            )
+        })
+        this.abilitiesContainer.addElements([this.character.abilities.get("Q")!.shaders])
     }
 
-    update(time:number, delta: number){
+    makeAbilityShader(texture: string):GameObjects.Shader{
+        const shader = this.add.shader(
+            "ability shader", 
+            0, 
+            0, 
+            this.abilityWidth, 
+            this.abilityHeight, 
+            [texture],
+        )
+
+        this.textures.get(texture).setFilter(Textures.FilterMode.NEAREST);
+        shader.scale = 2;
+        return shader;
+    }
+
+    /*update(time:number, delta: number){
         if(this.cooldown_time >= 0){
             this.cooldown_time += delta;
             this.shader_1.setUniform("cooldown_time.value", (this.cooldown_time/this.cooldown)*2*PI)
@@ -105,5 +104,5 @@ export class UI extends Scene{
                 this.cooldown_time = -1;
             }
         }
-    }
+    }*/
 }
