@@ -30,7 +30,7 @@ export class Game extends Scene
     }
 
     create ()
-    {      
+    {   
         this.generateMap();
         this.generatePlayer();
         this.input.setDefaultCursor("url(assets/cursor.png), pointer")

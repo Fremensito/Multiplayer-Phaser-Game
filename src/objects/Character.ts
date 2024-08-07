@@ -12,6 +12,7 @@ export class Character extends Physics.Arcade.Sprite{
     PI = Math.PI2/2;
     attackSpeed: number;
     abilities: Map<string, Ability>;
+    attack_animations = ["basic front attack", "basic right attack", "basic left attack", "basic back attack"]
     //TO DO: ADD TEXTURES ANIMATIONS DEPENDING OF THE CHARACTAR CLASS NAME
     char_class: string;
 
@@ -34,14 +35,16 @@ export class Character extends Physics.Arcade.Sprite{
         this.generateAnimations("idle left", "player idle", 4 ,5 ,2);
         this.generateAnimations("idle back", "player idle", 6, 7, 2);
 
-        this.generateAnimations("basic front attack", "player basic attack", 0, 4, data.abilities[0].speed);
-        this.generateAnimations("basic right attack", "player basic attack", 5, 9, data.abilities[0].speed);
-        this.generateAnimations("basic left attack", "player basic attack", 10, 14, data.abilities[0].speed);
-        this.generateAnimations("basic back attack", "player basic attack", 15, 19, data.abilities[0].speed);
+        this.generateAnimations(this.attack_animations[0], "player basic attack", 0, 4, data.abilities[0].speed);
+        this.generateAnimations(this.attack_animations[1], "player basic attack", 5, 9, data.abilities[0].speed);
+        this.generateAnimations(this.attack_animations[2], "player basic attack", 10, 14, data.abilities[0].speed);
+        this.generateAnimations(this.attack_animations[3], "player basic attack", 15, 19, data.abilities[0].speed);
 
-        this.generateAnimations("W", "player w", 0, 4, 12)
+        this.generateAnimations("W", "player w", 0, 4, data.abilities[1].speed)
+
         this.abilities = new Map<string, Ability>;
         this.abilities.set("Q", new Ability(data.abilities[0]))
+        this.abilities.set("W", new Ability(data.abilities[1]))
     }
 
     generateAnimations(name: string, texture: string, start:number, end: number, frameRate: number){
@@ -61,6 +64,14 @@ export class Character extends Physics.Arcade.Sprite{
             this.setVelocityX(this.direction.x * this.speed);
             this.setVelocityY(this.direction.y * this.speed);
         }
+        else if(this.attacking){
+            switch(this.anims.getName()){
+                case this.attack_animations[0]:
+                case this.attack_animations[1]:
+                case this.attack_animations[2]:
+                case this.attack_animations[3]: this.setVelocity(0,0); break;
+            }
+        }
         else{
             this.setVelocity(0,0)
         }
@@ -70,62 +81,42 @@ export class Character extends Physics.Arcade.Sprite{
         }
         if(!this.attacking)
             this.updateMovement()
-        else if(PCControls.Q.isDown && !this.anims.isPlaying){
-            this.updateBasicAnimation([
-                "basic front attack",
-                "basic left attack",
-                "basic back attack",
-                "basic right attack"
-            ], 0)
-        }
         else if(!this.anims.isPlaying)
             this.attacking = false;
     }
 
-    updateBasicAnimation(animations: Array<string>, repeat: number){
+    updateBasicAnimation(animations: Array<string>, repeat: number, startFrame: number){
         if(this.direction.angle() >= this.PI/4 && this.direction.angle() < 3*this.PI/4){
             // Checks if animation is different of which is being played or the animation of "attack" has finished
             // but the attack button is still being pressed
-            if(this.anims.getName() != animations[0] || (this.anims.getName() == animations[0] && !this.anims.isPlaying)){
-                this.play({key: animations[0], repeat: repeat, startFrame:1});
-                if(this.attacking){
-                    this.changeDirectionInput(PCControls.input.mousePointer)
-                }
+            if(this.anims.getName() != animations[0]){
+                this.play({key: animations[0], repeat: repeat, startFrame: startFrame});
             }
         }
         if(this.direction.angle() >= 3*this.PI/4 && this.direction.angle() < 5*this.PI/4 ){
-            if(this.anims.getName() != animations[1] || (this.anims.getName() == animations[1] && !this.anims.isPlaying)){
-                this.play({key: animations[1], repeat: repeat, startFrame:1});
-                if(this.attacking){
-                    this.changeDirectionInput(PCControls.input.mousePointer)
-                }
+            if(this.anims.getName() != animations[1]){
+                this.play({key: animations[1], repeat: repeat, startFrame: startFrame});
             }
         }
 
         if(this.direction.angle() >= 5*this.PI/4 && this.direction.angle() < 7*this.PI/4){
-            if(this.anims.getName() != animations[2] || (this.anims.getName() == animations[2] && !this.anims.isPlaying)){
-                this.play({key: animations[2], repeat: repeat, startFrame:1});
-                if(this.attacking){
-                    this.changeDirectionInput(PCControls.input.mousePointer)
-                }
+            if(this.anims.getName() != animations[2]){
+                this.play({key: animations[2], repeat: repeat, startFrame: startFrame});
             }
         }
 
         if(this.direction.angle() >= 7*this.PI/4 || this.direction.angle() < this.PI/4){
-            if(this.anims.getName() != animations[3] || (this.anims.getName() == animations[3] && !this.anims.isPlaying)){
-                this.play({key: animations[3], repeat: repeat, startFrame:1});
-                if(this.attacking){
-                    this.changeDirectionInput(PCControls.input.mousePointer)
-                }
+            if(this.anims.getName() != animations[3]){
+                this.play({key: animations[3], repeat: repeat, startFrame: startFrame});
             }
         }
     }
 
     updateMovement(){
         if(!this.idle)
-            this.updateBasicAnimation(["walk front", "walk left", "walk back", "walk right"], -1);
+            this.updateBasicAnimation(["walk front", "walk left", "walk back", "walk right"], -1, 1);
         else
-            this.updateBasicAnimation(["idle front", "idle left", "idle back", "idle right"], -1)
+            this.updateBasicAnimation(["idle front", "idle left", "idle back", "idle right"], -1, 1)
     }
 
 
@@ -136,6 +127,19 @@ export class Character extends Physics.Arcade.Sprite{
             const direction = new Math.Vector2(p.worldX - this.getCenter().x, p.worldY - this.getCenter().y);
             this.direction = direction.normalize();
         }
+    }
+
+    changeDirectionAttack(p:Input.Pointer){
+        if(p.button === 0){
+            const direction = new Math.Vector2(p.worldX - this.getCenter().x, p.worldY - this.getCenter().y);
+            this.direction = direction.normalize();
+        }
+    }
+
+    WAction(p:Input.Pointer){
+        this.changeDirectionInput(p);
+        const velocity = this.direction.multiply(new Math.Vector2(5*this.speed, 5 * this.speed));
+        this.setVelocity(velocity.x, velocity.y)
     }
 
     //Updates the direction to the last point indicated by cursor

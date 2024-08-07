@@ -4,7 +4,7 @@ import { ICharacter } from "../interfaces/Character";
 const abilities = [
     {
         name: "basic attack",
-        cooldown: 3,
+        cooldown: 1000,
         speed: 8,
         mana_cost: 0,
         UI: {
@@ -12,6 +12,18 @@ const abilities = [
             abilityHeight: 32,
             slotResource: "ui/hability.png",
             iconResource: "ui/scythe_hability.png"
+        }
+    },
+    {
+        name: "W",
+        cooldown: 3000,
+        speed: 16,
+        mana_cost: 0,
+        UI: {
+            abilityWidth: 32,
+            abilityHeight: 32,
+            slotResource: "ui/W-slot.png",
+            iconResource: "ui/W-icon.png"
         }
     },
 ]
@@ -26,7 +38,6 @@ const character:ICharacter = {
 }
 
 export class NETManager{
-    
     static getPlayer(userName: string, password: string):Player{
         return new Player(character);
     };

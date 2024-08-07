@@ -16,7 +16,7 @@ export class AbilitiesContainer{
     addElements(elements: Array<UIShaders>){
         this.elements = elements;
         let element:UIShaders;
-        for(let i:number = -2; i < -1; i++){
+        for(let i:number = -2; i < 0; i++){
             element = this.elements[2 + i]
 
             element.icon.setOrigin();

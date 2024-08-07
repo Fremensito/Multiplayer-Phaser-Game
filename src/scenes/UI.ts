@@ -58,6 +58,8 @@ export class UI extends Scene{
         this.load.setPath('assets');
         this.load.image("ability", "ui/hability.png"); 
         this.load.image("scythe ability", "ui/scythe_hability.png")
+        this.load.image("W-slot", "ui/W-slot.png"); 
+        this.load.image("W-icon", "ui/W-icon.png")
     }
 
     create(){
@@ -69,13 +71,19 @@ export class UI extends Scene{
             new Math.Vector2(this.game.config.width as number /2, this.game.config.height as number - this.abilityHeight)
         )
 
-        this.character.abilities.forEach(a => {
-            a.addShaders(
-                this.makeAbilityShader("ability"), 
-                this.makeAbilityShader("scythe ability")
-            )
-        })
-        this.abilitiesContainer.addElements([this.character.abilities.get("Q")!.shaders])
+        this.character.abilities.get("Q")!.addShaders(
+            this.makeAbilityShader("ability"), 
+            this.makeAbilityShader("scythe ability")
+        )
+        this.character.abilities.get("W")!.addShaders(
+            this.makeAbilityShader("W-slot"), 
+            this.makeAbilityShader("W-icon")
+        )
+
+        this.abilitiesContainer.addElements([
+            this.character.abilities.get("Q")!.shaders,
+            this.character.abilities.get("W")!.shaders
+        ])
     }
 
     makeAbilityShader(texture: string):GameObjects.Shader{
@@ -93,16 +101,7 @@ export class UI extends Scene{
         return shader;
     }
 
-    /*update(time:number, delta: number){
-        if(this.cooldown_time >= 0){
-            this.cooldown_time += delta;
-            this.shader_1.setUniform("cooldown_time.value", (this.cooldown_time/this.cooldown)*2*PI)
-            this.shader_2.setUniform("cooldown_time.value", (this.cooldown_time/this.cooldown)*2*PI)
-            if(this.cooldown_time/this.cooldown*2*PI > PI*2){
-                console.log("delta:" + delta)
-                console.log(this.cooldown_time);
-                this.cooldown_time = -1;
-            }
-        }
-    }*/
+    update(time:number, delta: number){
+        this.character.abilities.forEach((a) => a.update(delta))
+    }
 }

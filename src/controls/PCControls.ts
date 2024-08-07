@@ -15,20 +15,30 @@ export class PCControls{
     
     public static update(){
 
-        if(Input.Keyboard.JustDown(this.Q)){
-            this.character.attacking = true;
-            this.character.updateBasicAnimation([
-                "basic front attack",
-                "basic left attack",
-                "basic back attack",
-                "basic right attack"
-            ], 0)
+        if(!this.character.attacking){
+            if(Input.Keyboard.JustDown(this.Q) && this.character.abilities.get("Q")!.available){
+                this.character.attacking = true;
+                this.character.abilities.get("Q")!.activate();
+                this.character.changeDirectionAttack(this.input.mousePointer)
+                this.character.updateBasicAnimation([
+                    "basic front attack",
+                    "basic left attack",
+                    "basic back attack",
+                    "basic right attack"
+                ], 0, 1)
+            }
+            else if(Input.Keyboard.JustDown(this.W) && this.character.abilities.get("W")!.available){
+                this.character.attacking = true;
+                this.character.abilities.get("W")!.activate();
+                this.character.WAction(this.input.mousePointer)
+                this.character.play({key: "W", repeat: 0});
+            }
         }
 
-        if(Input.Keyboard.JustDown(this.W)){
-            this.character.attacking = true;
-            this.character.play({key: "W", repeat: 0});
-        }
+        // if(Input.Keyboard.JustDown(this.W)){
+        //     this.character.attacking = true;
+        //     this.character.play({key: "W", repeat: 0});
+        // }
         
         this.input.on("pointerdown", (p:Input.Pointer) => {
             this.character.idle = false;
@@ -37,11 +47,12 @@ export class PCControls{
         });
 
         this.input.on("pointermove",  (p:Input.Pointer) => {
-            this.character.changeDirectionInput(p)
-            if(this.mouseLeft)
+            if(this.mouseLeft){
+                this.character.changeDirectionInput(p);
                 this.character.idle = false;
+            }
         })
 
-        this.input.on("pointerup", ()=>{this.character.setVelocity(0,0), this.character.idle = true, this.mouseLeft = false})
+        this.input.on("pointerup", ()=>{this.mouseLeft = false})
     }
 }

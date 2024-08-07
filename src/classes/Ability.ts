@@ -1,5 +1,6 @@
 import { GameObjects } from "phaser";
 import { IAbility, UIAbility, UIShaders } from "../interfaces/Ability";
+import { PI } from "../utils/GameUtils";
 
 export class Ability{
     available: boolean;
@@ -20,13 +21,21 @@ export class Ability{
     addShaders(slot: GameObjects.Shader, icon: GameObjects.Shader){
         this.shaders = {
             slot: slot,
-            icon: icon,
+            icon: icon
         };
     }
 
-    /*createShader(resource: string): GameObjects.Shader{
-        const shader = 
-    }*/
+    update(delta: number){
+        if(!this.available){
+            this.cooldown_time += delta;
+            this.shaders.icon.setUniform("cooldown_time.value", (this.cooldown_time/this.cooldown)*2*PI)
+            this.shaders.slot.setUniform("cooldown_time.value", (this.cooldown_time/this.cooldown)*2*PI)
+            if(this.cooldown_time/this.cooldown*2*PI > PI*2){
+                this.cooldown_time = -1;
+                this.available = true;
+            }
+        }
+    }
 
     activate(){
         if(this.available){
