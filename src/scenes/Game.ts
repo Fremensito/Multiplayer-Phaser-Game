@@ -25,8 +25,9 @@ export class Game extends Scene
         this.load.image('tile-map', 'first-lv-tilemap.png');
         this.load.spritesheet("player", "classes/scythe-girl/walking.png", {frameWidth:64, frameHeight:64});
         this.load.spritesheet("player idle", "classes/scythe-girl/idle.png", {frameWidth:64, frameHeight:64});
-        this.load.spritesheet("player basic attack", "classes/scythe-girl/basic-attack.png", {frameWidth:64, frameHeight:64})
-        this.load.spritesheet("player w", "classes/scythe-girl/W.png", {frameWidth:64, frameHeight:64})
+        this.load.spritesheet("player basic attack", "classes/scythe-girl/basic-attack.png", {frameWidth:64, frameHeight:64});
+        this.load.spritesheet("player w", "classes/scythe-girl/W.png", {frameWidth:64, frameHeight:64});
+        this.load.spritesheet("W-particles", "classes/scythe-girl/W-particles.png", {frameWidth:64, frameHeight:64});
     }
 
     create ()

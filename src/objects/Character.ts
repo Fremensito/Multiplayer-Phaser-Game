@@ -1,7 +1,8 @@
-import {Input, Physics, Scene, Math } from "phaser";
+import {Input, Physics, Scene, Math, Animations } from "phaser";
 import { PCControls } from "../controls/PCControls";
 import { Ability } from "../classes/Ability";
 import { ICharacter } from "../interfaces/Character";
+import { SpriteParticle } from "../classes/SpriteParticle";
 
 export class Character extends Physics.Arcade.Sprite{
     speed:number;
@@ -43,8 +44,30 @@ export class Character extends Physics.Arcade.Sprite{
         this.generateAnimations("W", "player w", 0, 4, data.abilities[1].speed)
 
         this.abilities = new Map<string, Ability>;
-        this.abilities.set("Q", new Ability(data.abilities[0]))
-        this.abilities.set("W", new Ability(data.abilities[1]))
+        this.abilities.set("Q", new Ability(data.abilities[0], scene))
+        this.abilities.set("W", new Ability(data.abilities[1], scene))
+
+        this.on(Animations.Events.ANIMATION_UPDATE, (a:Animations.Animation, f:Animations.AnimationFrame)=>{
+            if(this.anims.getName() == "W"){
+                switch(f.index){
+                    case 2: new SpriteParticle(scene, this.x, this.y, "particle" + f.index, "W-particles", 0, 1, 
+                        8
+                    ); break;
+
+                    case 3: new SpriteParticle(scene, this.x, this.y, "particle" + f.index, "W-particles", 2, 3, 
+                        8
+                    ); break;
+
+                    case 4: new SpriteParticle(scene, this.x, this.y, "particle" + f.index, "W-particles", 4, 5, 
+                        8
+                    ); break;
+
+                    case 5: new SpriteParticle(scene, this.x, this.y, "particle" + f.index, "W-particles", 6, 7, 
+                        8
+                    ); break;
+                }
+            }
+        })
     }
 
     generateAnimations(name: string, texture: string, start:number, end: number, frameRate: number){
@@ -138,7 +161,7 @@ export class Character extends Physics.Arcade.Sprite{
 
     WAction(p:Input.Pointer){
         this.changeDirectionInput(p);
-        const velocity = this.direction.multiply(new Math.Vector2(5*this.speed, 5 * this.speed));
+        const velocity = this.direction.multiply(new Math.Vector2(3*this.speed, 3*this.speed));
         this.setVelocity(velocity.x, velocity.y)
     }
 

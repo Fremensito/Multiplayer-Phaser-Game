@@ -1,12 +1,14 @@
 import { Player } from "../classes/Player";
+import { IAbility } from "../interfaces/Ability";
 import { ICharacter } from "../interfaces/Character";
 
-const abilities = [
+const abilities: Array<IAbility> = [
     {
         name: "basic attack",
         cooldown: 1000,
         speed: 8,
         mana_cost: 0,
+        particlesSprite: "",
         UI: {
             abilityWidth: 32,
             abilityHeight: 32,
@@ -17,8 +19,9 @@ const abilities = [
     {
         name: "W",
         cooldown: 3000,
-        speed: 16,
+        speed: 12,
         mana_cost: 0,
+        particlesSprite: "W-particles.png",
         UI: {
             abilityWidth: 32,
             abilityHeight: 32,

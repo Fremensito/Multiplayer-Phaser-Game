@@ -12,6 +12,7 @@ export interface IAbility{
     cooldown: number;
     speed: number;
     mana_cost: number;
+    particlesSprite: string;
     UI: UIAbility;
 }
 
