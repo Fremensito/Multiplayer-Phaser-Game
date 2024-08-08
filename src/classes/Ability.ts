@@ -29,7 +29,7 @@ export class Ability extends GameObjects.Sprite{
         };
     }
 
-    update(delta: number, frame:number){
+    update(delta: number){
         if(!this.available){
             this.cooldown_time += delta;
             this.shaders.icon.setUniform("cooldown_time.value", (this.cooldown_time/this.cooldown)*2*PI)

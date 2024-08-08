@@ -1,11 +1,13 @@
 import { Animations, GameObjects, Scene } from "phaser";
 
-export class SpriteParticle{
+export class SpriteParticle extends GameObjects.Sprite{
     constructor(scene: Scene, x: number, y: number, name: string, texture: string, start:number, end: number, frameRate: number){
 
-        const sprite = scene.add.sprite(x,y, name);
-
-        sprite.anims.create({
+        super(scene, x, y, "W-particles")
+        scene.add.existing(this)
+        //const sprite = scene.add.sprite(x,y, name);
+        
+        this.anims.create({
             key: name,
             frames: scene.anims.generateFrameNumbers(texture, {
                 start: start,
@@ -13,7 +15,7 @@ export class SpriteParticle{
             }),
             frameRate: frameRate,
         })
-        sprite.anims.play(name);
-        sprite.on(Animations.Events.ANIMATION_COMPLETE, ()=>sprite.destroy());
+        this.anims.play(name);
+        this.on(Animations.Events.ANIMATION_COMPLETE, ()=>this.destroy());
     }
 }

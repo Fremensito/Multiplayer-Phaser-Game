@@ -66,6 +66,7 @@ export class Character extends Physics.Arcade.Sprite{
                         8
                     ); break;
                 }
+                console.log(scene.children)
             }
         })
     }
@@ -81,7 +82,7 @@ export class Character extends Physics.Arcade.Sprite{
         })
     }
 
-    update(delta: number){
+    update(){
         this.updateDirection();
         if(!this.idle && !this.attacking){
             this.setVelocityX(this.direction.x * this.speed);

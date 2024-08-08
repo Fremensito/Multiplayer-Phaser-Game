@@ -1,4 +1,4 @@
-import { Scene, Tilemaps } from 'phaser';
+import { Core, GameObjects, Scene, Tilemaps, Time } from 'phaser';
 import { Math } from 'phaser';
 import { Player } from '../classes/Player';
 import { PCControls } from '../controls/PCControls';
@@ -12,6 +12,7 @@ export class Game extends Scene
     character:Character;
     player: Player
     layer: Tilemaps.TilemapLayer;
+    backgroundLoop: number;
 
     constructor ()
     {
@@ -41,13 +42,16 @@ export class Game extends Scene
         PCControls.setInput(); 
         const ui = new UI(this.character);
         this.game.scene.add("UI", ui, true);
-    }
+    }   
 
-    update(time:number, delta:number){
+    update(){
         PCControls.update();
-        this.character.update(delta);
+        this.character.update();
+        this.children.sortChildrenFlag = true;
+        //console.log("hello")
+        //this.children.depthSort()
     }
-
+    
     generateMap(){
         const map = this.make.tilemap({width:50, height: 50, tileWidth: 16, tileHeight: 16});
         const tiles = map.addTilesetImage("tile-map", undefined, 16, 16)!;
