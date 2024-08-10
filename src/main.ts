@@ -8,6 +8,11 @@ const config: Types.Core.GameConfig = {
     type: Phaser.WEBGL,
     width: 1024,
     height: 768,
+    fps: {
+        target: 60,
+        limit: 60,
+        min: 30
+    },
     parent: 'game-container',
     physics: {
         default: "arcade",

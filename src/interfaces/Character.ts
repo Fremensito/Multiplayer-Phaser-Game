@@ -9,4 +9,5 @@ export interface ICharacter extends ICharacterClass{
     speed: number;
     x:number;
     y:number;
+    id: string;
 }

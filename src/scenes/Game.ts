@@ -13,6 +13,8 @@ export class Game extends Scene
     player: Player
     layer: Tilemaps.TilemapLayer;
     backgroundLoop: number;
+    pcControls: PCControls
+    netManager: NETManager
 
     constructor ()
     {
@@ -37,17 +39,23 @@ export class Game extends Scene
         this.generatePlayer();
         this.input.setDefaultCursor("url(assets/cursor.png), pointer")
         document.addEventListener('contextmenu', event => event.preventDefault());
-        PCControls.character = this.character;
-        PCControls.input = this.input;
-        PCControls.setInput(); 
+
+        this.pcControls = new PCControls();
+        this.pcControls.character = this.character;
+        this.pcControls.input = this.input;
+        this.pcControls.setInput(); 
         const ui = new UI(this.character);
         this.game.scene.add("UI", ui, true);
+
+        NETManager.scene = this;
+        NETManager.connect();
     }   
 
-    update(){
-        PCControls.update();
+    update(time:number, delta:number){
+        this.pcControls.update();
         this.character.update();
-        this.children.sortChildrenFlag = true;
+        //this.children.sortChildrenFlag = true;
+        NETManager.update();
         //console.log("hello")
         //this.children.depthSort()
     }

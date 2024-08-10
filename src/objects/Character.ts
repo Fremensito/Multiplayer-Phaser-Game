@@ -3,19 +3,21 @@ import { PCControls } from "../controls/PCControls";
 import { Ability } from "../classes/Ability";
 import { ICharacter } from "../interfaces/Character";
 import { SpriteParticle } from "../classes/SpriteParticle";
+import { NETManager } from "../managers/NETManager";
 
 export class Character extends Physics.Arcade.Sprite{
     speed:number;
     idle: boolean;
     attacking: boolean;
-    direction = Math.Vector2.ZERO;
-    pointToMove = Math.Vector2.ZERO;
+    direction:Math.Vector2;
+    pointToMove: Math.Vector2;
     PI = Math.PI2/2;
     attackSpeed: number;
     abilities: Map<string, Ability>;
     attack_animations = ["basic front attack", "basic right attack", "basic left attack", "basic back attack"]
     //TO DO: ADD TEXTURES ANIMATIONS DEPENDING OF THE CHARACTAR CLASS NAME
     char_class: string;
+    character:ICharacter
 
     constructor(scene: Scene, data:ICharacter){
         super(scene, data.x, data.y, "player", 0);
@@ -26,22 +28,29 @@ export class Character extends Physics.Arcade.Sprite{
         scene.physics.add.existing(this)
         this.body?.setSize(20, 20)
 
-        this.generateAnimations("walk front", "player", 0, 5, 8);
-        this.generateAnimations("walk right",  "player", 6, 11, 8);
-        this.generateAnimations("walk left",  "player", 12, 17, 8);
-        this.generateAnimations("walk back",  "player", 18, 23, 8);
+        this.pointToMove = new Math.Vector2(0,0)
+        this.direction = new Math.Vector2(0,0)
 
-        this.generateAnimations("idle front", "player idle", 0, 1, 2);
-        this.generateAnimations("idle right", "player idle", 2, 3, 2);
-        this.generateAnimations("idle left", "player idle", 4 ,5 ,2);
-        this.generateAnimations("idle back", "player idle", 6, 7, 2);
+        this.character = data;
+        
+        if(NETManager.numberOfPlayers == 0){
+            this.generateAnimations("walk front", "player", 0, 5, 8);
+            this.generateAnimations("walk right",  "player", 6, 11, 8);
+            this.generateAnimations("walk left",  "player", 12, 17, 8);
+            this.generateAnimations("walk back",  "player", 18, 23, 8);
 
-        this.generateAnimations(this.attack_animations[0], "player basic attack", 0, 4, data.abilities[0].speed);
-        this.generateAnimations(this.attack_animations[1], "player basic attack", 5, 9, data.abilities[0].speed);
-        this.generateAnimations(this.attack_animations[2], "player basic attack", 10, 14, data.abilities[0].speed);
-        this.generateAnimations(this.attack_animations[3], "player basic attack", 15, 19, data.abilities[0].speed);
+            this.generateAnimations("idle front", "player idle", 0, 1, 2);
+            this.generateAnimations("idle right", "player idle", 2, 3, 2);
+            this.generateAnimations("idle left", "player idle", 4 ,5 ,2);
+            this.generateAnimations("idle back", "player idle", 6, 7, 2);
 
-        this.generateAnimations("W", "player w", 0, 4, data.abilities[1].speed)
+            this.generateAnimations(this.attack_animations[0], "player basic attack", 0, 4, data.abilities[0].speed);
+            this.generateAnimations(this.attack_animations[1], "player basic attack", 5, 9, data.abilities[0].speed);
+            this.generateAnimations(this.attack_animations[2], "player basic attack", 10, 14, data.abilities[0].speed);
+            this.generateAnimations(this.attack_animations[3], "player basic attack", 15, 19, data.abilities[0].speed);
+
+            this.generateAnimations("W", "player w", 0, 4, data.abilities[1].speed)
+        }
 
         this.abilities = new Map<string, Ability>;
         this.abilities.set("Q", new Ability(data.abilities[0], scene))
@@ -66,7 +75,6 @@ export class Character extends Physics.Arcade.Sprite{
                         8
                     ); break;
                 }
-                console.log(scene.children)
             }
         })
     }
@@ -144,24 +152,20 @@ export class Character extends Physics.Arcade.Sprite{
     }
 
 
-    changeDirectionInput(p:Input.Pointer){
-        if(p.button === 0){
-            this.pointToMove.x = p.worldX;
-            this.pointToMove.y = p.worldY;
-            const direction = new Math.Vector2(p.worldX - this.getCenter().x, p.worldY - this.getCenter().y);
-            this.direction = direction.normalize();
-        }
+    changeDirectionInput(vector:Math.Vector2){
+        this.pointToMove.x = vector.x;
+        this.pointToMove.y = vector.y;
+        const direction = new Math.Vector2(vector.x - this.getCenter().x, vector.y - this.getCenter().y);
+        this.direction = direction.normalize();
     }
 
-    changeDirectionAttack(p:Input.Pointer){
-        if(p.button === 0){
-            const direction = new Math.Vector2(p.worldX - this.getCenter().x, p.worldY - this.getCenter().y);
-            this.direction = direction.normalize();
-        }
+    changeDirectionAttack(vector:Math.Vector2){
+        const direction = new Math.Vector2(vector.x - this.getCenter().x, vector.y - this.getCenter().y);
+        this.direction = direction.normalize();
     }
 
-    WAction(p:Input.Pointer){
-        this.changeDirectionInput(p);
+    WAction(vector:Math.Vector2){
+        this.changeDirectionInput(vector);
         const velocity = this.direction.multiply(new Math.Vector2(3*this.speed, 3*this.speed));
         this.setVelocity(velocity.x, velocity.y)
     }
