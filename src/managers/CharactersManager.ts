@@ -1,9 +1,10 @@
-import { Math } from "phaser";
+import { Animations, Math } from "phaser";
 import { Character } from "../objects/Character";
 
 export class CharactersManager{
     static useQ(character:Character, vector:Math.Vector2){
         character.attacking = true;
+        character.idle = false;
         character.abilities.get("Q")!.activate();
         character.changeDirectionAttack(vector)
         character.updateBasicAnimation([
@@ -16,6 +17,7 @@ export class CharactersManager{
 
     static useW(character:Character, vector:Math.Vector2){
         character.attacking = true;
+        character.idle = false;
         character.abilities.get("W")!.activate();
         character.WAction(vector)
         character.play({key: "W", repeat: 0});

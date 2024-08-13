@@ -5,6 +5,7 @@ import { PCControls } from '../controls/PCControls';
 import { UI } from './UI';
 import { Character } from '../objects/Character';
 import { NETManager } from '../managers/NETManager';
+//import { PhysicsManager } from '../managers/PhysicsManager';
 
 
 export class Game extends Scene
@@ -14,7 +15,8 @@ export class Game extends Scene
     layer: Tilemaps.TilemapLayer;
     backgroundLoop: number;
     pcControls: PCControls
-    netManager: NETManager
+    delta:number;
+    timeElapsed = 0;
 
     constructor ()
     {
@@ -49,15 +51,27 @@ export class Game extends Scene
 
         NETManager.scene = this;
         NETManager.connect();
+
+        //PhysicsManager.startPhysics(this);
+        this.matter.world.getDelta = ()=>{
+            return this.game.loop.delta
+        }
+
+        const rectangle = this.matter.bodies.rectangle(380, 380, 20, 20)
+        rectangle.isSensor = true
+        this.matter.world.add(rectangle)
     }   
 
     update(time:number, delta:number){
         this.pcControls.update();
-        this.character.update();
+        this.character.update(delta);
         //this.children.sortChildrenFlag = true;
         NETManager.update();
+        this.delta = delta;
+        //this.updateMatter(delta)
         //console.log("hello")
         //this.children.depthSort()
+        //console.log(this.matter.world.getDelta())
     }
     
     generateMap(){
@@ -95,5 +109,14 @@ export class Game extends Scene
         
         this.cameras.main.zoom = 3;
         this.cameras.main.centerOn(this.character.x, this.character.y)
+    }
+
+    updateMatter(delta:number){
+        this.timeElapsed += delta;
+        if(this.timeElapsed > 16){
+            console.log("hello")
+            this.matter.world.update(Date.now(), this.timeElapsed.valueOf());
+            this.timeElapsed = 0
+        }
     }
 }

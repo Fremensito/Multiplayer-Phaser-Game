@@ -6,7 +6,6 @@ import { Character } from "../objects/Character";
 import { Game } from "../scenes/Game";
 import { Math } from "phaser";
 import { CharactersManager } from "./CharactersManager";
-import { Action } from "../interfaces/Action";
 import { Vector2 } from "../interfaces/Vector2";
 
 const abilities: Array<IAbility> = [
@@ -40,7 +39,7 @@ const abilities: Array<IAbility> = [
 
 
 const character:ICharacter = {
-    speed: 40,
+    speed: 0.6,
     x: 0,
     y: 0,
     abilities: abilities,
@@ -55,14 +54,26 @@ export class NETManager{
     static numberOfPlayers = 0;
     static scene:Game;
     static blocked = false;
+    static ping = 0;
+    static action = "";
+    static id: string;
+    static pingStart: number;
 
     static getPlayer(userName: string, password: string):Player{
         return new Player(character);
     };
     
     static connect(){
+        this.scene.time.addEvent({
+            delay: 1000,
+            callback: this.getPing,
+            callbackScope: this,
+            loop: true
+        })
         this.players = new Map<string,Character>;   
-        this.socket = io("https://www.exhausteddevs.lol:443");
+        this.socket = io("http://localhost:3000");
+        this.socket.on("connect", ()=>this.id = this.socket.id!)
+        this.socket.on("ping", ()=>{this.ping = this.scene.time.now - this.pingStart})
         this.socket.on("update", (characters: Array<Array<string|ICharacter>>)=>{
             characters.forEach(c => {
                 this.addPlayer(c[1] as ICharacter)
@@ -72,7 +83,13 @@ export class NETManager{
         this.socket.on("wk", (id:string, direction: Math.Vector2) => this.receiveWalk(id, direction))
         this.socket.on("q", (id:string,direction: Math.Vector2) => this.receiveQ(id, direction))
         this.socket.on("w", (id:string,direction: Math.Vector2) => this.receiveW(id, direction))
+        this.socket.on("state", (id:string, position:Vector2)=>this.receiveState(id, position))
         this.numberOfPlayers++;
+    }
+
+    static getPing(){
+        this.pingStart = this.scene.time.now
+        this.socket.emit("ping")
     }
 
     static addPlayer(character:ICharacter){
@@ -85,25 +102,38 @@ export class NETManager{
 
     static update(){
         this.players.forEach((c)=>{
-            c.update()
+            c.update(this.scene.delta)
         })
     }
 
     private static receiveWalk(id: string, direction: Math.Vector2){
-        CharactersManager.pointerDownMove(this.players.get(id)!, direction)
+        this.action = "Walk";
+        if(id != this.id)
+            CharactersManager.pointerDownMove(this.players.get(id)!, direction)
     }
 
     private static receiveQ(id: string, direction: Math.Vector2){
-        CharactersManager.useQ(this.players.get(id)!, direction)
+        this.action = "Q";
+        if(id != this.id)
+            CharactersManager.useQ(this.players.get(id)!, direction)
     }
 
     private static receiveW(id: string, direction: Math.Vector2){
-        CharactersManager.useW(this.players.get(id)!, direction)
+        this.action = "W";
+        if(id != this.id)
+            CharactersManager.useW(this.players.get(id)!, direction)
+    }
+
+    private static receiveState(id:string, position:Vector2){
+        if(id == this.socket.id){
+            this.scene.character.x = position.x;
+            this.scene.character.y = position.y;
+        }
     }
 
     static sendWalk(direction: Vector2){
         if(!this.blocked){
-            this.socket.emit("wk", {x: direction.x, y: direction.y})
+            this.socket.emit("wk", {x: direction.x, y: direction.y}, {x: this.scene.character.x, y:this.scene.character.y})
             this.blocked = true;
             this.scene.time.delayedCall(100, ()=>this.blocked=false)
         }
@@ -115,5 +145,9 @@ export class NETManager{
 
     static sendW(direction:Vector2){
         this.socket.emit("w", {x: direction.x, y:direction.y})
+    }
+
+    static sendState(idle: boolean, direction: Vector2){
+        this.socket.emit("state", idle, direction)
     }
 }

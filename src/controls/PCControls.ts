@@ -1,8 +1,7 @@
-import { Input, Math } from "phaser";
+import { Input, Math} from "phaser";
 import { Character } from "../objects/Character";
-import { CharactersManager } from "../managers/CharactersManager";
-import { Action } from "../interfaces/Action";
 import { NETManager } from "../managers/NETManager";
+import { CharactersManager } from "../managers/CharactersManager";
 
 export class PCControls{
     character: Character;
@@ -33,6 +32,7 @@ export class PCControls{
                 //     "basic back attack",
                 //     "basic right attack"
                 // ], 0, 1)
+
                 CharactersManager.useQ(
                     this.character,
                     new Math.Vector2(this.input.mousePointer.worldX, this.input.mousePointer.worldY)
@@ -47,6 +47,7 @@ export class PCControls{
                 // this.character.abilities.get("W")!.activate();
                 // this.character.WAction(this.input.mousePointer);
                 // this.character.play({key: "W", repeat: 0});
+                
                 CharactersManager.useW( 
                     this.character,
                     new Math.Vector2(this.input.mousePointer.worldX, this.input.mousePointer.worldY))

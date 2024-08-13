@@ -1,11 +1,10 @@
-import {Input, Physics, Scene, Math, Animations } from "phaser";
-import { PCControls } from "../controls/PCControls";
+import {Input, Physics, Scene, Math, Animations, GameObjects } from "phaser";
 import { Ability } from "../classes/Ability";
 import { ICharacter } from "../interfaces/Character";
 import { SpriteParticle } from "../classes/SpriteParticle";
 import { NETManager } from "../managers/NETManager";
 
-export class Character extends Physics.Arcade.Sprite{
+export class Character extends Physics.Matter.Sprite{
     speed:number;
     idle: boolean;
     attacking: boolean;
@@ -18,15 +17,16 @@ export class Character extends Physics.Arcade.Sprite{
     //TO DO: ADD TEXTURES ANIMATIONS DEPENDING OF THE CHARACTAR CLASS NAME
     char_class: string;
     character:ICharacter
+    delta:number
+    //rectangle: GameObjects.Rectangle
 
     constructor(scene: Scene, data:ICharacter){
-        super(scene, data.x, data.y, "player", 0);
+        super(scene.matter.world, data.x, data.y, "player", 0);
         scene.add.existing(this);
         this.speed = data.speed;
         this.idle = true;
         this.attacking = false;
-        scene.physics.add.existing(this)
-        this.body?.setSize(20, 20)
+        scene.add.existing(this)
 
         this.pointToMove = new Math.Vector2(0,0)
         this.direction = new Math.Vector2(0,0)
@@ -77,6 +77,9 @@ export class Character extends Physics.Arcade.Sprite{
                 }
             }
         })
+
+        // this.rectangle = scene.add.rectangle(data.x, data.y, 5, 15, 0xff0000, 0xffffff)
+        // this.rectangle.setStrokeStyle(1, 0xffffff)
     }
 
     generateAnimations(name: string, texture: string, start:number, end: number, frameRate: number){
@@ -90,14 +93,23 @@ export class Character extends Physics.Arcade.Sprite{
         })
     }
 
-    update(){
+    update(delta:number){
         this.updateDirection();
         if(!this.idle && !this.attacking){
             this.setVelocityX(this.direction.x * this.speed);
             this.setVelocityY(this.direction.y * this.speed);
+            // this.speed = 40;
+            // this.x += this.speed*this.direction.x*delta/1000
+            // this.y += this.speed*this.direction.y*delta/1000
         }
         else if(this.attacking){
             switch(this.anims.getName()){
+                case "W": 
+                    if(!this.anims.isPlaying){
+                        this.idle = true;
+                        this.attacking = false;
+                    }
+                    break;
                 case this.attack_animations[0]:
                 case this.attack_animations[1]:
                 case this.attack_animations[2]:
@@ -115,6 +127,12 @@ export class Character extends Physics.Arcade.Sprite{
             this.updateMovement()
         else if(!this.anims.isPlaying)
             this.attacking = false;
+
+        // console.log("speed: " + this.speed)
+        console.log(this.x, this.y)
+        //console.log(this.scene.anims.get("W").duration, 1/12*5*1000)
+        // console.log(this.direction)
+        //NETManager.sendState(this.idle, this.direction)
     }
 
     updateBasicAnimation(animations: Array<string>, repeat: number, startFrame: number){
@@ -166,6 +184,7 @@ export class Character extends Physics.Arcade.Sprite{
 
     WAction(vector:Math.Vector2){
         this.changeDirectionInput(vector);
+        // this.speed = 3*this.speed;
         const velocity = this.direction.multiply(new Math.Vector2(3*this.speed, 3*this.speed));
         this.setVelocity(velocity.x, velocity.y)
     }

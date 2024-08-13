@@ -1,6 +1,7 @@
 import { Display, GameObjects, Math, Scene, Textures } from "phaser";
 import { Character } from "../objects/Character";
 import { AbilitiesContainer } from "../UI/AbilitiesContainer";
+import { NETManager } from "../managers/NETManager";
 
 const shader = `
 precision mediump float;
@@ -47,6 +48,9 @@ export class UI extends Scene{
     abilitiesContainer: AbilitiesContainer;
     abilityWidth = 32;
     abilityHeight = 32;
+    text: GameObjects.Text;
+    pingText: GameObjects.Text;
+    actionText: GameObjects.Text;
     
     constructor (character: Character)
     {
@@ -63,6 +67,18 @@ export class UI extends Scene{
     }
 
     create(){
+        this.text = new GameObjects.Text(this, 20, 20, "0", { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' });
+        this.text.setSize(5,5);
+        this.add.existing(this.text);
+
+        this.pingText = new GameObjects.Text(this, 20, 40, NETManager.ping.toString(), { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' })
+        this.pingText.setSize(5,5)
+        this.add.existing(this.pingText)
+
+        this.actionText = new GameObjects.Text(this, 20, 60, NETManager.action, { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' })
+        this.actionText.setSize(5,5)
+        this.add.existing(this.actionText)
+
         this.cache.shader.add("ability shader", new Display.BaseShader("ability shader", shader, undefined, { cooldown_time: { type: "1f", value: -1.0 } }))
 
         this.abilitiesContainer = new AbilitiesContainer(
@@ -102,6 +118,9 @@ export class UI extends Scene{
     }
 
     update(time:number, delta: number){
+        this.text.setText("FPS:" + (Math.RoundTo(1000/delta)).toString())
+        this.pingText.setText("PING: " + Math.RoundTo(NETManager.ping).toString())
+        this.actionText.setText("ACTION: " + NETManager.action)
         this.character.abilities.forEach((a) => a.update(delta))
     }
 }
