@@ -16,6 +16,7 @@ const config: Types.Core.GameConfig = {
                 isFixed: true
             },
             debug: true,
+            //debug: true,
             gravity: {x:0, y:0},
         }
     },

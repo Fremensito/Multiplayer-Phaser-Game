@@ -5,6 +5,8 @@ import { PCControls } from '../controls/PCControls';
 import { UI } from './UI';
 import { Character } from '../objects/Character';
 import { NETManager } from '../managers/NETManager';
+import { Enemy } from '../objects/Enemy';
+import { WorldManager } from '../managers/WorldManager';
 //import { PhysicsManager } from '../managers/PhysicsManager';
 
 
@@ -17,6 +19,7 @@ export class Game extends Scene
     pcControls: PCControls
     delta:number;
     timeElapsed = 0;
+    enemy:Enemy
 
     constructor ()
     {
@@ -33,6 +36,8 @@ export class Game extends Scene
         this.load.spritesheet("player basic attack", "classes/scythe-girl/basic-attack.png", {frameWidth:64, frameHeight:64});
         this.load.spritesheet("player w", "classes/scythe-girl/W.png", {frameWidth:64, frameHeight:64});
         this.load.spritesheet("W-particles", "classes/scythe-girl/W-particles.png", {frameWidth:64, frameHeight:64});
+
+        this.load.spritesheet("ghost", "enemies/ghost/ghost-idle.png", {frameWidth: 64, frameHeight: 64})
     }
 
     create ()
@@ -56,15 +61,16 @@ export class Game extends Scene
         this.matter.world.getDelta = ()=>{
             return this.game.loop.delta
         }
+        
+        this.enemy = new Enemy(this, {x: 320, y: 320, speed: 0.4, id:"ghost"})
 
-        const rectangle = this.matter.bodies.rectangle(380, 380, 20, 20)
-        rectangle.isSensor = true
-        this.matter.world.add(rectangle)
+        //this.matter.world.add(rectangle)
     }   
 
     update(time:number, delta:number){
         this.pcControls.update();
         this.character.update(delta);
+        this.enemy.update(delta)
         //this.children.sortChildrenFlag = true;
         NETManager.update();
         this.delta = delta;
@@ -100,8 +106,8 @@ export class Game extends Scene
             this.player.character
         );
 
-        this.character.x = this.layer.getCenter().x;
-        this.character.y = this.layer.getCenter().y;
+        // this.character.x = this.layer.getCenter().x;
+        // this.character.y = this.layer.getCenter().y;
 
         //Makes the.character look front
         this.character.pointToMove.y = this.character.y + 10;

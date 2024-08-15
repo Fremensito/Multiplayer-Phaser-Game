@@ -1,6 +1,39 @@
+import { Scene } from "phaser";
 import { Player } from "../classes/Player";
+import { Enemy } from "../objects/Enemy";
 
 export class WorldManager{
+
+    static categories ={
+        abilities: 1,
+        enemies: 2,
+        characters: 4,
+    }
+
+    static collideGroups = {
+        abilities: 1,
+        enemies: 2
+    }
+
+
     static mainPlayer: Player;
     static players: Map<string, Player>
+    static enemies = new Map<string, Enemy>()
+
+    static setCollisionsScytheQ(scene: Scene){
+        scene.matter.world.on("collisionstart", (event:any)=>{
+            for(let i = 0; i < event.pairs.length; i++){
+                let pair = event.pairs[i]
+                //console.log(pair)
+                if(pair ){
+                    
+                }
+                console.log(pair.bodyA.label, pair.bodyB.label)
+            }
+        })
+
+        scene.matter.world.on("collisionend", ()=>{
+            console.log("bye")
+        })
+    }
 }

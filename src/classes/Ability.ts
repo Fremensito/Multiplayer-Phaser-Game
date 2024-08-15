@@ -1,6 +1,7 @@
 import { GameObjects, Scene } from "phaser";
 import { IAbility, UIAbility, UIShaders } from "../interfaces/Ability";
 import { PI } from "../utils/GameUtils";
+import { Character } from "../objects/Character";
 
 export class Ability extends GameObjects.Sprite{
     available: boolean;
@@ -10,6 +11,7 @@ export class Ability extends GameObjects.Sprite{
     particlesSprite: string;
     UI: UIAbility;
     shaders: UIShaders;
+    range:number
 
     constructor(ability: IAbility, scene:Scene){
         super(scene, 0,0, "W-particles");
@@ -20,6 +22,7 @@ export class Ability extends GameObjects.Sprite{
         this.mana_cost = ability.mana_cost;
         this.particlesSprite = ability.particlesSprite;
         this.UI = ability.UI;
+        this.range = ability.range;
     }
 
     addShaders(slot: GameObjects.Shader, icon: GameObjects.Shader){
@@ -38,9 +41,6 @@ export class Ability extends GameObjects.Sprite{
                 this.cooldown_time = -1;
                 this.available = true;
             }
-        }
-        if(this.particlesSprite){
-
         }
     }
 

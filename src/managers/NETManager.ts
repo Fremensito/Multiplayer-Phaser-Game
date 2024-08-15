@@ -20,7 +20,8 @@ const abilities: Array<IAbility> = [
             abilityHeight: 32,
             slotResource: "ui/hability.png",
             iconResource: "ui/scythe_hability.png"
-        }
+        },
+        range:20
     },
     {
         name: "W",
@@ -33,15 +34,16 @@ const abilities: Array<IAbility> = [
             abilityHeight: 32,
             slotResource: "ui/W-slot.png",
             iconResource: "ui/W-icon.png"
-        }
+        },
+        range:26
     },
 ]
 
 
 const character:ICharacter = {
     speed: 0.6,
-    x: 0,
-    y: 0,
+    x: 280,
+    y: 280,
     abilities: abilities,
     characterClass: "scythe-girl",
     id: "testeo",
@@ -74,11 +76,12 @@ export class NETManager{
         this.socket = io("http://localhost:3000");
         this.socket.on("connect", ()=>this.id = this.socket.id!)
         this.socket.on("ping", ()=>{this.ping = this.scene.time.now - this.pingStart})
-        this.socket.on("update", (characters: Array<Array<string|ICharacter>>)=>{
+        this.socket.on("update", (characters: Array<ICharacter>)=>{
             characters.forEach(c => {
-                this.addPlayer(c[1] as ICharacter)
+                this.addPlayer(c)
             })
         })
+        this.socket.on("disconnected", (id:string)=>this.deletePlayer(id))
         this.socket.on("pe",(m:ICharacter) => this.addPlayer(m))
         this.socket.on("wk", (id:string, direction: Math.Vector2) => this.receiveWalk(id, direction))
         this.socket.on("q", (id:string,direction: Math.Vector2) => this.receiveQ(id, direction))
@@ -98,6 +101,13 @@ export class NETManager{
             this.numberOfPlayers++;
         }
         //this.scene.add.existing(this.players.get(id)!)
+    }
+
+    static deletePlayer(id:string){
+        console.log("hello")
+        let player = this.players.get(id)
+        player!.destroy();
+        this.players.delete(id)
     }
 
     static update(){
