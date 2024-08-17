@@ -24,7 +24,11 @@ export class Character extends AliveEntity{
     //rectangle: GameObjects.Rectangle
 
     constructor(scene: Scene, data:ICharacter){
-        super(scene.matter.world, data.x, data.y, "player", 0);
+        super(scene.matter.world, data.x, data.y, "player", 0, {
+            friction: 0,
+            frictionAir: 0,
+            frictionStatic: 0
+        });
         this.speed = data.speed;
         this.idle = true;
         this.attacking = false;
@@ -127,9 +131,9 @@ export class Character extends AliveEntity{
         else if(!this.anims.isPlaying)
             this.attacking = false;
 
-        (this.abilities.get("Q") as Q).updateQ(this)
+        //(this.abilities.get("Q") as Q).updateQ(this)
         // console.log("speed: " + this.speed)
-        console.log(this.x, this.y)
+        //console.log(this.x, this.y)
         //console.log(this.scene.anims.get("W").duration, 1/12*5*1000)
         // console.log(this.direction)
         //NETManager.sendState(this.idle, this.direction)

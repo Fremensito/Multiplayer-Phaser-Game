@@ -29,11 +29,11 @@ export class Q extends Ability{
     constructor(ability:IAbility, scene:Scene, character: Character){
         super(ability, scene)
         this.scene = scene
-        this.createRight(character)
-        this.createDown(character)
-        this.createLeft(character)
-        this.createUp(character)
-        this.addCollisions();
+        // this.createRight(character)
+        // this.createDown(character)
+        // this.createLeft(character)
+        // this.createUp(character)
+        //this.addCollisions();
     }
 
     createRight(character:Character){

@@ -7,11 +7,14 @@ import { DamageText } from "../classes/DamageText";
 
 export class Enemy extends AliveEntity{
     healthBar: HealthBar
-    bodyWidth: number
-    bodyHeight: number
     name = "ghost"
     constructor(scene:Scene, data:IEnemy){
-        super(scene.matter.world, data.x, data.y, "ghost", 0, {label:"ghost"})
+        super(scene.matter.world, data.x, data.y, "ghost", 0, {
+            label:"ghost",
+            friction: 0,
+            frictionAir: 0,
+            frictionStatic: 0,
+        })
         scene.add.existing(this)
         this.speed = data.speed;
         this.idle = true;
@@ -29,19 +32,15 @@ export class Enemy extends AliveEntity{
         this.generateAnimations("ghost walk back",  "ghost", 24, 31, 8);
 
         this.setBody({width:10, height:20})
-        this.bodyHeight=20;
-        this.bodyWidth=10;
         this.setSensor(true)
 
-        scene.time.addEvent({
-            callback: this.randomMovement,
-            loop: true,
-            repeat: -1,
-            delay: 5000,
-            callbackScope: this
-        })
-
-        WorldManager.enemies.set("hello", this)
+        // scene.time.addEvent({
+        //     callback: this.randomMovement,
+        //     loop: true,
+        //     repeat: -1,
+        //     delay: 5000,
+        //     callbackScope: this
+        // })
         this.setCollisionCategory(WorldManager.categories.enemies);
         //this.setCollidesWith(WorldManager.categories.abilities)
         this.setCollisionGroup(WorldManager.collideGroups.enemies);

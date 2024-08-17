@@ -7,6 +7,9 @@ import { Game } from "../scenes/Game";
 import { Math } from "phaser";
 import { CharactersManager } from "./CharactersManager";
 import { Vector2 } from "../interfaces/Vector2";
+import { IEnemy } from "../interfaces/Enemy";
+import { WorldManager } from "./WorldManager";
+import { Enemy } from "../objects/Enemy";
 
 const abilities: Array<IAbility> = [
     {
@@ -76,14 +79,18 @@ export class NETManager{
         this.socket = io("http://localhost:3000");
         this.socket.on("connect", ()=>this.id = this.socket.id!)
         this.socket.on("ping", ()=>{this.ping = this.scene.time.now - this.pingStart})
-        this.socket.on("update", (characters: Array<ICharacter>)=>{
+        this.socket.on("update", (characters: Array<ICharacter>, enemies:Array<IEnemy>)=>{
             characters.forEach(c => {
                 this.addPlayer(c)
             })
+
+            enemies.forEach(e => this.addEnemy(e))
         })
         this.socket.on("disconnected", (id:string)=>this.deletePlayer(id))
         this.socket.on("pe",(m:ICharacter) => this.addPlayer(m))
         this.socket.on("wk", (id:string, direction: Math.Vector2) => this.receiveWalk(id, direction))
+        this.socket.on("em", (id:string, vector:Math.Vector2)=> this.receiveEnemyMovement(id, vector))
+        this.socket.on("ed", (damage:number, id:string) => WorldManager.enemies.get(id)?.getDamage(damage))
         this.socket.on("q", (id:string,direction: Math.Vector2) => this.receiveQ(id, direction))
         this.socket.on("w", (id:string,direction: Math.Vector2) => this.receiveW(id, direction))
         this.socket.on("state", (id:string, position:Vector2)=>this.receiveState(id, position))
@@ -101,6 +108,12 @@ export class NETManager{
             this.numberOfPlayers++;
         }
         //this.scene.add.existing(this.players.get(id)!)
+    }
+    
+    static addEnemy(enemy:IEnemy){
+        if(!WorldManager.enemies.get(enemy.id)){
+            WorldManager.enemies.set(enemy.id, new Enemy(this.scene, enemy))
+        }
     }
 
     static deletePlayer(id:string){
@@ -136,9 +149,17 @@ export class NETManager{
 
     private static receiveState(id:string, position:Vector2){
         if(id == this.socket.id){
+            console.log({x:this.scene.character.x, y:this.scene.character.y}, position)
             this.scene.character.x = position.x;
             this.scene.character.y = position.y;
+            console.log("adjusted")
         }
+    }
+
+    private static receiveEnemyMovement(id:string, vector:Math.Vector2){
+        console.log(vector)
+        WorldManager.enemies.get(id)!.changeDirectionInput(vector);
+        WorldManager.enemies.get(id)!.idle = false;
     }
 
     static sendWalk(direction: Vector2){
@@ -149,8 +170,8 @@ export class NETManager{
         }
     }
 
-    static sendQ(direction: Vector2){
-        this.socket.emit("q", {x: direction.x, y:direction.y})
+    static sendQ(direction: Vector2, weaponDirection: string){
+        this.socket.emit("q", {x: direction.x, y:direction.y}, weaponDirection)
     }
 
     static sendW(direction:Vector2){

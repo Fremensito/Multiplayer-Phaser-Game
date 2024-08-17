@@ -19,10 +19,10 @@ export class PCControls{
     update(){
         if(!this.character.attacking){
             if(Input.Keyboard.JustDown(this.Q) && this.character.abilities.get("Q")!.available){
-                NETManager.sendQ({
-                    x: this.input.mousePointer.worldX,
-                    y: this.input.mousePointer.worldY
-                })
+                // NETManager.sendQ({
+                //     x: this.input.mousePointer.worldX,
+                //     y: this.input.mousePointer.worldY
+                // })
                 // this.character.attacking = true;
                 // this.character.abilities.get("Q")!.activate();
                 // this.character.changeDirectionAttack(new Math.Vector2(this.input.mousePointer.worldX, this.input.mousePointer.worldY))

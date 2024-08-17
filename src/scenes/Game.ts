@@ -62,7 +62,7 @@ export class Game extends Scene
             return this.game.loop.delta
         }
         
-        this.enemy = new Enemy(this, {x: 320, y: 320, speed: 0.4, id:"ghost"})
+        //this.enemy = new Enemy(this, {x: 320, y: 320, speed: 0.4, id:"ghost"})
 
         //this.matter.world.add(rectangle)
     }   
@@ -70,7 +70,8 @@ export class Game extends Scene
     update(time:number, delta:number){
         this.pcControls.update();
         this.character.update(delta);
-        this.enemy.update(delta)
+        WorldManager.enemies.forEach(e => e.update(delta))
+        //this.enemy.update(delta)
         //this.children.sortChildrenFlag = true;
         NETManager.update();
         this.delta = delta;
