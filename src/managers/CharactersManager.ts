@@ -1,7 +1,8 @@
 import { Math } from "phaser";
 import { Character } from "../objects/Character";
-import { Q } from "../classes/scythe-girl/Q";
 import { NETManager } from "./NETManager";
+import { QAbility } from "../classes/scythe-girl/QAbility";
+import { WAbility } from "../classes/scythe-girl/WAbility";
 
 export class CharactersManager{
 
@@ -12,7 +13,8 @@ export class CharactersManager{
         character.idle = false;
         character.abilities.get("Q")!.activate();
         character.changeDirectionAttack(vector);
-        this.doQDamage(character)
+        if(character.character.id == NETManager.id)
+            this.doQDamage(character)
         character.updateBasicAnimation([
             "basic front attack",
             "basic left attack",
@@ -25,20 +27,20 @@ export class CharactersManager{
         if(character.direction.angle() >= this.PI/4 && character.direction.angle() < 3*this.PI/4){
             // Checks if animation is different of which is being played or the animation of "attack" has finished
             // but the attack button is still being pressed
-            //(character.abilities.get("Q") as Q).enemiesDown.forEach(e => e.getDamage(10))
-           NETManager.sendQ(character.direction, (character.abilities.get("Q") as Q).directions.down)
+            NETManager.sendQ(character.direction, (character.abilities.get("Q") as QAbility).directions.down);
+            (character.abilities.get("Q") as QAbility).enemiesDown.forEach(e => e.getDamageClient(10))
         }else
         if(character.direction.angle() >= 3*this.PI/4 && character.direction.angle() < 5*this.PI/4 ){
-            //(character.abilities.get("Q") as Q).enemiesLeft.forEach(e => e.getDamage(10))
-            NETManager.sendQ(character.direction, (character.abilities.get("Q") as Q).directions.left)
+            NETManager.sendQ(character.direction,  (character.abilities.get("Q") as QAbility).directions.left);
+            (character.abilities.get("Q") as QAbility).enemiesLeft.forEach(e => e.getDamageClient(10))
         }else
         if(character.direction.angle() >= 5*this.PI/4 && character.direction.angle() < 7*this.PI/4){
-            //(character.abilities.get("Q") as Q).enemiesUp.forEach(e => e.getDamage(10))
-            NETManager.sendQ(character.direction, (character.abilities.get("Q") as Q).directions.up)
+            (character.abilities.get("Q") as QAbility).enemiesUp.forEach(e => e.getDamageClient(10))
+            NETManager.sendQ(character.direction,  (character.abilities.get("Q") as QAbility).directions.up)
         }else
         if(character.direction.angle() >= 7*this.PI/4 || character.direction.angle() < this.PI/4){
-            //(character.abilities.get("Q") as Q).enemiesRight.forEach(e => e.getDamage(10))
-            NETManager.sendQ(character.direction, (character.abilities.get("Q") as Q).directions.right)
+            NETManager.sendQ(character.direction,  (character.abilities.get("Q") as QAbility).directions.right);
+            (character.abilities.get("Q") as QAbility).enemiesRight.forEach(e => e.getDamageClient(10))
         }
     }
 
@@ -48,6 +50,7 @@ export class CharactersManager{
         character.abilities.get("W")!.activate();
         character.WAction(vector)
         character.play({key: "W", repeat: 0});
+        (character.abilities.get("W") as WAbility).doDamage();
     }
 
     static pointerDownMove(character:Character, vector:Math.Vector2){

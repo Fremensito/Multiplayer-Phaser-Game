@@ -1,11 +1,11 @@
-import {Input, Physics, Scene, Math, Animations, GameObjects } from "phaser";
+import {Scene, Math, Animations, Sound} from "phaser";
 import { Ability } from "../classes/Ability";
 import { ICharacter } from "../interfaces/Character";
 import { SpriteParticle } from "../classes/SpriteParticle";
-import { NETManager } from "../managers/NETManager";
 import { AliveEntity } from "./AliveEntity";
-import { Q } from "../classes/scythe-girl/Q";
 import { WorldManager } from "../managers/WorldManager";
+import { QAbility } from "../classes/scythe-girl/QAbility";
+import { WAbility } from "../classes/scythe-girl/WAbility";
 
 export class Character extends AliveEntity{
     speed:number;
@@ -21,7 +21,11 @@ export class Character extends AliveEntity{
     character:ICharacter
     delta:number
     name = "character"
+    static animationsGenerated = false;
     //rectangle: GameObjects.Rectangle
+
+    WSound;
+    QSound;
 
     constructor(scene: Scene, data:ICharacter){
         super(scene.matter.world, data.x, data.y, "player", 0, {
@@ -40,7 +44,7 @@ export class Character extends AliveEntity{
 
         this.character = data;
         
-        if(NETManager.numberOfPlayers == 0){
+        if(!Character.animationsGenerated){
             this.generateAnimations("walk front", "player", 0, 5, 8);
             this.generateAnimations("walk right",  "player", 6, 11, 8);
             this.generateAnimations("walk left",  "player", 12, 17, 8);
@@ -57,14 +61,18 @@ export class Character extends AliveEntity{
             this.generateAnimations(this.attack_animations[3], "player basic attack", 15, 19, data.abilities[0].speed);
 
             this.generateAnimations("W", "player w", 0, 4, data.abilities[1].speed)
+            Character.animationsGenerated = true
         }
 
         this.abilities = new Map<string, Ability>;
-        let QAbility = new Q(data.abilities[0], scene, this)
         //QAbility.createRight(this);
-        this.abilities.set("Q", QAbility)
-        this.abilities.set("W", new Ability(data.abilities[1], scene))
+        this.abilities.set("Q", new QAbility(data.abilities[0], scene, this))
+        this.abilities.set("W", new WAbility(data.abilities[1], scene, this))
         
+        this.WSound = scene.sound.add("WScythe");
+        this.WSound.volume = 0.5
+        this.QSound = scene.sound.add("QScythe")
+        this.QSound.volume = 0.5
 
         this.on(Animations.Events.ANIMATION_UPDATE, (a:Animations.Animation, f:Animations.AnimationFrame)=>{
             if(this.anims.getName() == "W"){
@@ -131,7 +139,8 @@ export class Character extends AliveEntity{
         else if(!this.anims.isPlaying)
             this.attacking = false;
 
-        //(this.abilities.get("Q") as Q).updateQ(this)
+        (this.abilities.get("Q") as QAbility).updateQ(this);
+        (this.abilities.get("W") as WAbility).updateW();
         // console.log("speed: " + this.speed)
         //console.log(this.x, this.y)
         //console.log(this.scene.anims.get("W").duration, 1/12*5*1000)
@@ -146,10 +155,16 @@ export class Character extends AliveEntity{
             this.updateBasicAnimation(["idle front", "idle left", "idle back", "idle right"], -1, 1)
     }
 
+    changeDirectionAttack(vector: Math.Vector2): void {
+        super.changeDirectionAttack(vector)
+        this.QSound.play();
+    }
+
     WAction(vector:Math.Vector2){
         this.changeDirectionInput(vector);
         // this.speed = 3*this.speed;
         const velocity = this.direction.multiply(new Math.Vector2(3*this.speed, 3*this.speed));
         this.setVelocity(velocity.x, velocity.y)
+        this.WSound.play()
     }
 }

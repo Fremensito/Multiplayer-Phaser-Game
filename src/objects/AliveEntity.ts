@@ -8,6 +8,7 @@ export class AliveEntity extends Physics.Matter.Sprite{
     pointToMove: Math.Vector2
     PI = Math.PI2/2;
     health: number;
+    id:string
 
     generateAnimations(name: string, texture: string, start:number, end: number, frameRate: number){
         this.scene.anims.create({

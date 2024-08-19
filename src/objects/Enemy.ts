@@ -1,4 +1,4 @@
-import { Math, Scene } from "phaser";
+import { Math, Scene, Sound } from "phaser";
 import { AliveEntity } from "./AliveEntity";
 import { IEnemy } from "../interfaces/Enemy";
 import { HealthBar } from "../classes/HealthBar";
@@ -8,6 +8,8 @@ import { DamageText } from "../classes/DamageText";
 export class Enemy extends AliveEntity{
     healthBar: HealthBar
     name = "ghost"
+    getHit
+    
     constructor(scene:Scene, data:IEnemy){
         super(scene.matter.world, data.x, data.y, "ghost", 0, {
             label:"ghost",
@@ -15,6 +17,7 @@ export class Enemy extends AliveEntity{
             frictionAir: 0,
             frictionStatic: 0,
         })
+        this.id = data.id;
         scene.add.existing(this)
         this.speed = data.speed;
         this.idle = true;
@@ -30,6 +33,9 @@ export class Enemy extends AliveEntity{
         this.generateAnimations("ghost walk right",  "ghost", 8, 15, 8);
         this.generateAnimations("ghost walk left",  "ghost", 16, 23, 8);
         this.generateAnimations("ghost walk back",  "ghost", 24, 31, 8);
+
+        this.getHit = scene.sound.add("getHit");
+        this.getHit.volume = 0.5
 
         this.setBody({width:10, height:20})
         this.setSensor(true)
@@ -64,9 +70,13 @@ export class Enemy extends AliveEntity{
         this.healthBar.update(this.x, this.y - 13)
     }
 
-    getDamage(damage:number){
+    getDamageClient(damage:number){
         //console.log("got damage")
         new DamageText(this.scene, this.x, this.y, damage)
+        this.getHit.play();
+    }
+
+    getDamage(damage:number){
         this.healthBar.quantity -= damage
     }
 

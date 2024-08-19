@@ -1,5 +1,4 @@
 import { io, Socket } from "socket.io-client";
-import { Player } from "../classes/Player";
 import { IAbility } from "../interfaces/Ability";
 import { ICharacter } from "../interfaces/Character";
 import { Character } from "../objects/Character";
@@ -59,14 +58,10 @@ export class NETManager{
     static numberOfPlayers = 0;
     static scene:Game;
     static blocked = false;
-    static ping = 0;
+    static ping = 100;
     static action = "";
     static id: string;
     static pingStart: number;
-
-    static getPlayer(userName: string, password: string):Player{
-        return new Player(character);
-    };
     
     static connect(){
         this.scene.time.addEvent({
@@ -82,6 +77,9 @@ export class NETManager{
         this.socket.on("update", (characters: Array<ICharacter>, enemies:Array<IEnemy>)=>{
             characters.forEach(c => {
                 this.addPlayer(c)
+                if(c.id == this.id){
+                    this.scene.generateMainPlayer(WorldManager.players.get(c.id)!);
+                }
             })
 
             enemies.forEach(e => this.addEnemy(e))
@@ -99,15 +97,18 @@ export class NETManager{
 
     static getPing(){
         this.pingStart = this.scene.time.now
-        this.socket.emit("ping")
+        this.scene.time.delayedCall(
+            this.ping/2,
+            ()=>this.socket.emit("ping"),
+            [],
+            this
+        )
     }
 
     static addPlayer(character:ICharacter){
-        if(!this.players.get(character.id)){
-            this.players.set(character.id, new Character(this.scene, character))
-            this.numberOfPlayers++;
+        if(!WorldManager.players.get(character.id)){
+            WorldManager.players.set(character.id, new Character(this.scene, character))
         }
-        //this.scene.add.existing(this.players.get(id)!)
     }
     
     static addEnemy(enemy:IEnemy){
@@ -117,10 +118,10 @@ export class NETManager{
     }
 
     static deletePlayer(id:string){
-        console.log("hello")
-        let player = this.players.get(id)
+        //console.log("hello")
+        let player = WorldManager.players.get(id)
         player!.destroy();
-        this.players.delete(id)
+        WorldManager.players.delete(id)
     }
 
     static update(){
@@ -132,19 +133,19 @@ export class NETManager{
     private static receiveWalk(id: string, direction: Math.Vector2){
         this.action = "Walk";
         if(id != this.id)
-            CharactersManager.pointerDownMove(this.players.get(id)!, direction)
+            CharactersManager.pointerDownMove(WorldManager.players.get(id)!, direction)
     }
 
     private static receiveQ(id: string, direction: Math.Vector2){
         this.action = "Q";
         if(id != this.id)
-            CharactersManager.useQ(this.players.get(id)!, direction)
+            CharactersManager.useQ(WorldManager.players.get(id)!, direction)
     }
 
     private static receiveW(id: string, direction: Math.Vector2){
         this.action = "W";
         if(id != this.id)
-            CharactersManager.useW(this.players.get(id)!, direction)
+            CharactersManager.useW(WorldManager.players.get(id)!, direction)
     }
 
     private static receiveState(id:string, position:Vector2){
@@ -157,25 +158,39 @@ export class NETManager{
     }
 
     private static receiveEnemyMovement(id:string, vector:Math.Vector2){
-        console.log(vector)
         WorldManager.enemies.get(id)!.changeDirectionInput(vector);
         WorldManager.enemies.get(id)!.idle = false;
     }
 
     static sendWalk(direction: Vector2){
         if(!this.blocked){
-            this.socket.emit("wk", {x: direction.x, y: direction.y}, {x: this.scene.character.x, y:this.scene.character.y})
+            this.scene.time.delayedCall(
+                this.ping/2,
+                ()=>this.socket.emit("wk", {x: direction.x, y: direction.y}, {x: this.scene.character.x, y:this.scene.character.y}),
+                [],
+                this
+            )
             this.blocked = true;
             this.scene.time.delayedCall(100, ()=>this.blocked=false)
         }
     }
 
     static sendQ(direction: Vector2, weaponDirection: string){
-        this.socket.emit("q", {x: direction.x, y:direction.y}, weaponDirection)
+        this.scene.time.delayedCall(
+            this.ping/2,
+            () => this.socket.emit("q", {x: direction.x, y:direction.y}, weaponDirection),
+            [],
+            this
+        )
     }
 
     static sendW(direction:Vector2){
-        this.socket.emit("w", {x: direction.x, y:direction.y})
+        this.scene.time.delayedCall(
+            this.ping/2,
+            ()=>{this.socket.emit("w", {x: direction.x, y:direction.y}), console.log("W")},
+            [],
+            this
+        )
     }
 
     static sendState(idle: boolean, direction: Vector2){

@@ -20,11 +20,11 @@ export class Game extends Scene
     delta:number;
     timeElapsed = 0;
     enemy:Enemy
+    created = false;
 
     constructor ()
     {
         super("Game");
-        this.player = NETManager.getPlayer("s", "s");
     }
 
     preload ()
@@ -36,23 +36,20 @@ export class Game extends Scene
         this.load.spritesheet("player basic attack", "classes/scythe-girl/basic-attack.png", {frameWidth:64, frameHeight:64});
         this.load.spritesheet("player w", "classes/scythe-girl/W.png", {frameWidth:64, frameHeight:64});
         this.load.spritesheet("W-particles", "classes/scythe-girl/W-particles.png", {frameWidth:64, frameHeight:64});
-
+        
         this.load.spritesheet("ghost", "enemies/ghost/ghost-idle.png", {frameWidth: 64, frameHeight: 64})
+
+        this.load.audio("getHit", "sounds/get-hit2.wav")
+        this.load.audio("WScythe", "sounds/scythe-girl/W.wav");
+        this.load.audio("QScythe", "sounds/scythe-girl/Q.wav")
     }
 
     create ()
     {   
         this.generateMap();
-        this.generatePlayer();
+        //this.generatePlayer();
         this.input.setDefaultCursor("url(assets/cursor.png), pointer")
         document.addEventListener('contextmenu', event => event.preventDefault());
-
-        this.pcControls = new PCControls();
-        this.pcControls.character = this.character;
-        this.pcControls.input = this.input;
-        this.pcControls.setInput(); 
-        const ui = new UI(this.character);
-        this.game.scene.add("UI", ui, true);
 
         NETManager.scene = this;
         NETManager.connect();
@@ -65,20 +62,28 @@ export class Game extends Scene
         //this.enemy = new Enemy(this, {x: 320, y: 320, speed: 0.4, id:"ghost"})
 
         //this.matter.world.add(rectangle)
-    }   
+    } 
+    
+    generateMainPlayer(character:Character){
+        this.character = character
+        this.cameras.main.zoom = 3;
+        this.cameras.main.centerOn(this.character.x, this.character.y)
+        const ui = new UI(this.character);
+        this.game.scene.add("UI", ui, true);
+        this.pcControls = new PCControls();
+        this.pcControls.character = this.character
+        this.pcControls.input = this.input
+        this.pcControls.setInput();
+    }
 
     update(time:number, delta:number){
-        this.pcControls.update();
-        this.character.update(delta);
+        if(this.pcControls && this.pcControls.input){
+            this.pcControls.update();
+            this.character.update(delta);
+        }
         WorldManager.enemies.forEach(e => e.update(delta))
-        //this.enemy.update(delta)
-        //this.children.sortChildrenFlag = true;
-        NETManager.update();
+        WorldManager.players.forEach(c => c.update(delta))
         this.delta = delta;
-        //this.updateMatter(delta)
-        //console.log("hello")
-        //this.children.depthSort()
-        //console.log(this.matter.world.getDelta())
     }
     
     generateMap(){

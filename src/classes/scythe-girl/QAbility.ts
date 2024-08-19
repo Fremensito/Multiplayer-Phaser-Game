@@ -5,13 +5,13 @@ import { Character } from "../../objects/Character";
 import { Enemy } from "../../objects/Enemy";
 import { WorldManager } from "../../managers/WorldManager";
 
-export class Q extends Ability{
+export class QAbility extends Ability{
 
     right: MatterJS.BodyType;
     down: MatterJS.BodyType;
     left: MatterJS.BodyType;
     up: MatterJS.BodyType;
-    offset = 14
+    offset = this.range/2
     scene: Scene;
     enemiesToHit = Array<Enemy>
     directions = {
@@ -29,34 +29,34 @@ export class Q extends Ability{
     constructor(ability:IAbility, scene:Scene, character: Character){
         super(ability, scene)
         this.scene = scene
-        // this.createRight(character)
-        // this.createDown(character)
-        // this.createLeft(character)
-        // this.createUp(character)
-        //this.addCollisions();
+        this.createRight(character)
+        this.createDown(character)
+        this.createLeft(character)
+        this.createUp(character)
+        this.addCollisions();
     }
 
     createRight(character:Character){
         //this.right = this.scene.matter.bodies.rectangle(character.x + 13, character.y, 15, 30)
-        this.right = this.scene.matter.bodies.rectangle(character.x + this.offset, character.y, 16, 30);
+        this.right = this.scene.matter.bodies.rectangle(character.x + this.offset, character.y, this.range, 30);
         this.right.label = this.directions.right
         this.addToWorld(this.right)
     }
 
     createDown(character:Character){
-        this.down = this.scene.matter.bodies.rectangle(character.x, character.y+this.offset, 30, 16);
+        this.down = this.scene.matter.bodies.rectangle(character.x, character.y+this.offset, 30, this.range);
         this.down.label = this.directions.down
         this.addToWorld(this.down)
     }
 
     createLeft(character: Character){
-        this.left = this.scene.matter.bodies.rectangle(character.x - this.offset, character.y, 16,30)
+        this.left = this.scene.matter.bodies.rectangle(character.x - this.offset, character.y, this.range,30)
         this.left.label = this.directions.left;
         this.addToWorld(this.left)
     }
 
     createUp(character:Character){
-        this.up = this.scene.matter.bodies.rectangle(character.x, character.y - this.offset, 30, 16)
+        this.up = this.scene.matter.bodies.rectangle(character.x, character.y - this.offset, 30, this.range)
         this.up.label = this.directions.up;
         this.addToWorld(this.up)
     }

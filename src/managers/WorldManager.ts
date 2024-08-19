@@ -1,6 +1,7 @@
 import { Scene } from "phaser";
 import { Player } from "../classes/Player";
 import { Enemy } from "../objects/Enemy";
+import { Character } from "../objects/Character";
 
 export class WorldManager{
 
@@ -17,23 +18,23 @@ export class WorldManager{
 
 
     static mainPlayer: Player;
-    static players: Map<string, Player>
-    static enemies = new Map<string, Enemy>()
+    static players = new Map<string, Character>();
+    static enemies = new Map<string, Enemy>();
 
-    static setCollisionsScytheQ(scene: Scene){
-        scene.matter.world.on("collisionstart", (event:any)=>{
-            for(let i = 0; i < event.pairs.length; i++){
-                let pair = event.pairs[i]
-                //console.log(pair)
-                if(pair ){
+    // static setCollisionsScytheQ(scene: Scene){
+    //     scene.matter.world.on("collisionstart", (event:any)=>{
+    //         for(let i = 0; i < event.pairs.length; i++){
+    //             let pair = event.pairs[i]
+    //             //console.log(pair)
+    //             if(pair ){
                     
-                }
-                console.log(pair.bodyA.label, pair.bodyB.label)
-            }
-        })
+    //             }
+    //             console.log(pair.bodyA.label, pair.bodyB.label)
+    //         }
+    //     })
 
-        scene.matter.world.on("collisionend", ()=>{
-            console.log("bye")
-        })
-    }
+    //     scene.matter.world.on("collisionend", ()=>{
+    //         console.log("bye")
+    //     })
+    // }
 }
