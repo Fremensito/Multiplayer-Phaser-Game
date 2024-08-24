@@ -7,6 +7,9 @@ export class SpriteParticle extends GameObjects.Sprite{
         scene.add.existing(this)
         //const sprite = scene.add.sprite(x,y, name);
         
+        //this.preFX?.addGlow(0xff4040, 6)
+        this.postFX.addGlow(0xff4040, 6)
+        
         this.anims.create({
             key: name,
             frames: scene.anims.generateFrameNumbers(texture, {

@@ -1,9 +1,8 @@
-import { Core, GameObjects, Scene, Tilemaps, Time } from 'phaser';
+import { Scene, Tilemaps} from 'phaser';
 import { Math } from 'phaser';
 import { Player } from '../classes/Player';
 import { PCControls } from '../controls/PCControls';
-import { UI } from './UI';
-import { Character } from '../objects/Character';
+import { Character } from '../objects/sctythe-girl/Character';
 import { NETManager } from '../managers/NETManager';
 import { Enemy } from '../objects/Enemy';
 import { WorldManager } from '../managers/WorldManager';
@@ -21,6 +20,10 @@ export class Game extends Scene
     timeElapsed = 0;
     enemy:Enemy
     created = false;
+    static ghostSprites = {
+        ghostIdle: "ghost",
+        ghostGetHit: "ghost get hit"
+    }
 
     constructor ()
     {
@@ -37,7 +40,8 @@ export class Game extends Scene
         this.load.spritesheet("player w", "classes/scythe-girl/W.png", {frameWidth:64, frameHeight:64});
         this.load.spritesheet("W-particles", "classes/scythe-girl/W-particles.png", {frameWidth:64, frameHeight:64});
         
-        this.load.spritesheet("ghost", "enemies/ghost/ghost-idle.png", {frameWidth: 64, frameHeight: 64})
+        this.load.spritesheet(Game.ghostSprites.ghostIdle, "enemies/ghost/ghost-idle.png", {frameWidth: 64, frameHeight: 64})
+        this.load.spritesheet(Game.ghostSprites.ghostGetHit, "enemies/ghost/ghost-get-hit.png", {frameWidth: 64, frameHeight: 64})
 
         this.load.audio("getHit", "sounds/get-hit2.wav")
         this.load.audio("WScythe", "sounds/scythe-girl/W.wav");
@@ -62,14 +66,19 @@ export class Game extends Scene
         //this.enemy = new Enemy(this, {x: 320, y: 320, speed: 0.4, id:"ghost"})
 
         //this.matter.world.add(rectangle)
+        this.time.addEvent({
+            delay: 1000,
+            callback: ()=>console.log(WorldManager.enemies.size),
+            loop: true
+        })
+
+        console.log(this.game)
     } 
     
     generateMainPlayer(character:Character){
         this.character = character
         this.cameras.main.zoom = 3;
         this.cameras.main.centerOn(this.character.x, this.character.y)
-        const ui = new UI(this.character);
-        this.game.scene.add("UI", ui, true);
         this.pcControls = new PCControls();
         this.pcControls.character = this.character
         this.pcControls.input = this.input
@@ -79,10 +88,12 @@ export class Game extends Scene
     update(time:number, delta:number){
         if(this.pcControls && this.pcControls.input){
             this.pcControls.update();
-            this.character.update(delta);
+            //this.character.update(delta);
         }
         WorldManager.enemies.forEach(e => e.update(delta))
-        WorldManager.players.forEach(c => c.update(delta))
+        WorldManager.players.forEach(c =>{
+            c!.update(delta)
+        })
         this.delta = delta;
     }
     
@@ -90,7 +101,6 @@ export class Game extends Scene
         const map = this.make.tilemap({width:50, height: 50, tileWidth: 16, tileHeight: 16});
         const tiles = map.addTilesetImage("tile-map", undefined, 16, 16)!;
         this.layer = map.createBlankLayer('layer1', tiles)!;
-        
         
         this.layer.forEachTile((v)=>{
             if(Math.Between(1, 100) <= 30){
@@ -103,7 +113,7 @@ export class Game extends Scene
         
         this.layer.getCenter().y = this.game.config.height as number / 2;
         this.layer.scale = 0.8;
-        this.layer.setSkipCull(true)
+        this.layer.setSkipCull(true);
     }
 
     generatePlayer(){
@@ -126,9 +136,9 @@ export class Game extends Scene
     updateMatter(delta:number){
         this.timeElapsed += delta;
         if(this.timeElapsed > 16){
-            console.log("hello")
+            console.log("hello");
             this.matter.world.update(Date.now(), this.timeElapsed.valueOf());
-            this.timeElapsed = 0
+            this.timeElapsed = 0;
         }
     }
 }

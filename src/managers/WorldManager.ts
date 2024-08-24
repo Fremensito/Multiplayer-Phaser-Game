@@ -1,7 +1,6 @@
-import { Scene } from "phaser";
 import { Player } from "../classes/Player";
 import { Enemy } from "../objects/Enemy";
-import { Character } from "../objects/Character";
+import { Character } from "../objects/sctythe-girl/Character";
 
 export class WorldManager{
 

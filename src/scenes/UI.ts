@@ -1,7 +1,10 @@
 import { Display, GameObjects, Math, Scene, Textures } from "phaser";
-import { Character } from "../objects/Character";
 import { AbilitiesContainer } from "../UI/AbilitiesContainer";
 import { NETManager } from "../managers/NETManager";
+import { IAbility, UIShaders} from "../interfaces/Ability";
+import { UIAbility } from "../UI/UIAbility";
+import { Character } from "../objects/sctythe-girl/Character";
+import { CombatAbility } from "../classes/combat/CombatAbility";
 
 const shader = `
 precision mediump float;
@@ -44,7 +47,9 @@ void main() {
 const PI = Math.PI2/2;
 
 export class UI extends Scene{
+
     character: Character;
+    abilities = new Map<CombatAbility, UIAbility>();
     abilitiesContainer: AbilitiesContainer;
     abilityWidth = 32;
     abilityHeight = 32;
@@ -52,9 +57,11 @@ export class UI extends Scene{
     pingText: GameObjects.Text;
     actionText: GameObjects.Text;
     
-    constructor (character: Character)
+    constructor (abilities: Array<IAbility>, character:Character)
     {
         super({key: "UI", active: true});
+        this.abilities.set(character.abilities.get("Q")!, new UIAbility(abilities[0]))
+        this.abilities.set(character.abilities.get("W")!, new UIAbility(abilities[1]));
         this.character = character;
     }
 
@@ -87,19 +94,19 @@ export class UI extends Scene{
             new Math.Vector2(this.game.config.width as number /2, this.game.config.height as number - this.abilityHeight)
         )
 
-        this.character.abilities.get("Q")!.addShaders(
+        this.abilities.get(this.character.abilities.get("Q")!)!.addShaders(
             this.makeAbilityShader("ability"), 
             this.makeAbilityShader("scythe ability")
         )
-        this.character.abilities.get("W")!.addShaders(
+        this.abilities.get(this.character.abilities.get("W")!)!.addShaders(
             this.makeAbilityShader("W-slot"), 
             this.makeAbilityShader("W-icon")
         )
 
-        this.abilitiesContainer.addElements([
-            this.character.abilities.get("Q")!.shaders,
-            this.character.abilities.get("W")!.shaders
-        ])
+        const shaders = new Array<UIShaders>
+        this.abilities.forEach(a => shaders.push(a.shaders))
+
+        this.abilitiesContainer.addElements(shaders)
     }
 
     makeAbilityShader(texture: string):GameObjects.Shader{
@@ -121,6 +128,6 @@ export class UI extends Scene{
         this.text.setText("FPS:" + (Math.RoundTo(1000/delta)).toString())
         this.pingText.setText("PING: " + Math.RoundTo(NETManager.ping).toString())
         this.actionText.setText("ACTION: " + NETManager.action)
-        this.character.abilities.forEach((a) => a.update(delta))
+        this.character.abilities.forEach((a) => this.abilities.get(a)!.update(a.available, a.cooldown, a.cooldowntime))
     }
 }

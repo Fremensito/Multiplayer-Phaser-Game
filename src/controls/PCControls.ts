@@ -1,5 +1,5 @@
 import { Input, Math} from "phaser";
-import { Character } from "../objects/Character";
+import { Character } from "../objects/sctythe-girl/Character";
 import { NETManager } from "../managers/NETManager";
 import { CharactersManager } from "../managers/CharactersManager";
 

@@ -1,4 +1,4 @@
-import { GameObjects, Math } from "phaser";
+import { Math } from "phaser";
 import { UIShaders } from "../interfaces/Ability";
 
 export class AbilitiesContainer{
@@ -37,5 +37,9 @@ export class AbilitiesContainer{
             e.slot.y = center.y;
         })
         this.center = center;
+    }
+
+    update(){
+
     }
 }

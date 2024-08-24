@@ -1,6 +1,6 @@
 import { GameObjects } from "phaser";
 
-export interface UIAbility{
+export interface IUIAbility{
     abilityWidth: number;
     abilityHeight: number
     slotResource: string;
@@ -13,8 +13,8 @@ export interface IAbility{
     speed: number;
     mana_cost: number;
     particlesSprite: string;
-    range: number
-    UI: UIAbility;
+    range: number;
+    UI: IUIAbility;
 }
 
 export interface UIShaders{

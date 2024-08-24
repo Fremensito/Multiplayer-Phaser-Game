@@ -1,11 +1,12 @@
-import {Scene, Math, Animations, Sound} from "phaser";
-import { Ability } from "../classes/Ability";
-import { ICharacter } from "../interfaces/Character";
-import { SpriteParticle } from "../classes/SpriteParticle";
-import { AliveEntity } from "./AliveEntity";
-import { WorldManager } from "../managers/WorldManager";
-import { QAbility } from "../classes/scythe-girl/QAbility";
-import { WAbility } from "../classes/scythe-girl/WAbility";
+import {Scene, Math, Animations} from "phaser";
+import { ICharacter } from "../../interfaces/Character";
+import { SpriteParticle } from "../../classes/SpriteParticle";
+import { AliveEntity } from "../AliveEntity";
+import { WorldManager } from "../../managers/WorldManager";
+import { QAbility } from "../../classes/combat/scythe-girl/QAbility";
+import { WAbility } from "../../classes/combat/scythe-girl/WAbility";
+import { CombatAbility } from "../../classes/combat/CombatAbility";
+import { UI } from "../../scenes/UI";
 
 export class Character extends AliveEntity{
     speed:number;
@@ -14,7 +15,10 @@ export class Character extends AliveEntity{
     direction:Math.Vector2;
     pointToMove: Math.Vector2;
     PI = Math.PI2/2;
-    abilities: Map<string, Ability>;
+
+    abilities = new Map<string, CombatAbility>();
+    QAbility: QAbility;
+    WAbility: WAbility;
     attack_animations = ["basic front attack", "basic right attack", "basic left attack", "basic back attack"]
     //TO DO: ADD TEXTURES ANIMATIONS DEPENDING OF THE CHARACTAR CLASS NAME
     char_class: string;
@@ -64,10 +68,15 @@ export class Character extends AliveEntity{
             Character.animationsGenerated = true
         }
 
-        this.abilities = new Map<string, Ability>;
         //QAbility.createRight(this);
-        this.abilities.set("Q", new QAbility(data.abilities[0], scene, this))
-        this.abilities.set("W", new WAbility(data.abilities[1], scene, this))
+
+        this.abilities.set("Q", new QAbility(data.abilities[0], scene, this));
+        this.QAbility = this.abilities.get("Q") as QAbility;
+        this.abilities.set("W", new WAbility(data.abilities[1], scene, this));
+        this.WAbility = this.abilities.get("W") as WAbility;
+
+        const ui = new UI(data.abilities, this);
+        scene.game.scene.add("UI", ui, true);
         
         this.WSound = scene.sound.add("WScythe");
         this.WSound.volume = 0.5
@@ -139,8 +148,8 @@ export class Character extends AliveEntity{
         else if(!this.anims.isPlaying)
             this.attacking = false;
 
-        (this.abilities.get("Q") as QAbility).updateQ(this);
-        (this.abilities.get("W") as WAbility).updateW();
+        this.QAbility.updateQ(this, delta);
+        this.WAbility.updateW(delta);
         // console.log("speed: " + this.speed)
         //console.log(this.x, this.y)
         //console.log(this.scene.anims.get("W").duration, 1/12*5*1000)
@@ -166,5 +175,10 @@ export class Character extends AliveEntity{
         const velocity = this.direction.multiply(new Math.Vector2(3*this.speed, 3*this.speed));
         this.setVelocity(velocity.x, velocity.y)
         this.WSound.play()
+    }
+
+    destroy(){
+        
+        super.destroy()
     }
 }

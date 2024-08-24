@@ -1,55 +1,13 @@
 import { io, Socket } from "socket.io-client";
-import { IAbility } from "../interfaces/Ability";
 import { ICharacter } from "../interfaces/Character";
-import { Character } from "../objects/Character";
+import { Character } from "../objects/sctythe-girl/Character";
 import { Game } from "../scenes/Game";
-import { Math } from "phaser";
+import { Math, Scenes } from "phaser";
 import { CharactersManager } from "./CharactersManager";
 import { Vector2 } from "../interfaces/Vector2";
 import { IEnemy } from "../interfaces/Enemy";
 import { WorldManager } from "./WorldManager";
 import { Enemy } from "../objects/Enemy";
-
-const abilities: Array<IAbility> = [
-    {
-        name: "basic attack",
-        cooldown: 1000,
-        speed: 8,
-        mana_cost: 0,
-        particlesSprite: "",
-        UI: {
-            abilityWidth: 32,
-            abilityHeight: 32,
-            slotResource: "ui/hability.png",
-            iconResource: "ui/scythe_hability.png"
-        },
-        range:20
-    },
-    {
-        name: "W",
-        cooldown: 3000,
-        speed: 12,
-        mana_cost: 0,
-        particlesSprite: "W-particles.png",
-        UI: {
-            abilityWidth: 32,
-            abilityHeight: 32,
-            slotResource: "ui/W-slot.png",
-            iconResource: "ui/W-icon.png"
-        },
-        range:26
-    },
-]
-
-
-const character:ICharacter = {
-    speed: 0.6,
-    x: 280,
-    y: 280,
-    abilities: abilities,
-    characterClass: "scythe-girl",
-    id: "testeo",
-}
 
 export class NETManager{
 
@@ -64,16 +22,18 @@ export class NETManager{
     static pingStart: number;
     
     static connect(){
-        this.scene.time.addEvent({
-            delay: 1000,
-            callback: this.getPing,
-            callbackScope: this,
-            loop: true
-        })
+        // this.scene.time.addEvent({
+        //     delay: 1000,
+        //     callback: this.getPing,
+        //     callbackScope: this,
+        //     loop: true
+        // })
         this.players = new Map<string,Character>;   
         this.socket = io("http://localhost:3000");
-        this.socket.on("connect", ()=>this.id = this.socket.id!)
-        this.socket.on("ping", ()=>{this.ping = this.scene.time.now - this.pingStart})
+        this.socket.on("connect", ()=>{
+            this.id = this.socket.id!
+        })
+        //this.socket.on("ping", ()=>{this.ping = this.scene.time.now - this.pingStart})
         this.socket.on("update", (characters: Array<ICharacter>, enemies:Array<IEnemy>)=>{
             characters.forEach(c => {
                 this.addPlayer(c)
@@ -81,7 +41,6 @@ export class NETManager{
                     this.scene.generateMainPlayer(WorldManager.players.get(c.id)!);
                 }
             })
-
             enemies.forEach(e => this.addEnemy(e))
         })
         this.socket.on("disconnected", (id:string)=>this.deletePlayer(id))
@@ -91,7 +50,7 @@ export class NETManager{
         this.socket.on("ed", (damage:number, id:string) => WorldManager.enemies.get(id)?.getDamage(damage))
         this.socket.on("q", (id:string,direction: Math.Vector2) => this.receiveQ(id, direction))
         this.socket.on("w", (id:string,direction: Math.Vector2) => this.receiveW(id, direction))
-        this.socket.on("state", (id:string, position:Vector2)=>this.receiveState(id, position))
+        this.socket.on("sne", (enemies:Array<IEnemy>, players: Array<ICharacter>, timeServer:number)=>this.synchronize(enemies, players, timeServer))
         this.numberOfPlayers++;
     }
 
@@ -119,9 +78,11 @@ export class NETManager{
 
     static deletePlayer(id:string){
         //console.log("hello")
-        let player = WorldManager.players.get(id)
-        player!.destroy();
-        WorldManager.players.delete(id)
+        this.scene.events.once(Scenes.Events.POST_UPDATE, ()=>{
+            let player = WorldManager.players.get(id)
+            WorldManager.players.delete(id)
+            player!.destroy();
+        })
     }
 
     static update(){
@@ -148,18 +109,28 @@ export class NETManager{
             CharactersManager.useW(WorldManager.players.get(id)!, direction)
     }
 
-    private static receiveState(id:string, position:Vector2){
-        if(id == this.socket.id){
-            console.log({x:this.scene.character.x, y:this.scene.character.y}, position)
-            this.scene.character.x = position.x;
-            this.scene.character.y = position.y;
-            console.log("adjusted")
+    private static receiveEnemyMovement(id:string, vector:Math.Vector2){
+        if(WorldManager.enemies.get(id) != undefined){
+            WorldManager.enemies.get(id)!.idle = false;
+            WorldManager.enemies.get(id)!.changeDirectionInput(vector);
+            WorldManager.enemies.get(id)!.update(this.scene.delta)
         }
     }
 
-    private static receiveEnemyMovement(id:string, vector:Math.Vector2){
-        WorldManager.enemies.get(id)!.changeDirectionInput(vector);
-        WorldManager.enemies.get(id)!.idle = false;
+    private static synchronize(enemies:Array<IEnemy>, players:Array<ICharacter>, timeServer:number){
+        let interpolationFactor = 0.2
+        players.forEach(c => {
+            if(this.id != c.id){
+                let player = WorldManager.players.get(c.id)!
+                player.x = Math.Linear(player.x, c.x, interpolationFactor)
+                player.y = Math.Linear(player.y, c.y, interpolationFactor)
+            }
+        })
+        enemies.forEach(e => {
+            let enemy = WorldManager.enemies.get(e.id)!
+            enemy.x = Math.Linear(enemy.x, e.x, interpolationFactor)
+            enemy.y = Math.Linear(enemy.y, e.y, interpolationFactor)
+        })
     }
 
     static sendWalk(direction: Vector2){
@@ -193,7 +164,5 @@ export class NETManager{
         )
     }
 
-    static sendState(idle: boolean, direction: Vector2){
-        this.socket.emit("state", idle, direction)
-    }
+    
 }

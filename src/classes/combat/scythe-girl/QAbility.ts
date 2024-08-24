@@ -1,17 +1,17 @@
-import { Scene } from "phaser";
-import { IAbility } from "../../interfaces/Ability";
-import { Ability } from "../Ability";
-import { Character } from "../../objects/Character";
-import { Enemy } from "../../objects/Enemy";
-import { WorldManager } from "../../managers/WorldManager";
+import { Physics, Scene } from "phaser";
+import { IAbility } from "../../../interfaces/Ability";
+import { Character } from "../../../objects/sctythe-girl/Character";
+import { Enemy } from "../../../objects/Enemy";
+import { WorldManager } from "../../../managers/WorldManager";
+import { CombatAbility } from "../CombatAbility";
 
-export class QAbility extends Ability{
+export class QAbility extends CombatAbility{
 
     right: MatterJS.BodyType;
     down: MatterJS.BodyType;
     left: MatterJS.BodyType;
     up: MatterJS.BodyType;
-    offset = this.range/2
+    offset: number //= this.range/2
     scene: Scene;
     enemiesToHit = Array<Enemy>
     directions = {
@@ -27,7 +27,8 @@ export class QAbility extends Ability{
     enemiesLeft = new Array<Enemy>
 
     constructor(ability:IAbility, scene:Scene, character: Character){
-        super(ability, scene)
+        super(ability);
+        this.offset = this.range/2
         this.scene = scene
         this.createRight(character)
         this.createDown(character)
@@ -79,28 +80,16 @@ export class QAbility extends Ability{
             for(let i = 0; i < event.pairs.length; i++){
                 let pair = event.pairs[i]
                 if(pair.bodyA.label == this.directions.up || pair.bodyB.label == this.directions.up){
-                    if(pair.bodyA.label == this.directions.up)
-                        this.enemiesUp.push(pair.bodyB.gameObject)
-                    else
-                        this.enemiesUp.push(pair.bodyA.gameObject)
+                    this.addEnemyAndOnDestroy(this.enemiesUp, pair, this.directions.up)
                 }
                 else if(pair.bodyA.label == this.directions.right || pair.bodyB.label == this.directions.right){
-                    if(pair.bodyA.label == this.directions.right)
-                        this.enemiesRight.push(pair.bodyB.gameObject)
-                    else
-                        this.enemiesRight.push(pair.bodyA.gameObject)
+                    this.addEnemyAndOnDestroy(this.enemiesRight, pair, this.directions.right)
                 }
                 else if(pair.bodyA.label == this.directions.down || pair.bodyB.label == this.directions.down){
-                    if(pair.bodyA.label == this.directions.down)
-                        this.enemiesDown.push(pair.bodyB.gameObject)
-                    else
-                        this.enemiesDown.push(pair.bodyA.gameObject)
+                    this.addEnemyAndOnDestroy(this.enemiesDown, pair, this.directions.down)
                 }
                 else if(pair.bodyA.label == this.directions.left || pair.bodyB.label == this.directions.left){
-                    if(pair.bodyA.label == this.directions.left)
-                        this.enemiesLeft.push(pair.bodyB.gameObject)
-                    else
-                        this.enemiesLeft.push(pair.bodyA.gameObject)
+                    this.addEnemyAndOnDestroy(this.enemiesLeft, pair, this.directions.left)
                 }
                 //console.log(pair.bodyA.label, pair.bodyB.label)
             }
@@ -139,7 +128,39 @@ export class QAbility extends Ability{
         })
     }
 
-    updateQ(character: Character){
+    addEnemyAndOnDestroy(enemies: Array<Enemy>, pair: any, direction: string){
+        if(pair.bodyA.label == direction){
+            enemies.push(pair.bodyB.gameObject);
+            (pair.bodyB.gameObject as Physics.Matter.Sprite).on("destroy", 
+                ()=>enemies.splice(enemies.indexOf(pair.bodyB.gameObject), 1))
+        }
+        else{
+            enemies.push(pair.bodyA.gameObject);
+            (pair.bodyA.gameObject as Physics.Matter.Sprite).on("destroy",
+                ()=>enemies.splice(enemies.indexOf(pair.bodyA.gameObject), 1)
+            )
+        }
+    }
+
+    doDamage(direction:string){
+        switch(direction){
+            case this.directions.right:
+                this.enemiesRight.forEach(e => e!.getDamageClient(10));
+                break;
+            case this.directions.down:
+                this.enemiesDown.forEach(e => e!.getDamageClient(10));
+                break;
+            case this.directions.left:
+                this.enemiesLeft.forEach(e => e!.getDamageClient(10));
+                break;
+            case this.directions.up:
+                this.enemiesUp.forEach(e => e!.getDamageClient(10));
+                break;
+        }
+    }
+
+    updateQ(character: Character, delta: number){
+        super.update(delta)
         this.right.position.x = character.x + this.offset;
         this.right.position.y = character.y;
 
@@ -151,5 +172,12 @@ export class QAbility extends Ability{
 
         this.up.position.x = character.x;
         this.up.position.y = character.y - this.offset;
+    }
+
+    filterNulls(){
+        this.enemiesRight = this.enemiesRight.filter(e=>e!=null);
+        this.enemiesDown = this.enemiesDown.filter(e=>e!=null);
+        this.enemiesLeft = this.enemiesLeft.filter(e=>e!=null);
+        this.enemiesUp = this.enemiesUp.filter(e=>e!=null);
     }
 }
