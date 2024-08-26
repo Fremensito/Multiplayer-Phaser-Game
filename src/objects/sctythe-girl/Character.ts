@@ -15,6 +15,7 @@ export class Character extends AliveEntity{
     direction:Math.Vector2;
     pointToMove: Math.Vector2;
     PI = Math.PI2/2;
+    created = false
 
     abilities = new Map<string, CombatAbility>();
     QAbility: QAbility;
@@ -41,6 +42,7 @@ export class Character extends AliveEntity{
         this.idle = true;
         this.attacking = false;
         scene.add.existing(this)
+        this.id = data.id;
         //this.scene.matter.world.add(this.body?.gameObject)
 
         this.pointToMove = new Math.Vector2(0,0)

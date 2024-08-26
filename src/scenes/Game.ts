@@ -48,7 +48,7 @@ export class Game extends Scene
         this.load.audio("QScythe", "sounds/scythe-girl/Q.wav")
     }
 
-    create ()
+    async create ()
     {   
         this.generateMap();
         //this.generatePlayer();
@@ -56,7 +56,7 @@ export class Game extends Scene
         document.addEventListener('contextmenu', event => event.preventDefault());
 
         NETManager.scene = this;
-        NETManager.connect();
+        await NETManager.connect();
 
         //PhysicsManager.startPhysics(this);
         this.matter.world.getDelta = ()=>{

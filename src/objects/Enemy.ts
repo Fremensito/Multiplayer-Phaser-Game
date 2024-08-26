@@ -99,8 +99,8 @@ export class Enemy extends AliveEntity{
         this.getHit.play();
     }
 
-    getDamage(damage:number){
-        this.healthBar.quantity -= damage
+    getDamage(health:number){
+        this.healthBar.quantity = health;
         if(this.healthBar.quantity <=0 ){
            this.die();
         }

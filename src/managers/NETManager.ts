@@ -1,4 +1,3 @@
-import { io, Socket } from "socket.io-client";
 import { ICharacter } from "../interfaces/Character";
 import { Character } from "../objects/sctythe-girl/Character";
 import { Game } from "../scenes/Game";
@@ -8,60 +7,103 @@ import { Vector2 } from "../interfaces/Vector2";
 import { IEnemy } from "../interfaces/Enemy";
 import { WorldManager } from "./WorldManager";
 import { Enemy } from "../objects/Enemy";
+import { Client, Room } from "colyseus.js";
+import { SAliveEntity } from "../interfaces/SAliveEntity";
+import { RoomState } from "../schemas/RoomState";
 
 export class NETManager{
 
-    private static socket: Socket;
-    static players = new Map<string, Character>;
+    private static client = new Client("ws://localhost:2567");
+    static room: Room<RoomState>;
     static numberOfPlayers = 0;
     static scene:Game;
     static blocked = false;
     static ping = 100;
     static action = "";
-    static id: string;
     static pingStart: number;
     
-    static connect(){
-        // this.scene.time.addEvent({
-        //     delay: 1000,
-        //     callback: this.getPing,
-        //     callbackScope: this,
-        //     loop: true
-        // })
-        this.players = new Map<string,Character>;   
-        this.socket = io("http://localhost:3000");
-        this.socket.on("connect", ()=>{
-            this.id = this.socket.id!
+    static async connect(){
+        this.scene.time.addEvent({
+            delay: 1000,
+            callback: this.getPing,
+            callbackScope: this,
+            loop: true
         })
+
+        this.room = await this.client.join("my_room");
+        
+        this.room.state.characters.onAdd((character, sessionID:string)=>{
+            WorldManager.aliveEntities.set(character.id, character)
+            character.onChange(()=>{
+                if(character.id != this.room.sessionId && WorldManager.players.get(character.id)){
+                    let interpolationFactor = 0.2
+                    let player = WorldManager.players.get(character.id)!;
+                    player.x = Math.Linear(player.x, character.x, interpolationFactor)
+                    player.y = Math.Linear(player.y, character.y, interpolationFactor)
+                    player.health = character.health;
+                }
+            })
+        })
+
+        this.room.state.characters.onRemove((player:SAliveEntity, sessionID: string)=>{
+            this.deletePlayer(sessionID)
+        })
+
+        this.room.state.enemies.onAdd(e=>{
+            e.onChange(()=>{
+                if(WorldManager.enemies.get(e.id)){
+                    let interpolationFactor = 0.2
+                    let enemy = WorldManager.enemies.get(e.id)!
+                    enemy.getDamage(e.health)
+                    enemy.x = Math.Linear(enemy.x, e.x, interpolationFactor)
+                    enemy.y = Math.Linear(enemy.y, e.y, interpolationFactor)
+                }
+            })
+        })
+
         //this.socket.on("ping", ()=>{this.ping = this.scene.time.now - this.pingStart})
-        this.socket.on("update", (characters: Array<ICharacter>, enemies:Array<IEnemy>)=>{
-            characters.forEach(c => {
+        this.room.onMessage("update", (data: {characters:Array<ICharacter>, enemies: Array<IEnemy>})=>{
+            data.characters.forEach(c => {
                 this.addPlayer(c)
-                if(c.id == this.id){
+                if(c.id == this.room.sessionId){
                     this.scene.generateMainPlayer(WorldManager.players.get(c.id)!);
                 }
             })
-            enemies.forEach(e => this.addEnemy(e))
+            console.log(data.enemies)
+            data.enemies.forEach(e => this.addEnemy(e))
+            console.log(WorldManager.enemies)
         })
-        this.socket.on("disconnected", (id:string)=>this.deletePlayer(id))
-        this.socket.on("pe",(m:ICharacter) => this.addPlayer(m))
-        this.socket.on("wk", (id:string, direction: Math.Vector2) => this.receiveWalk(id, direction))
-        this.socket.on("em", (id:string, vector:Math.Vector2)=> this.receiveEnemyMovement(id, vector))
-        this.socket.on("ed", (damage:number, id:string) => WorldManager.enemies.get(id)?.getDamage(damage))
-        this.socket.on("q", (id:string,direction: Math.Vector2) => this.receiveQ(id, direction))
-        this.socket.on("w", (id:string,direction: Math.Vector2) => this.receiveW(id, direction))
-        this.socket.on("sne", (enemies:Array<IEnemy>, players: Array<ICharacter>, timeServer:number)=>this.synchronize(enemies, players, timeServer))
+
+        this.room.onMessage("pe", (character:ICharacter)=>{
+        })
+
+        this.room.onMessage("wk", (data: {id:string, direction: Math.Vector2})=>{
+            this.receiveWalk(data.id, data.direction);
+        });
+        
+        this.room.onMessage("em", (data: {id: string, vector: Math.Vector2})=>{
+            this.receiveEnemyMovement(data.id, data.vector);
+        });
+
+        
+        this.room.onMessage("q", (data: {id:string, direction: Math.Vector2})=>{
+            this.receiveQ(data.id, data.direction)
+        });
+        
+        this.room.onMessage("w", (data: { id: string, direction: Math.Vector2})=>{
+            this.receiveW(data.id, data.direction)
+        })
+
+        this.room.onMessage("ping",()=>{
+            this.ping = this.scene.time.now-this.pingStart;
+        })
+
         this.numberOfPlayers++;
     }
 
     static getPing(){
         this.pingStart = this.scene.time.now
-        this.scene.time.delayedCall(
-            this.ping/2,
-            ()=>this.socket.emit("ping"),
-            [],
-            this
-        )
+        this.room.send("ping")
     }
 
     static addPlayer(character:ICharacter){
@@ -71,7 +113,7 @@ export class NETManager{
     }
     
     static addEnemy(enemy:IEnemy){
-        if(!WorldManager.enemies.get(enemy.id)){
+        if(!WorldManager.enemies.get(enemy.id)){    
             WorldManager.enemies.set(enemy.id, new Enemy(this.scene, enemy))
         }
     }
@@ -80,32 +122,27 @@ export class NETManager{
         //console.log("hello")
         this.scene.events.once(Scenes.Events.POST_UPDATE, ()=>{
             let player = WorldManager.players.get(id)
-            WorldManager.players.delete(id)
+            WorldManager.players.delete(id);
+            WorldManager.aliveEntities.delete(id);
             player!.destroy();
-        })
-    }
-
-    static update(){
-        this.players.forEach((c)=>{
-            c.update(this.scene.delta)
         })
     }
 
     private static receiveWalk(id: string, direction: Math.Vector2){
         this.action = "Walk";
-        if(id != this.id)
+        if(id != this.room.sessionId)
             CharactersManager.pointerDownMove(WorldManager.players.get(id)!, direction)
     }
 
     private static receiveQ(id: string, direction: Math.Vector2){
         this.action = "Q";
-        if(id != this.id)
+        if(id != this.room.sessionId)
             CharactersManager.useQ(WorldManager.players.get(id)!, direction)
     }
 
     private static receiveW(id: string, direction: Math.Vector2){
         this.action = "W";
-        if(id != this.id)
+        if(id != this.room.sessionId)
             CharactersManager.useW(WorldManager.players.get(id)!, direction)
     }
 
@@ -117,52 +154,20 @@ export class NETManager{
         }
     }
 
-    private static synchronize(enemies:Array<IEnemy>, players:Array<ICharacter>, timeServer:number){
-        let interpolationFactor = 0.2
-        players.forEach(c => {
-            if(this.id != c.id){
-                let player = WorldManager.players.get(c.id)!
-                player.x = Math.Linear(player.x, c.x, interpolationFactor)
-                player.y = Math.Linear(player.y, c.y, interpolationFactor)
-            }
-        })
-        enemies.forEach(e => {
-            let enemy = WorldManager.enemies.get(e.id)!
-            enemy.x = Math.Linear(enemy.x, e.x, interpolationFactor)
-            enemy.y = Math.Linear(enemy.y, e.y, interpolationFactor)
-        })
-    }
-
     static sendWalk(direction: Vector2){
         if(!this.blocked){
-            this.scene.time.delayedCall(
-                this.ping/2,
-                ()=>this.socket.emit("wk", {x: direction.x, y: direction.y}, {x: this.scene.character.x, y:this.scene.character.y}),
-                [],
-                this
-            )
+            this.room.send("wk", direction);
             this.blocked = true;
             this.scene.time.delayedCall(100, ()=>this.blocked=false)
         }
     }
 
     static sendQ(direction: Vector2, weaponDirection: string){
-        this.scene.time.delayedCall(
-            this.ping/2,
-            () => this.socket.emit("q", {x: direction.x, y:direction.y}, weaponDirection),
-            [],
-            this
-        )
+        this.room.send("q", {direction: direction, weaponDirection: weaponDirection})
     }
 
     static sendW(direction:Vector2){
-        this.scene.time.delayedCall(
-            this.ping/2,
-            ()=>{this.socket.emit("w", {x: direction.x, y:direction.y}), console.log("W")},
-            [],
-            this
-        )
+        this.room.send("w", direction)
     }
-
     
 }

@@ -9,12 +9,12 @@ export class CharactersManager{
     static PI = Math.PI2/2
 
     static useQ(character:Character, vector:Math.Vector2){
+        console.log(character.id, NETManager.room.sessionId)
         character.attacking = true;
         character.idle = false;
         character.abilities.get("Q")!.activate();
         character.changeDirectionAttack(vector);
-        if(character.character.id == NETManager.id)
-            this.selectQDirection(character)
+        this.selectQDirection(character)
         character.updateBasicAnimation([
             "basic front attack",
             "basic left attack",
@@ -28,19 +28,23 @@ export class CharactersManager{
         if(character.direction.angle() >= this.PI/4 && character.direction.angle() < 3*this.PI/4){
             // Checks if animation is different of which is being played or the animation of "attack" has finished
             // but the attack button is still being pressed
-            NETManager.sendQ(character.direction, q.directions.down);
+            if(character.id == NETManager.room.sessionId)
+                NETManager.sendQ(character.direction, q.directions.down);
             q.doDamage(q.directions.down);
         }else
         if(character.direction.angle() >= 3*this.PI/4 && character.direction.angle() < 5*this.PI/4 ){
-            NETManager.sendQ(character.direction, q.directions.left);
+            if(character.id == NETManager.room.sessionId)
+                NETManager.sendQ(character.direction, q.directions.left);
             q.doDamage(q.directions.left);
         }else
         if(character.direction.angle() >= 5*this.PI/4 && character.direction.angle() < 7*this.PI/4){
-            NETManager.sendQ(character.direction, q.directions.up);
+            if(character.id == NETManager.room.sessionId)
+                NETManager.sendQ(character.direction, q.directions.up);
             q.doDamage(q.directions.up);
         }else
         if(character.direction.angle() >= 7*this.PI/4 || character.direction.angle() < this.PI/4){
-            NETManager.sendQ(character.direction, q.directions.right);
+            if(character.id == NETManager.room.sessionId)
+                NETManager.sendQ(character.direction, q.directions.right);
             q.doDamage(q.directions.right);
         }
     }

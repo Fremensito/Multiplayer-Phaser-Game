@@ -1,4 +1,5 @@
 import { Player } from "../classes/Player";
+import { SAliveEntity } from "../interfaces/SAliveEntity";
 import { Enemy } from "../objects/Enemy";
 import { Character } from "../objects/sctythe-girl/Character";
 
@@ -19,6 +20,7 @@ export class WorldManager{
     static mainPlayer: Player;
     static players = new Map<string, Character>();
     static enemies = new Map<string, Enemy>();
+    static aliveEntities = new Map<string, SAliveEntity>();
 
     // static setCollisionsScytheQ(scene: Scene){
     //     scene.matter.world.on("collisionstart", (event:any)=>{
