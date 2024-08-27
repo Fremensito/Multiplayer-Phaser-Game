@@ -6,8 +6,7 @@ import { WorldManager } from "../../managers/WorldManager";
 import { QAbility } from "../../classes/combat/scythe-girl/QAbility";
 import { WAbility } from "../../classes/combat/scythe-girl/WAbility";
 import { CombatAbility } from "../../classes/combat/CombatAbility";
-import { Player } from "../../classes/Player";
-import { MainCharacter } from "../MainCharacter";
+import { NETManager } from "../../managers/NETManager";
 
 export class Character extends AliveEntity{
     speed:number;
@@ -38,6 +37,7 @@ export class Character extends AliveEntity{
             friction: 0,
             frictionAir: 0,
             frictionStatic: 0,
+            label: "character"
         });
         this.speed = data.speed;
         this.idle = true;
@@ -105,9 +105,50 @@ export class Character extends AliveEntity{
             }
         })
 
-        this.setBody({width:10, height:20})
+        this.setBody({width:10, height:20}, {label: "character"})
         this.setSensor(true)
         this.setCollisionGroup(WorldManager.collideGroups.objects)
+
+        this.scene.matter.world.on("collisionstart", (event:any)=>{
+            for(let i = 0; i < event.pairs.length; i++){
+                let pair = event.pairs[i]
+                this.chooseCharacter(pair)
+            }
+        })
+
+        this.scene.matter.world.on("collisionactive", (event:any)=>{
+            for(let i = 0; i < event.pairs.length; i++){
+                let pair = event.pairs[i]
+                this.chooseCharacter(pair)
+            }
+        })
+    }
+
+    chooseCharacter(pair: any){
+        if(pair.bodyA.label == "character" && pair.bodyA.gameObject.id == NETManager.room.sessionId
+            && pair.bodyB.label != "character"
+        ){
+            let character = pair.bodyA.gameObject as Character;
+            let collidedObject = pair.bodyB.gameObject as Physics.Matter.Sprite;
+            this.reactToCollision(character, collidedObject);
+        }
+        else if(pair.bodyB.label == "character" && pair.bodyB.gameObject.id == NETManager.room.sessionId
+            && pair.bodyA.label != "character"
+        ){
+            let character = pair.bodyB.gameObject as Character;
+            let collidedObject = pair.bodyA.gameObject as Physics.Matter.Sprite;
+            this.reactToCollision(character, collidedObject);
+        }
+    }
+
+    reactToCollision(character:Character, collidedObject:Physics.Matter.Sprite){
+        console.log(character.id, NETManager.room.sessionId)
+        if(this.id == NETManager.room.sessionId){
+            console.log("collided")
+            let new_direction = (new Math.Vector2(character.x-collidedObject.x, character.y - collidedObject.y)).normalize();
+            this.x += new_direction.x * this.speed
+            this.y += new_direction.y * this.speed
+        }
     }
 
     update(delta:number){
