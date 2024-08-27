@@ -6,7 +6,6 @@ import { WorldManager } from "../../managers/WorldManager";
 import { QAbility } from "../../classes/combat/scythe-girl/QAbility";
 import { WAbility } from "../../classes/combat/scythe-girl/WAbility";
 import { CombatAbility } from "../../classes/combat/CombatAbility";
-import { UI } from "../../scenes/UI";
 
 export class Character extends AliveEntity{
     speed:number;
@@ -17,7 +16,7 @@ export class Character extends AliveEntity{
     PI = Math.PI2/2;
     created = false
 
-    abilities = new Map<string, CombatAbility>();
+    abilities?: Map<string, CombatAbility>;
     QAbility: QAbility;
     WAbility: WAbility;
     attack_animations = ["basic front attack", "basic right attack", "basic left attack", "basic back attack"]
@@ -71,14 +70,11 @@ export class Character extends AliveEntity{
         }
 
         //QAbility.createRight(this);
-
+        this.abilities = new Map<string, CombatAbility>();
         this.abilities.set("Q", new QAbility(data.abilities[0], scene, this));
         this.QAbility = this.abilities.get("Q") as QAbility;
         this.abilities.set("W", new WAbility(data.abilities[1], scene, this));
         this.WAbility = this.abilities.get("W") as WAbility;
-
-        const ui = new UI(data.abilities, this);
-        scene.game.scene.add("UI", ui, true);
         
         this.WSound = scene.sound.add("WScythe");
         this.WSound.volume = 0.5
@@ -179,8 +175,8 @@ export class Character extends AliveEntity{
         this.WSound.play()
     }
 
-    destroy(){
-        
-        super.destroy()
+    destroyAbilities(){
+        this.abilities!.forEach(a => a.destroy());
+        delete this.abilities;
     }
 }

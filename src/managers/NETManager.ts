@@ -10,6 +10,7 @@ import { Enemy } from "../objects/Enemy";
 import { Client, Room } from "colyseus.js";
 import { SAliveEntity } from "../interfaces/SAliveEntity";
 import { RoomState } from "../schemas/RoomState";
+import { MainCharacter } from "../objects/MainCharacter";
 
 export class NETManager{
 
@@ -75,6 +76,7 @@ export class NETManager{
         })
 
         this.room.onMessage("pe", (character:ICharacter)=>{
+            this.addPlayer(character)
         })
 
         this.room.onMessage("wk", (data: {id:string, direction: Math.Vector2})=>{
@@ -84,7 +86,6 @@ export class NETManager{
         this.room.onMessage("em", (data: {id: string, vector: Math.Vector2})=>{
             this.receiveEnemyMovement(data.id, data.vector);
         });
-
         
         this.room.onMessage("q", (data: {id:string, direction: Math.Vector2})=>{
             this.receiveQ(data.id, data.direction)
@@ -107,8 +108,11 @@ export class NETManager{
     }
 
     static addPlayer(character:ICharacter){
-        if(!WorldManager.players.get(character.id)){
+        if(!WorldManager.players.get(character.id) && character.id != this.room.sessionId){
             WorldManager.players.set(character.id, new Character(this.scene, character))
+        }
+        else if(!WorldManager.players.get(character.id) && character.id == this.room.sessionId){
+            WorldManager.players.set(character.id, new MainCharacter(this.scene, character))
         }
     }
     
@@ -124,6 +128,7 @@ export class NETManager{
             let player = WorldManager.players.get(id)
             WorldManager.players.delete(id);
             WorldManager.aliveEntities.delete(id);
+            player!.destroyAbilities();
             player!.destroy();
         })
     }
@@ -135,6 +140,7 @@ export class NETManager{
     }
 
     private static receiveQ(id: string, direction: Math.Vector2){
+        console.log(direction)
         this.action = "Q";
         if(id != this.room.sessionId)
             CharactersManager.useQ(WorldManager.players.get(id)!, direction)

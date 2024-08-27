@@ -11,7 +11,7 @@ export class WAbility extends CombatAbility{
 
     hitbox: MatterJS.BodyType;
     enemiesHit = new Array<Enemy>()
-    character:Character
+    character?:Character
     damage = 10
 
     constructor(ability:IAbility, scene:Scene, character: Character){
@@ -70,8 +70,9 @@ export class WAbility extends CombatAbility{
     attack(body: any){
         let enemy = WorldManager.enemies.get(body.gameObject.id)!
         this.enemiesHit.push(enemy);
-        if(this.character?.anims.getName() == "W" && this.character?.anims.isPlaying)
+        if(this.character?.anims.getName() == "W" && this.character?.anims.isPlaying){
             enemy.getDamageClient(this.damage);
+        }
     }
 
     doDamage(){
@@ -80,11 +81,13 @@ export class WAbility extends CombatAbility{
 
     updateW(delta: number){
         super.update(delta);
-        this.hitbox.position.x = this.character.x;
-        this.hitbox.position.y = this.character.y;
+        this.hitbox.position.x = this.character!.x;
+        this.hitbox.position.y = this.character!.y;
     }
 
-    filterNulls(){
-        this.enemiesHit = this.enemiesHit.filter(e=>e != null)
+    destroy(){
+        super.destroy();
+        this.scene.matter.world.remove(this.hitbox);
+        delete this.character
     }
 }

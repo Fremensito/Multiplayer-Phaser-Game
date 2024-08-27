@@ -180,4 +180,12 @@ export class QAbility extends CombatAbility{
         this.enemiesLeft = this.enemiesLeft.filter(e=>e!=null);
         this.enemiesUp = this.enemiesUp.filter(e=>e!=null);
     }
+
+    destroy(){
+        super.destroy();
+        this.scene.matter.world.remove(this.right);
+        this.scene.matter.world.remove(this.down);
+        this.scene.matter.world.remove(this.left);
+        this.scene.matter.world.remove(this.up);
+    }
 }

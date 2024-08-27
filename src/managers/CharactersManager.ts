@@ -12,9 +12,18 @@ export class CharactersManager{
         console.log(character.id, NETManager.room.sessionId)
         character.attacking = true;
         character.idle = false;
-        character.abilities.get("Q")!.activate();
-        character.changeDirectionAttack(vector);
+        character.abilities!.get("Q")!.activate();
+
+        //Because of net desync
+        if(character.id == NETManager.room.sessionId)
+            character.changeDirectionAttack(vector);
+        else{
+            character.direction = new Math.Vector2(vector.x, vector.y)
+            console.log(character.direction)
+        }
+
         this.selectQDirection(character)
+        console.log(character.direction)
         character.updateBasicAnimation([
             "basic front attack",
             "basic left attack",
@@ -24,7 +33,7 @@ export class CharactersManager{
     }
 
     static selectQDirection(character:Character){
-        let q = (character.abilities.get("Q") as QAbility);
+        let q = (character.abilities!.get("Q") as QAbility);
         if(character.direction.angle() >= this.PI/4 && character.direction.angle() < 3*this.PI/4){
             // Checks if animation is different of which is being played or the animation of "attack" has finished
             // but the attack button is still being pressed
@@ -52,10 +61,10 @@ export class CharactersManager{
     static useW(character:Character, vector:Math.Vector2){
         character.attacking = true;
         character.idle = false;
-        character.abilities.get("W")!.activate();
+        character.abilities!.get("W")!.activate();
         character.WAction(vector)
         character.play({key: "W", repeat: 0});
-        (character.abilities.get("W") as WAbility).doDamage();
+        (character.abilities!.get("W") as WAbility).doDamage();
     }
 
     static pointerDownMove(character:Character, vector:Math.Vector2){

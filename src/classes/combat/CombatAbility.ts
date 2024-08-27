@@ -34,4 +34,6 @@ export class CombatAbility{
             this.cooldowntime = 0;
         }
     }
+
+    destroy(){}
 }
