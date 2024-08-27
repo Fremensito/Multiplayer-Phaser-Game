@@ -61,7 +61,7 @@ export class Enemy extends AliveEntity{
         //this.postFX.addGlow(0xff4040, 6)
         this.setCollisionCategory(WorldManager.categories.enemies);
         //this.setCollidesWith(WorldManager.categories.abilities)
-        this.setCollisionGroup(WorldManager.collideGroups.enemies);
+        this.setCollisionGroup(WorldManager.collideGroups.objects);
     }
 
     update(delta: number){

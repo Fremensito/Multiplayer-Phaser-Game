@@ -13,7 +13,7 @@ const config: Types.Core.GameConfig = {
             runner:{
                 isFixed: true
             },
-            debug: true,
+            //debug: true,
             gravity: {x:0, y:0},
         }
     },

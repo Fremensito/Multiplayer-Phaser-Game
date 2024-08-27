@@ -18,7 +18,7 @@ export class PCControls{
 
     update(){
         if(!this.character.attacking){
-            if(Input.Keyboard.JustDown(this.Q) && this.character.abilities.get("Q")!.available){
+            if(Input.Keyboard.JustDown(this.Q) && this.character.abilities!.get("Q")!.available){
                 // NETManager.sendQ({
                 //     x: this.input.mousePointer.worldX,
                 //     y: this.input.mousePointer.worldY
@@ -38,7 +38,7 @@ export class PCControls{
                     new Math.Vector2(this.input.mousePointer.worldX, this.input.mousePointer.worldY)
                 )
             }
-            else if(Input.Keyboard.JustDown(this.W) && this.character.abilities.get("W")!.available){
+            else if(Input.Keyboard.JustDown(this.W) && this.character.abilities!.get("W")!.available){
                 NETManager.sendW({
                     x: this.input.mousePointer.worldX,
                     y: this.input.mousePointer.worldY

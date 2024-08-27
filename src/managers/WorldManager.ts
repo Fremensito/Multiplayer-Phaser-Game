@@ -13,8 +13,11 @@ export class WorldManager{
 
     static collideGroups = {
         abilities: 1,
-        enemies: 2
+        enemies: 2,
+        objects: 4
     }
+
+    static delta = 0;
 
 
     static mainPlayer: Player;

@@ -95,6 +95,7 @@ export class Game extends Scene
             c!.update(delta)
         })
         this.delta = delta;
+        WorldManager.delta = delta;
     }
     
     generateMap(){

@@ -1,4 +1,4 @@
-import {Scene, Math, Animations} from "phaser";
+import {Scene, Math, Animations, Physics} from "phaser";
 import { ICharacter } from "../../interfaces/Character";
 import { SpriteParticle } from "../../classes/SpriteParticle";
 import { AliveEntity } from "../AliveEntity";
@@ -6,6 +6,8 @@ import { WorldManager } from "../../managers/WorldManager";
 import { QAbility } from "../../classes/combat/scythe-girl/QAbility";
 import { WAbility } from "../../classes/combat/scythe-girl/WAbility";
 import { CombatAbility } from "../../classes/combat/CombatAbility";
+import { Player } from "../../classes/Player";
+import { MainCharacter } from "../MainCharacter";
 
 export class Character extends AliveEntity{
     speed:number;
@@ -35,7 +37,7 @@ export class Character extends AliveEntity{
         super(scene.matter.world, data.x, data.y, "player", 0, {
             friction: 0,
             frictionAir: 0,
-            frictionStatic: 0
+            frictionStatic: 0,
         });
         this.speed = data.speed;
         this.idle = true;
@@ -105,9 +107,7 @@ export class Character extends AliveEntity{
 
         this.setBody({width:10, height:20})
         this.setSensor(true)
-        this.setCollisionCategory(WorldManager.categories.characters)
-        // this.rectangle = scene.add.rectangle(data.x, data.y, 5, 15, 0xff0000, 0xffffff)
-        // this.rectangle.setStrokeStyle(1, 0xffffff)
+        this.setCollisionGroup(WorldManager.collideGroups.objects)
     }
 
     update(delta:number){
