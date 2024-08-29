@@ -1,10 +1,11 @@
-import { FX, Math, Physics, Scene, Scenes} from "phaser";
+import { FX, Math, Scene} from "phaser";
 import { AliveEntity } from "./AliveEntity";
 import { IEnemy } from "../interfaces/Enemy";
 import { HealthBar } from "../classes/HealthBar";
 import { WorldManager } from "../managers/WorldManager";
 import { DamageText } from "../classes/DamageText";
 import { Game } from "../scenes/Game";
+import SAT from "sat";
 
 export class Enemy extends AliveEntity{
     static animationsGenerated = false;
@@ -18,14 +19,10 @@ export class Enemy extends AliveEntity{
     healthBar: HealthBar
     name = "ghost"
     destroyed = false;
+    box: SAT.Box;
     
     constructor(scene:Scene, data:IEnemy){
-        super(scene.matter.world, data.x, data.y, "ghost", 0, {
-            label:"ghost",
-            friction: 0,
-            frictionAir: 0,
-            frictionStatic: 0,
-        })
+        super(scene, data.x, data.y, "ghost", 0)
         this.id = data.id;
         this.pointToMove = new Math.Vector2(data.pointToMoveX, data.pointToMoveY);
         this.direction = new Math.Vector2(data.directionX, data.directionY)
@@ -51,17 +48,17 @@ export class Enemy extends AliveEntity{
 
         this.getHit = scene.sound.add("getHit");
         this.getHit.volume = 0.5
-
-        this.setBody({width:10, height:20})
-        this.setSensor(true)
-
+        
+        this.boxWidth = 5;
+        this.boxHeight = 10;
+        this.box = new SAT.Box(new SAT.Vector(data.x - this.boxWidth/2, data.y - this.boxHeight/2), this.boxWidth, this.boxHeight)
+        this.generateDebugRect(scene)
         //this.preFX?.addShadow(1, 1, undefined, 10, 0xf10023);
         //this.postFX.addGlow(0xffffff, 3)
         //this.preFX?.addGlow(0xff4040, 6)
         //this.postFX.addGlow(0xff4040, 6)
-        this.setCollisionCategory(WorldManager.categories.enemies);
-        //this.setCollidesWith(WorldManager.categories.abilities)
-        this.setCollisionGroup(WorldManager.collideGroups.objects);
+        this.box.pos.x = (this.x - this.boxWidth/2)
+        this.box.pos.y = (this.y - this.boxHeight/2)
     }
 
     update(delta: number){
@@ -72,17 +69,20 @@ export class Enemy extends AliveEntity{
             this.updateBasicAnimation(["ghost walk front", "ghost walk left", "ghost walk back", "ghost walk right"], -1, 1);
         this.updateDirection();
         if(!this.idle && !this.attacking){
-            this.setVelocityX(this.direction.x * this.speed);
-            this.setVelocityY(this.direction.y * this.speed);
+            this.x += this.speed*this.direction.x*delta
+            this.y += this.speed*this.direction.y*delta
         }
-        else{
-            this.setVelocity(0,0)
-        }
+        // else{
+        //     this.setVelocity(0,0)
+        // }
         if(this.checkPositionGoal()){
             this.idle = true;
-            this.setVelocity(0,0);
+            // this.setVelocity(0,0);
         }
         this.healthBar.update(this.x, this.y - 13)
+        this.debug();
+        this.box.pos.x = (this.x - this.boxWidth/2)
+        this.box.pos.y = (this.y - this.boxHeight/2)
     }
 
     getDamageClient(damage:number){
@@ -113,6 +113,7 @@ export class Enemy extends AliveEntity{
                 this.healthBar.destroy();
                 console.log(WorldManager.enemies.delete(this.id))
                 this.destroy()
+                this.boxRect.destroy();
             },
             loop: false,
             delay: 100,

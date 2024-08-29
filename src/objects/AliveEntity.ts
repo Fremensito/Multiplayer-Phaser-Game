@@ -1,6 +1,7 @@
-import { Math, Physics } from "phaser";
+import { GameObjects, Math, Physics, Scene } from "phaser";
+import { MainCharacter } from "./MainCharacter";
 
-export class AliveEntity extends Physics.Matter.Sprite{
+export class AliveEntity extends GameObjects.Sprite{
     speed:number;
     idle: boolean;
     attacking: boolean;
@@ -9,6 +10,26 @@ export class AliveEntity extends Physics.Matter.Sprite{
     PI = Math.PI2/2;
     health: number;
     id:string
+    boxHeight: number;
+    boxWidth: number;
+    boxRect: GameObjects.Rectangle;
+    debugMode = false;
+    box: SAT.Box;
+
+    generateDebugRect(scene: Scene){
+        this.boxRect = new GameObjects.Rectangle(scene, this.x, this.y, this.boxWidth, this.boxHeight)
+        this.boxRect.setStrokeStyle(1, 0xee0000);
+    }
+
+    debug(){
+        if(!this.debugMode){
+            this.scene.add.existing(this.boxRect)
+            this.debugMode = true;
+        }
+        this.boxRect.x = this.x;
+        this.boxRect.y = this.y;
+        this.boxRect.depth = 3000;
+    }
 
     generateAnimations(name: string, texture: string, start:number, end: number, frameRate: number){
         this.scene.anims.create({

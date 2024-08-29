@@ -2,6 +2,9 @@ import { Player } from "../classes/Player";
 import { SAliveEntity } from "../interfaces/SAliveEntity";
 import { Enemy } from "../objects/Enemy";
 import { Character } from "../objects/sctythe-girl/Character";
+import { NETManager } from "./NETManager";
+import SAT from "sat";
+import { Math } from "phaser";
 
 export class WorldManager{
 
@@ -25,20 +28,18 @@ export class WorldManager{
     static enemies = new Map<string, Enemy>();
     static aliveEntities = new Map<string, SAliveEntity>();
 
-    // static setCollisionsScytheQ(scene: Scene){
-    //     scene.matter.world.on("collisionstart", (event:any)=>{
-    //         for(let i = 0; i < event.pairs.length; i++){
-    //             let pair = event.pairs[i]
-    //             //console.log(pair)
-    //             if(pair ){
-                    
-    //             }
-    //             console.log(pair.bodyA.label, pair.bodyB.label)
-    //         }
-    //     })
+    static checkCollisions(){
+        if(NETManager.room){
+            let player = this.players.get(NETManager.room.sessionId)!
 
-    //     scene.matter.world.on("collisionend", ()=>{
-    //         console.log("bye")
-    //     })
-    // }
+            this.enemies.forEach(e=>{
+                if(SAT.testPolygonPolygon(e.box.toPolygon(), player.box.toPolygon())){
+                    let new_direction = (new Math.Vector2(player.x-e.x, player.y - e.y)).normalize();
+                    player.x += new_direction.x * player.speed * this.delta
+                    player.y += new_direction.y * player.speed * this.delta
+                    console.log("collisioning")
+                }
+            })
+        }
+    }
 }

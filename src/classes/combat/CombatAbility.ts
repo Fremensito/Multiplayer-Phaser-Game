@@ -8,6 +8,7 @@ export class CombatAbility{
     mana_cost: number;
     particlesSprite: string;
     range: number;
+    debugMode = false;
 
     constructor(ability: IAbility){
         this.available = true;

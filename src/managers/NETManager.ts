@@ -87,8 +87,8 @@ export class NETManager{
             this.receiveEnemyMovement(data.id, data.vector);
         });
         
-        this.room.onMessage("q", (data: {id:string, direction: Math.Vector2})=>{
-            this.receiveQ(data.id, data.direction)
+        this.room.onMessage("q", (data: {id:string, direction: Math.Vector2, weaponDirection:string})=>{
+            this.receiveQ(data.id, data.direction, data.weaponDirection)
         });
         
         this.room.onMessage("w", (data: { id: string, direction: Math.Vector2})=>{
@@ -139,7 +139,7 @@ export class NETManager{
             CharactersManager.pointerDownMove(WorldManager.players.get(id)!, direction)
     }
 
-    private static receiveQ(id: string, direction: Math.Vector2){
+    private static receiveQ(id: string, direction: Math.Vector2, weaponDirection: string){
         console.log(direction)
         this.action = "Q";
         if(id != this.room.sessionId)

@@ -39,22 +39,22 @@ export class CharactersManager{
             // but the attack button is still being pressed
             if(character.id == NETManager.room.sessionId)
                 NETManager.sendQ(character.direction, q.directions.down);
-            q.doDamage(q.directions.down);
+            q.doDamage(q.directions.down, character);
         }else
         if(character.direction.angle() >= 3*this.PI/4 && character.direction.angle() < 5*this.PI/4 ){
             if(character.id == NETManager.room.sessionId)
                 NETManager.sendQ(character.direction, q.directions.left);
-            q.doDamage(q.directions.left);
+            q.doDamage(q.directions.left, character);
         }else
         if(character.direction.angle() >= 5*this.PI/4 && character.direction.angle() < 7*this.PI/4){
             if(character.id == NETManager.room.sessionId)
                 NETManager.sendQ(character.direction, q.directions.up);
-            q.doDamage(q.directions.up);
+            q.doDamage(q.directions.up, character);
         }else
         if(character.direction.angle() >= 7*this.PI/4 || character.direction.angle() < this.PI/4){
             if(character.id == NETManager.room.sessionId)
                 NETManager.sendQ(character.direction, q.directions.right);
-            q.doDamage(q.directions.right);
+            q.doDamage(q.directions.right, character);
         }
     }
 
@@ -64,7 +64,6 @@ export class CharactersManager{
         character.abilities!.get("W")!.activate();
         character.WAction(vector)
         character.play({key: "W", repeat: 0});
-        (character.abilities!.get("W") as WAbility).doDamage();
     }
 
     static pointerDownMove(character:Character, vector:Math.Vector2){

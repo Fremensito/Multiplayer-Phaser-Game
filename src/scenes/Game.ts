@@ -1,4 +1,4 @@
-import { Scene, Tilemaps} from 'phaser';
+import { GameObjects, Scene, Tilemaps} from 'phaser';
 import { Math } from 'phaser';
 import { Player } from '../classes/Player';
 import { PCControls } from '../controls/PCControls';
@@ -24,6 +24,8 @@ export class Game extends Scene
         ghostIdle: "ghost",
         ghostGetHit: "ghost get hit"
     }
+
+    partitionWidth = 200;
 
     constructor ()
     {
@@ -66,19 +68,18 @@ export class Game extends Scene
         //this.enemy = new Enemy(this, {x: 320, y: 320, speed: 0.4, id:"ghost"})
 
         //this.matter.world.add(rectangle)
-        this.time.addEvent({
-            delay: 1000,
-            callback: ()=>console.log(WorldManager.enemies.size),
-            loop: true
-        })
-
-        console.log(this.game)
+        // this.time.addEvent({
+        //     delay: 1000,
+        //     callback: ()=>console.log(WorldManager.enemies.size),
+        //     loop: true
+        // })
     } 
     
     generateMainPlayer(character:Character){
         this.character = character
         this.cameras.main.zoom = 3;
         this.cameras.main.centerOn(this.character.x, this.character.y)
+        this.cameras.main.startFollow(this.character)
         this.pcControls = new PCControls();
         this.pcControls.character = this.character
         this.pcControls.input = this.input
@@ -96,6 +97,7 @@ export class Game extends Scene
         })
         this.delta = delta;
         WorldManager.delta = delta;
+        WorldManager.checkCollisions();
     }
     
     generateMap(){
@@ -112,9 +114,22 @@ export class Game extends Scene
             }
         })
         
-        this.layer.getCenter().y = this.game.config.height as number / 2;
-        this.layer.scale = 0.8;
+        this.layer.x = 0;
+        this.layer.y = 0;
+        this.layer.scale = 1;
         this.layer.setSkipCull(true);
+        this.partition()
+    }
+
+    partition(){
+        for(let i = 0; i < 4; i++){
+            for(let j = 0; j < 4; j++){
+                let rect = new GameObjects.Rectangle(this, j*200 + 100, i*200 + 100, 200, 200);
+                rect.setStrokeStyle(1, 0x13e8e8)
+                rect.depth = 3000;
+                this.add.existing(rect)
+            }
+        }
     }
 
     generatePlayer(){
