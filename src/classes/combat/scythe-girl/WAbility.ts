@@ -5,6 +5,7 @@ import { Character } from "../../../objects/sctythe-girl/Character";
 import { WorldManager } from "../../../managers/WorldManager";
 import { CombatAbility } from "../CombatAbility";
 import SAT from "sat";
+import { SCYTHE_GIRL } from "../../../utils/AssetsGlobals";
 
 export class WAbility extends CombatAbility{
 
@@ -13,8 +14,9 @@ export class WAbility extends CombatAbility{
     damage = 10
     character: Character
 
-    constructor(ability:IAbility){
-        super(ability)
+    constructor(scene:Scene, ability: IAbility, x:number, y: number, texture: string){
+        super(scene, ability, x, y, texture)
+        this.generateAnimations(SCYTHE_GIRL.WVFX, SCYTHE_GIRL.WVFX, 0, 6, ability.speed)
     }
 
     clear(){

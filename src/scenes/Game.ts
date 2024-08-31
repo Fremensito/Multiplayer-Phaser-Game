@@ -6,6 +6,8 @@ import { Character } from '../objects/sctythe-girl/Character';
 import { NETManager } from '../managers/NETManager';
 import { Enemy } from '../objects/Enemy';
 import { WorldManager } from '../managers/WorldManager';
+import { MAP } from '../utils/AssetsGlobals';
+import { AssetsLoader } from '../utils/AssetsLoader';
 //import { PhysicsManager } from '../managers/PhysicsManager';
 
 
@@ -20,11 +22,6 @@ export class Game extends Scene
     timeElapsed = 0;
     enemy:Enemy
     created = false;
-    static ghostSprites = {
-        ghostIdle: "ghost",
-        ghostGetHit: "ghost get hit"
-    }
-
     partitionWidth = 200;
 
     constructor ()
@@ -35,44 +32,25 @@ export class Game extends Scene
     preload ()
     {   
         this.load.setPath('assets');
-        this.load.image('tile-map', 'first-lv-tilemap.png');
-        this.load.spritesheet("player", "classes/scythe-girl/walking.png", {frameWidth:64, frameHeight:64});
-        this.load.spritesheet("player idle", "classes/scythe-girl/idle.png", {frameWidth:64, frameHeight:64});
-        this.load.spritesheet("player basic attack", "classes/scythe-girl/basic-attack.png", {frameWidth:64, frameHeight:64});
-        this.load.spritesheet("player w", "classes/scythe-girl/W.png", {frameWidth:64, frameHeight:64});
-        this.load.spritesheet("W-particles", "classes/scythe-girl/W-particles.png", {frameWidth:64, frameHeight:64});
-        
-        this.load.spritesheet(Game.ghostSprites.ghostIdle, "enemies/ghost/ghost-idle.png", {frameWidth: 64, frameHeight: 64})
-        this.load.spritesheet(Game.ghostSprites.ghostGetHit, "enemies/ghost/ghost-get-hit.png", {frameWidth: 64, frameHeight: 64})
 
-        this.load.audio("getHit", "sounds/get-hit2.wav")
-        this.load.audio("WScythe", "sounds/scythe-girl/W.wav");
-        this.load.audio("QScythe", "sounds/scythe-girl/Q.wav")
+        AssetsLoader.loadGeneral(this);
+        AssetsLoader.loadMap(this)
+        AssetsLoader.loadScythe(this);
+        AssetsLoader.loadGhost(this)
     }
 
     async create ()
     {   
         this.generateMap();
+        WorldManager.segmentMap()
         //this.generatePlayer();
         this.input.setDefaultCursor("url(assets/cursor.png), pointer")
         document.addEventListener('contextmenu', event => event.preventDefault());
 
         NETManager.scene = this;
         await NETManager.connect();
-
-        //PhysicsManager.startPhysics(this);
-        this.matter.world.getDelta = ()=>{
-            return this.game.loop.delta
-        }
         
         //this.enemy = new Enemy(this, {x: 320, y: 320, speed: 0.4, id:"ghost"})
-
-        //this.matter.world.add(rectangle)
-        // this.time.addEvent({
-        //     delay: 1000,
-        //     callback: ()=>console.log(WorldManager.enemies.size),
-        //     loop: true
-        // })
     } 
     
     generateMainPlayer(character:Character){
@@ -102,7 +80,7 @@ export class Game extends Scene
     
     generateMap(){
         const map = this.make.tilemap({width:50, height: 50, tileWidth: 16, tileHeight: 16});
-        const tiles = map.addTilesetImage("tile-map", undefined, 16, 16)!;
+        const tiles = map.addTilesetImage(MAP.tilemap, undefined, 16, 16)!;
         this.layer = map.createBlankLayer('layer1', tiles)!;
         
         this.layer.forEachTile((v)=>{
@@ -129,32 +107,6 @@ export class Game extends Scene
                 rect.depth = 3000;
                 this.add.existing(rect)
             }
-        }
-    }
-
-    generatePlayer(){
-        this.character = new Character(
-            this, 
-            this.player.character
-        );
-
-        // this.character.x = this.layer.getCenter().x;
-        // this.character.y = this.layer.getCenter().y;
-
-        //Makes the.character look front
-        this.character.pointToMove.y = this.character.y + 10;
-        this.character.pointToMove.x = this.character.x;
-        
-        this.cameras.main.zoom = 3;
-        this.cameras.main.centerOn(this.character.x, this.character.y)
-    }
-
-    updateMatter(delta:number){
-        this.timeElapsed += delta;
-        if(this.timeElapsed > 16){
-            console.log("hello");
-            this.matter.world.update(Date.now(), this.timeElapsed.valueOf());
-            this.timeElapsed = 0;
         }
     }
 }

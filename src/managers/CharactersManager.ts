@@ -2,7 +2,7 @@ import { Math } from "phaser";
 import { Character } from "../objects/sctythe-girl/Character";
 import { NETManager } from "./NETManager";
 import { QAbility } from "../classes/combat/scythe-girl/QAbility";
-import { WAbility } from "../classes/combat/scythe-girl/WAbility";
+import { SCYTHE_GIRL } from "../utils/AssetsGlobals";
 
 export class CharactersManager{
 
@@ -29,7 +29,7 @@ export class CharactersManager{
             "basic left attack",
             "basic back attack",
             "basic right attack"
-        ], 0, 1)
+        ], 0, 0)
     }
 
     static selectQDirection(character:Character){
@@ -62,6 +62,7 @@ export class CharactersManager{
         character.attacking = true;
         character.idle = false;
         character.abilities!.get("W")!.activate();
+        character.abilities!.get("W")!.play({key: SCYTHE_GIRL.WVFX, repeat: 0, startFrame: 0});
         character.WAction(vector)
         character.play({key: "W", repeat: 0});
     }

@@ -13,6 +13,7 @@ export interface IAbility{
     speed: number;
     mana_cost: number;
     particlesSprite: string;
+    sprite: string;
     range: number;
     UI: IUIAbility;
 }

@@ -1,11 +1,11 @@
-import { FX, Math, Scene} from "phaser";
+import { Math, Scene} from "phaser";
 import { AliveEntity } from "./AliveEntity";
 import { IEnemy } from "../interfaces/Enemy";
 import { HealthBar } from "../classes/HealthBar";
 import { WorldManager } from "../managers/WorldManager";
 import { DamageText } from "../classes/DamageText";
-import { Game } from "../scenes/Game";
 import SAT from "sat";
+import { GHOST } from "../utils/AssetsGlobals";
 
 export class Enemy extends AliveEntity{
     static animationsGenerated = false;
@@ -39,14 +39,14 @@ export class Enemy extends AliveEntity{
             this.generateAnimations("ghost walk left",  "ghost", 16, 23, 8);
             this.generateAnimations("ghost walk back",  "ghost", 24, 31, 8);
 
-            this.generateAnimations(this.getHitAnims.front, Game.ghostSprites.ghostGetHit, 0, 1, 6)
-            this.generateAnimations(this.getHitAnims.right,  Game.ghostSprites.ghostGetHit, 2, 3, 6)
-            this.generateAnimations(this.getHitAnims.left, Game.ghostSprites.ghostGetHit, 4,5, 6)
-            this.generateAnimations(this.getHitAnims.back, Game.ghostSprites.ghostGetHit, 6, 6, 6)
+            this.generateAnimations(this.getHitAnims.front, GHOST.getHit, 0, 1, 6)
+            this.generateAnimations(this.getHitAnims.right,  GHOST.getHit, 2, 3, 6)
+            this.generateAnimations(this.getHitAnims.left, GHOST.getHit, 4,5, 6)
+            this.generateAnimations(this.getHitAnims.back, GHOST.getHit, 6, 6, 6)
             Enemy.animationsGenerated=true
         }
 
-        this.getHit = scene.sound.add("getHit");
+        this.getHit = scene.sound.add(GHOST.getHit);
         this.getHit.volume = 0.5
         
         this.boxWidth = 5;
@@ -69,8 +69,8 @@ export class Enemy extends AliveEntity{
             this.updateBasicAnimation(["ghost walk front", "ghost walk left", "ghost walk back", "ghost walk right"], -1, 1);
         this.updateDirection();
         if(!this.idle && !this.attacking){
-            this.x += this.speed*this.direction.x*delta
-            this.y += this.speed*this.direction.y*delta
+            // this.x += this.speed*this.direction.x*delta
+            // this.y += this.speed*this.direction.y*delta
         }
         // else{
         //     this.setVelocity(0,0)
@@ -80,21 +80,27 @@ export class Enemy extends AliveEntity{
             // this.setVelocity(0,0);
         }
         this.healthBar.update(this.x, this.y - 13)
-        this.debug();
+        //this.debug();
         this.box.pos.x = (this.x - this.boxWidth/2)
         this.box.pos.y = (this.y - this.boxHeight/2)
     }
 
     getDamageClient(damage:number){
         //console.log("got damage")
-        this.updateBasicAnimation([
-            this.getHitAnims.front, 
-            this.getHitAnims.left, 
-            this.getHitAnims.back, 
-            this.getHitAnims.right],
-            0,
-            0
-        )
+        // this.updateBasicAnimation([
+        //     this.getHitAnims.front, 
+        //     this.getHitAnims.left, 
+        //     this.getHitAnims.back, 
+        //     this.getHitAnims.right],
+        //     0,
+        //     0
+        // )
+        this.setTintFill(0xfafafa);
+        this.scene.time.addEvent({
+            delay: 100,
+            callbackScope: this,
+            callback: ()=>this.clearTint()
+        })
         new DamageText(this.scene, this.x, this.y, damage)
         this.getHit.play();
     }

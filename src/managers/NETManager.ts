@@ -1,7 +1,7 @@
 import { ICharacter } from "../interfaces/Character";
 import { Character } from "../objects/sctythe-girl/Character";
 import { Game } from "../scenes/Game";
-import { Math, Scenes } from "phaser";
+import { Math as PMath, Scenes } from "phaser";
 import { CharactersManager } from "./CharactersManager";
 import { Vector2 } from "../interfaces/Vector2";
 import { IEnemy } from "../interfaces/Enemy";
@@ -39,8 +39,8 @@ export class NETManager{
                 if(character.id != this.room.sessionId && WorldManager.players.get(character.id)){
                     let interpolationFactor = 0.2
                     let player = WorldManager.players.get(character.id)!;
-                    player.x = Math.Linear(player.x, character.x, interpolationFactor)
-                    player.y = Math.Linear(player.y, character.y, interpolationFactor)
+                    player.x = PMath.Linear(player.x, character.x, interpolationFactor)
+                    player.y = PMath.Linear(player.y, character.y, interpolationFactor)
                     player.health = character.health;
                 }
             })
@@ -53,11 +53,11 @@ export class NETManager{
         this.room.state.enemies.onAdd(e=>{
             e.onChange(()=>{
                 if(WorldManager.enemies.get(e.id)){
-                    let interpolationFactor = 0.2
+                    let interpolationFactor = 0.7
                     let enemy = WorldManager.enemies.get(e.id)!
                     enemy.getDamage(e.health)
-                    enemy.x = Math.Linear(enemy.x, e.x, interpolationFactor)
-                    enemy.y = Math.Linear(enemy.y, e.y, interpolationFactor)
+                    enemy.x = PMath.Linear(enemy.x, e.x, interpolationFactor)
+                    enemy.y = PMath.Linear(enemy.y, e.y, interpolationFactor)
                 }
             })
         })
@@ -79,19 +79,19 @@ export class NETManager{
             this.addPlayer(character)
         })
 
-        this.room.onMessage("wk", (data: {id:string, direction: Math.Vector2})=>{
+        this.room.onMessage("wk", (data: {id:string, direction: PMath.Vector2})=>{
             this.receiveWalk(data.id, data.direction);
         });
         
-        this.room.onMessage("em", (data: {id: string, vector: Math.Vector2})=>{
+        this.room.onMessage("em", (data: {id: string, vector: PMath.Vector2})=>{
             this.receiveEnemyMovement(data.id, data.vector);
         });
         
-        this.room.onMessage("q", (data: {id:string, direction: Math.Vector2, weaponDirection:string})=>{
+        this.room.onMessage("q", (data: {id:string, direction: PMath.Vector2, weaponDirection:string})=>{
             this.receiveQ(data.id, data.direction, data.weaponDirection)
         });
         
-        this.room.onMessage("w", (data: { id: string, direction: Math.Vector2})=>{
+        this.room.onMessage("w", (data: { id: string, direction: PMath.Vector2})=>{
             this.receiveW(data.id, data.direction)
         })
 
@@ -117,8 +117,18 @@ export class NETManager{
     }
     
     static addEnemy(enemy:IEnemy){
-        if(!WorldManager.enemies.get(enemy.id)){    
-            WorldManager.enemies.set(enemy.id, new Enemy(this.scene, enemy))
+        if(!WorldManager.enemies.get(enemy.id)){
+            let worldEnemy = new Enemy(this.scene, enemy)
+            WorldManager.enemies.set(enemy.id, worldEnemy)
+            // console.log(WorldManager.mapParitions.get(
+            //     {
+            //         x:Math.floor(worldEnemy.x/WorldManager.width), 
+            //         y: Math.floor(worldEnemy.y/WorldManager.width)
+            //     }))
+            WorldManager.mapParitions.get(
+                    Math.floor(worldEnemy.x/WorldManager.width).toString() +
+                    Math.floor(worldEnemy.y/WorldManager.width).toString()
+                )?.push(worldEnemy)
         }
     }
 
@@ -133,26 +143,26 @@ export class NETManager{
         })
     }
 
-    private static receiveWalk(id: string, direction: Math.Vector2){
+    private static receiveWalk(id: string, direction: PMath.Vector2){
         this.action = "Walk";
         if(id != this.room.sessionId)
             CharactersManager.pointerDownMove(WorldManager.players.get(id)!, direction)
     }
 
-    private static receiveQ(id: string, direction: Math.Vector2, weaponDirection: string){
+    private static receiveQ(id: string, direction: PMath.Vector2, weaponDirection: string){
         console.log(direction)
         this.action = "Q";
         if(id != this.room.sessionId)
             CharactersManager.useQ(WorldManager.players.get(id)!, direction)
     }
 
-    private static receiveW(id: string, direction: Math.Vector2){
+    private static receiveW(id: string, direction: PMath.Vector2){
         this.action = "W";
         if(id != this.room.sessionId)
             CharactersManager.useW(WorldManager.players.get(id)!, direction)
     }
 
-    private static receiveEnemyMovement(id:string, vector:Math.Vector2){
+    private static receiveEnemyMovement(id:string, vector:PMath.Vector2){
         if(WorldManager.enemies.get(id) != undefined){
             WorldManager.enemies.get(id)!.idle = false;
             WorldManager.enemies.get(id)!.changeDirectionInput(vector);

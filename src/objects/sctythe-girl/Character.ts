@@ -1,12 +1,11 @@
-import {Scene, Math, Animations, GameObjects} from "phaser";
+import {Scene, Math, GameObjects} from "phaser";
 import { ICharacter } from "../../interfaces/Character";
-import { SpriteParticle } from "../../classes/SpriteParticle";
 import { AliveEntity } from "../AliveEntity";
-import { WorldManager } from "../../managers/WorldManager";
 import { QAbility } from "../../classes/combat/scythe-girl/QAbility";
 import { WAbility } from "../../classes/combat/scythe-girl/WAbility";
 import { CombatAbility } from "../../classes/combat/CombatAbility";
 import SAT from "sat";
+import { SCYTHE_GIRL } from "../../utils/AssetsGlobals";
 
 export class Character extends AliveEntity{
     speed:number;
@@ -43,7 +42,6 @@ export class Character extends AliveEntity{
         this.attacking = false;
         scene.add.existing(this)
         this.id = data.id;
-        //this.scene.matter.world.add(this.body?.gameObject)
 
         this.pointToMove = new Math.Vector2(0,0)
         this.direction = new Math.Vector2(0,0)
@@ -51,65 +49,42 @@ export class Character extends AliveEntity{
         this.character = data;
         
         if(!Character.animationsGenerated){
-            this.generateAnimations("walk front", "player", 0, 5, 8);
-            this.generateAnimations("walk right",  "player", 6, 11, 8);
-            this.generateAnimations("walk left",  "player", 12, 17, 8);
-            this.generateAnimations("walk back",  "player", 18, 23, 8);
+            this.generateAnimations("walk front", SCYTHE_GIRL.walking, 0, 5, 8);
+            this.generateAnimations("walk right",   SCYTHE_GIRL.walking, 6, 11, 8);
+            this.generateAnimations("walk left",   SCYTHE_GIRL.walking, 12, 17, 8);
+            this.generateAnimations("walk back",   SCYTHE_GIRL.walking, 18, 23, 8);
 
-            this.generateAnimations("idle front", "player idle", 0, 1, 2);
-            this.generateAnimations("idle right", "player idle", 2, 3, 2);
-            this.generateAnimations("idle left", "player idle", 4 ,5 ,2);
-            this.generateAnimations("idle back", "player idle", 6, 7, 2);
+            this.generateAnimations("idle front", SCYTHE_GIRL.idle, 0, 1, 2);
+            this.generateAnimations("idle right", SCYTHE_GIRL.idle, 2, 3, 2);
+            this.generateAnimations("idle left", SCYTHE_GIRL.idle, 4 ,5 ,2);
+            this.generateAnimations("idle back", SCYTHE_GIRL.idle, 6, 7, 2);
 
-            this.generateAnimations(this.attack_animations[0], "player basic attack", 0, 4, data.abilities[0].speed);
-            this.generateAnimations(this.attack_animations[1], "player basic attack", 5, 9, data.abilities[0].speed);
-            this.generateAnimations(this.attack_animations[2], "player basic attack", 10, 14, data.abilities[0].speed);
-            this.generateAnimations(this.attack_animations[3], "player basic attack", 15, 19, data.abilities[0].speed);
+            this.generateAnimations(this.attack_animations[0], SCYTHE_GIRL.Q, 0, 6, data.abilities[0].speed);
+            this.generateAnimations(this.attack_animations[1], SCYTHE_GIRL.Q, 7, 13, data.abilities[0].speed);
+            this.generateAnimations(this.attack_animations[2], SCYTHE_GIRL.Q, 14, 20, data.abilities[0].speed);
+            this.generateAnimations(this.attack_animations[3], SCYTHE_GIRL.Q, 21, 27, data.abilities[0].speed);
 
-            this.generateAnimations("W", "player w", 0, 4, data.abilities[1].speed)
+            this.generateAnimations("W", SCYTHE_GIRL.W, 0, 4, data.abilities[1].speed)
             Character.animationsGenerated = true
         }
 
         //QAbility.createRight(this);
         this.abilities = new Map<string, CombatAbility>();
-        this.abilities.set("Q", new QAbility(data.abilities[0]));
+        this.abilities.set("Q", new QAbility(scene, data.abilities[0], data.x, data.y, SCYTHE_GIRL.QVFX));
         this.QAbility = this.abilities.get("Q") as QAbility;
-        this.abilities.set("W", new WAbility(data.abilities[1]));
+        this.abilities.set("W", new WAbility(scene, data.abilities[1], data.x, data.y, SCYTHE_GIRL.WVFX));
         this.WAbility = this.abilities.get("W") as WAbility;
         
-        this.WSound = scene.sound.add("WScythe");
+        this.WSound = scene.sound.add(SCYTHE_GIRL.WSound);
         this.WSound.volume = 0.5
-        this.QSound = scene.sound.add("QScythe")
+        this.QSound = scene.sound.add(SCYTHE_GIRL.QSound)
         this.QSound.volume = 0.5
-
-        this.on(Animations.Events.ANIMATION_UPDATE, (a:Animations.Animation, f:Animations.AnimationFrame)=>{
-            if(this.anims.getName() == "W"){
-                switch(f.index){
-                    case 2: new SpriteParticle(scene, this.x, this.y, "particle" + f.index, "W-particles", 0, 1, 
-                        8
-                    ); break;
-
-                    case 3: new SpriteParticle(scene, this.x, this.y, "particle" + f.index, "W-particles", 2, 3, 
-                        8
-                    ); break;
-
-                    case 4: new SpriteParticle(scene, this.x, this.y, "particle" + f.index, "W-particles", 4, 5, 
-                        8
-                    ); break;
-
-                    case 5: new SpriteParticle(scene, this.x, this.y, "particle" + f.index, "W-particles", 6, 7, 
-                        8
-                    ); break;
-                }
-            }
-        })
 
         this.boxHeight = 10;
         this.boxWidth = 10;
         this.box = new SAT.Box(new SAT.Vector(data.x - this.boxWidth/2, data.y - this.boxHeight/2), this.boxWidth, this.boxHeight)
         this.generateDebugRect(scene);
     }
-
 
 
     update(delta:number){
@@ -158,15 +133,17 @@ export class Character extends AliveEntity{
         else if(!this.anims.isPlaying)
             this.attacking = false;
 
-        this.QAbility.update(delta);
-        this.WAbility.update(delta);
+        this.QAbility.updatePosition(this);
+        this.WAbility.updatePosition(this);
+        this.QAbility.update(delta)
+        this.WAbility.update(delta)
         //this.WAbility.updateW(delta);
         // console.log("speed: " + this.speed)
         // console.log(this.x, this.y)
         //console.log(this.scene.anims.get("W").duration, 1/12*5*1000)
         // console.log(this.direction)
         //NETManager.sendState(this.idle, this.direction)
-        this.debug();
+        //this.debug();
         this.box.pos.x = (this.x - this.boxWidth/2)
         this.box.pos.y = (this.y - this.boxHeight/2)
     }
