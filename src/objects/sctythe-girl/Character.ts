@@ -138,6 +138,7 @@ export class Character extends AliveEntity{
             this.attacking = false;
 
         this.QAbility.updatePosition(this);
+        this.QAbility.debug(this.x, this.y);
         this.WAbility.updatePosition(this);
         this.QAbility.update(delta)
         this.WAbility.update(delta)

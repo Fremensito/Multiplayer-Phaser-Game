@@ -1,5 +1,4 @@
-import { GameObjects, Math as PMath, Physics, Scene } from "phaser";
-import { MainCharacter } from "./MainCharacter";
+import { GameObjects, Math as PMath, Scene } from "phaser";
 import { WorldManager } from "../managers/WorldManager";
 
 export class AliveEntity extends GameObjects.Sprite{

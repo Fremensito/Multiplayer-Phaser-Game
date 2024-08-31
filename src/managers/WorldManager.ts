@@ -61,6 +61,5 @@ export class WorldManager{
                 })
             }
         }
-        console.log(count);
     }
 }
