@@ -23,6 +23,8 @@ export class Enemy extends AliveEntity{
     
     constructor(scene:Scene, data:IEnemy){
         super(scene, data.x, data.y, "ghost", 0)
+        this.lastPosition.x = this.x
+        this.lastPosition.y = this.y
         this.id = data.id;
         this.pointToMove = new Math.Vector2(data.pointToMoveX, data.pointToMoveY);
         this.direction = new Math.Vector2(data.directionX, data.directionY)
@@ -62,6 +64,7 @@ export class Enemy extends AliveEntity{
     }
 
     update(delta: number){
+        this.saveLastPosition();
         this.depth = this.y
         if(!this.anims.getName().includes("ghost get hit")){
             this.updateBasicAnimation(["ghost walk front", "ghost walk left", "ghost walk back", "ghost walk right"], -1, 1);
@@ -83,6 +86,7 @@ export class Enemy extends AliveEntity{
         //this.debug();
         this.box.pos.x = (this.x - this.boxWidth/2)
         this.box.pos.y = (this.y - this.boxHeight/2)
+        this.updatePartition()
     }
 
     getDamageClient(damage:number){
@@ -120,6 +124,8 @@ export class Enemy extends AliveEntity{
                 console.log(WorldManager.enemies.delete(this.id))
                 this.destroy()
                 this.boxRect.destroy();
+                let entities = WorldManager.mapPartitions.get(this.partition)
+                entities?.splice(entities.indexOf(this), 1)
             },
             loop: false,
             delay: 100,

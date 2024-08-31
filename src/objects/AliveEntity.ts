@@ -1,13 +1,14 @@
-import { GameObjects, Math, Physics, Scene } from "phaser";
+import { GameObjects, Math as PMath, Physics, Scene } from "phaser";
 import { MainCharacter } from "./MainCharacter";
+import { WorldManager } from "../managers/WorldManager";
 
 export class AliveEntity extends GameObjects.Sprite{
     speed:number;
     idle: boolean;
     attacking: boolean;
-    direction:Math.Vector2;
-    pointToMove: Math.Vector2
-    PI = Math.PI2/2;
+    direction:PMath.Vector2;
+    pointToMove: PMath.Vector2
+    PI = PMath.PI2/2;
     health: number;
     id:string
     boxHeight: number;
@@ -15,10 +16,34 @@ export class AliveEntity extends GameObjects.Sprite{
     boxRect: GameObjects.Rectangle;
     debugMode = false;
     box: SAT.Box;
+    partition: string;
+    lastPosition =  {x: 0, y:0}
 
     generateDebugRect(scene: Scene){
         this.boxRect = new GameObjects.Rectangle(scene, this.x, this.y, this.boxWidth, this.boxHeight)
         this.boxRect.setStrokeStyle(1, 0xee0000);
+    }
+
+    setPartition(){
+        WorldManager.mapPartitions.get(Math.floor(this.x/WorldManager.width).toString() + "-" +  
+            Math.floor(this.y/WorldManager.width).toString())?.push(this)
+
+        this.partition = Math.floor(this.x/WorldManager.width).toString() + "-" +  
+            Math.floor(this.y/WorldManager.width).toString();
+    }
+
+    saveLastPosition(){
+        this.lastPosition.x = this.x;
+        this.lastPosition.y = this.y;
+    }
+
+    updatePartition(){
+        let entities = WorldManager.mapPartitions.get(
+            Math.floor(this.lastPosition.x/WorldManager.width).toString() + "-" +
+            Math.floor(this.lastPosition.y/WorldManager.width).toString()
+        );
+        entities?.splice(entities.indexOf(this), 1)
+        this.setPartition();
     }
 
     debug(){
@@ -69,21 +94,21 @@ export class AliveEntity extends GameObjects.Sprite{
         }
     }
 
-    changeDirectionInput(vector:Math.Vector2){
+    changeDirectionInput(vector:PMath.Vector2){
         this.pointToMove.x = vector.x;
         this.pointToMove.y = vector.y;
-        const direction = new Math.Vector2(vector.x - this.getCenter().x, vector.y - this.getCenter().y);
+        const direction = new PMath.Vector2(vector.x - this.getCenter().x, vector.y - this.getCenter().y);
         this.direction = direction.normalize();
     }
 
-    changeDirectionAttack(vector:Math.Vector2){
-        const direction = new Math.Vector2(vector.x - this.getCenter().x, vector.y - this.getCenter().y);
+    changeDirectionAttack(vector:PMath.Vector2){
+        const direction = new PMath.Vector2(vector.x - this.getCenter().x, vector.y - this.getCenter().y);
         this.direction = direction.normalize();
     }
 
      //Updates the direction to the last point indicated by cursor
      updateDirection(){
-        const direction = new Math.Vector2(this.pointToMove.x - this.getCenter().x, this.pointToMove.y - this.getCenter().y);
+        const direction = new PMath.Vector2(this.pointToMove.x - this.getCenter().x, this.pointToMove.y - this.getCenter().y);
         this.direction = direction.normalize();
     }
 

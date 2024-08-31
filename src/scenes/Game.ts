@@ -55,7 +55,7 @@ export class Game extends Scene
     
     generateMainPlayer(character:Character){
         this.character = character
-        this.cameras.main.zoom = 3;
+        this.cameras.main.zoom = 2;
         this.cameras.main.centerOn(this.character.x, this.character.y)
         this.cameras.main.startFollow(this.character)
         this.pcControls = new PCControls();

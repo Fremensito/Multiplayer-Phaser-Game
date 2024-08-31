@@ -125,8 +125,8 @@ export class NETManager{
             //         x:Math.floor(worldEnemy.x/WorldManager.width), 
             //         y: Math.floor(worldEnemy.y/WorldManager.width)
             //     }))
-            WorldManager.mapParitions.get(
-                    Math.floor(worldEnemy.x/WorldManager.width).toString() +
+            WorldManager.mapPartitions.get(
+                    Math.floor(worldEnemy.x/WorldManager.width).toString() + "-"+
                     Math.floor(worldEnemy.y/WorldManager.width).toString()
                 )?.push(worldEnemy)
         }

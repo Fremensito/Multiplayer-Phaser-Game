@@ -37,6 +37,9 @@ export class Character extends AliveEntity{
 
     constructor(scene: Scene, data:ICharacter){
         super(scene, data.x, data.y, "player", 0);
+        this.setPartition()
+        this.lastPosition.x = this.x;
+        this.lastPosition.y = this.y;
         this.speed =  data.speed
         this.idle = true;
         this.attacking = false;
@@ -88,6 +91,7 @@ export class Character extends AliveEntity{
 
 
     update(delta:number){
+        this.saveLastPosition()
         this.depth = this.y
         this.updateDirection();
         if(!this.idle && !this.attacking){
@@ -144,6 +148,7 @@ export class Character extends AliveEntity{
         // console.log(this.direction)
         //NETManager.sendState(this.idle, this.direction)
         //this.debug();
+        this.updatePartition()
         this.box.pos.x = (this.x - this.boxWidth/2)
         this.box.pos.y = (this.y - this.boxHeight/2)
     }
