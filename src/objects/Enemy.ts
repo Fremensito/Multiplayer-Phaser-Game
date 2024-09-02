@@ -64,7 +64,7 @@ export class Enemy extends AliveEntity{
     }
 
     update(delta: number){
-        this.saveLastPosition();
+        //this.saveLastPosition();
         this.depth = this.y
         if(!this.anims.getName().includes("ghost get hit")){
             this.updateBasicAnimation(["ghost walk front", "ghost walk left", "ghost walk back", "ghost walk right"], -1, 1);
@@ -86,7 +86,7 @@ export class Enemy extends AliveEntity{
         //this.debug();
         this.box.pos.x = (this.x - this.boxWidth/2)
         this.box.pos.y = (this.y - this.boxHeight/2)
-        this.updatePartition()
+        //this.updatePartition()
     }
 
     getDamageClient(damage:number){

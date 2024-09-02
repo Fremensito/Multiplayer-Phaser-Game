@@ -1,8 +1,7 @@
-import { Physics, Scene, Math } from "phaser";
-import { Character } from "./sctythe-girl/Character";
+import { Scene} from "phaser";
+import { Character } from "./sctythe-girl/ScytheGirl";
 import { ICharacter } from "../interfaces/Character";
 import { UI } from "../scenes/UI";
-import { NETManager } from "../managers/NETManager";
 
 export class MainCharacter extends Character{
     constructor(scene: Scene, data:ICharacter){

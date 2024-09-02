@@ -1,5 +1,4 @@
 import { IAbility } from "../../../interfaces/Ability";
-import { Character } from "../../../objects/sctythe-girl/Character";
 import { WorldManager } from "../../../managers/WorldManager";
 import { CombatAbility } from "../CombatAbility";
 import SAT from "sat";
@@ -30,7 +29,7 @@ export class QAbility extends CombatAbility{
         this.generateAnimations(this.directions.left, SCYTHE_GIRL.QVFX, 14, 20, ability.speed)
         this.generateAnimations(this.directions.up, SCYTHE_GIRL.QVFX, 21, 27, ability.speed)
 
-        this.graphics = scene.add.graphics();
+        //this.graphics = scene.add.graphics();
         this.up = new SAT.Box(new SAT.Vector(x - this.attackWidth/2, y-this.range), this.attackWidth, this.range)
         this.down = new SAT.Box(new SAT.Vector(x- this.width/2, y), this.attackWidth, this.range)
         this.right = new SAT.Box(new SAT.Vector(x, y - this.attackWidth/2), this.range, this.attackWidth)
@@ -38,7 +37,7 @@ export class QAbility extends CombatAbility{
         // this.left = new SAT.Box(new SAT.Vector(x))
     }
 
-    doDamage(direction:string, character:Character){
+    doDamage(direction:string){
         switch(direction){
             case this.directions.up:
                 this.play({key: this.directions.up, repeat: 0, startFrame: 0})
@@ -74,20 +73,24 @@ export class QAbility extends CombatAbility{
         }
     }
 
+    updatePosition(x:number, y:number){
+        super.updatePosition(x, y)
+        this.up.pos = new SAT.Vector(x - this.attackWidth/2, y-this.range)
+        this.down.pos = new SAT.Vector(x - this.attackWidth/2, y)
+        this.right.pos = new SAT.Vector(x, y - this.attackWidth/2)
+        this.left.pos = new SAT.Vector(x - this.range, y - this.attackWidth/2)
+    }
+
     debug(x:number, y: number){
         this.graphics.clear()
         this.graphics.lineStyle(1, 0xff4c4a);
 
-        this.up.pos = new SAT.Vector(x - this.attackWidth/2, y-this.range)
         this.drawLines(this.up, this.up.toPolygon().points)
         
-        this.down.pos = new SAT.Vector(x - this.attackWidth/2, y)
         this.drawLines(this.down, this.down.toPolygon().points)
 
-        this.right.pos = new SAT.Vector(x, y - this.attackWidth/2)
         this.drawLines(this.right, this.right.toPolygon().points)
         
-        this.left.pos = new SAT.Vector(x - this.range, y - this.attackWidth/2)
         this.drawLines(this.left, this.left.toPolygon().points)
     }
 

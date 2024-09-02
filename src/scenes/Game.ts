@@ -1,23 +1,21 @@
 import { GameObjects, Scene, Tilemaps} from 'phaser';
 import { Math } from 'phaser';
 import { Player } from '../classes/Player';
-import { PCControls } from '../controls/PCControls';
-import { Character } from '../objects/sctythe-girl/Character';
 import { NETManager } from '../managers/NETManager';
 import { Enemy } from '../objects/Enemy';
 import { WorldManager } from '../managers/WorldManager';
 import { MAP } from '../utils/AssetsGlobals';
 import { AssetsLoader } from '../utils/AssetsLoader';
+import { AliveEntity } from '../objects/AliveEntity';
 //import { PhysicsManager } from '../managers/PhysicsManager';
 
 
 export class Game extends Scene
 {   
-    character:Character;
+    character:AliveEntity;
     player: Player
     layer: Tilemaps.TilemapLayer;
     backgroundLoop: number;
-    pcControls: PCControls
     delta:number;
     timeElapsed = 0;
     enemy:Enemy
@@ -53,26 +51,23 @@ export class Game extends Scene
         //this.enemy = new Enemy(this, {x: 320, y: 320, speed: 0.4, id:"ghost"})
     } 
     
-    generateMainPlayer(character:Character){
+    fixCamera(character:AliveEntity){
         this.character = character
         this.cameras.main.zoom = 3;
         this.cameras.main.centerOn(this.character.x, this.character.y)
         this.cameras.main.startFollow(this.character)
-        this.pcControls = new PCControls();
-        this.pcControls.character = this.character
-        this.pcControls.input = this.input
-        this.pcControls.setInput();
     }
 
     update(time:number, delta:number){
-        if(this.pcControls && this.pcControls.input){
-            this.pcControls.update();
-            //this.character.update(delta);
-        }
+        // if(this.pcControls && this.pcControls.input){
+        //     this.pcControls.update();
+        //     //this.character.update(delta);
+        // }
+        WorldManager.mainPlayer.character.update(delta)
         WorldManager.enemies.forEach(e => e.update(delta))
-        WorldManager.players.forEach(c =>{
-            c!.update(delta)
-        })
+        // WorldManager.players.forEach(c =>{
+        //     c!.update(delta)
+        // })
         this.delta = delta;
         WorldManager.delta = delta;
         WorldManager.checkCollisions();

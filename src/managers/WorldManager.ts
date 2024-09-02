@@ -1,7 +1,6 @@
 import { Player } from "../classes/Player";
 import { SAliveEntity } from "../interfaces/SAliveEntity";
 import { Enemy } from "../objects/Enemy";
-import { Character } from "../objects/sctythe-girl/Character";
 import { NETManager } from "./NETManager";
 import SAT from "sat";
 import { Math as PMath} from "phaser";
@@ -26,7 +25,6 @@ export class WorldManager{
     static delta = 0;
 
     static mainPlayer: Player;
-    static players = new Map<string, Character>();
     static enemies = new Map<string, Enemy>();
     static aliveEntities = new Map<string, SAliveEntity>();
     static mapPartitions = new Map<string, Array<AliveEntity>>()
@@ -43,11 +41,12 @@ export class WorldManager{
     static checkCollisions(){
         let count = 0;
         if(NETManager.room){
-            let player = this.players.get(NETManager.room.sessionId)
+            let player = this.mainPlayer.character
+            console.log(player?.partition)
             if(player){
                 //console.log(player.partition)
                 this.mapPartitions.get(player.partition)?.forEach(e=>{
-                    if(!(e instanceof Character) && SAT.testPolygonPolygon(e.box.toPolygon(), player.box.toPolygon())){
+                    if((e instanceof Enemy) && SAT.testPolygonPolygon(e.box.toPolygon(), player.box.toPolygon())){
                         count++;
                         console.log( this.mapPartitions.get(player.partition))
                         player.saveLastPosition()

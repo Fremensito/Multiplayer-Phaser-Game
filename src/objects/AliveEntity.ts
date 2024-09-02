@@ -1,5 +1,6 @@
 import { GameObjects, Math as PMath, Scene } from "phaser";
 import { WorldManager } from "../managers/WorldManager";
+import { CombatAbility } from "../classes/combat/CombatAbility";
 
 export class AliveEntity extends GameObjects.Sprite{
     speed:number;
@@ -9,7 +10,7 @@ export class AliveEntity extends GameObjects.Sprite{
     pointToMove: PMath.Vector2
     PI = PMath.PI2/2;
     health: number;
-    id:string
+    id:string;
     boxHeight: number;
     boxWidth: number;
     boxRect: GameObjects.Rectangle;
@@ -17,6 +18,7 @@ export class AliveEntity extends GameObjects.Sprite{
     box: SAT.Box;
     partition: string;
     lastPosition =  {x: 0, y:0}
+    abilities?: Map<string, CombatAbility>;
 
     generateDebugRect(scene: Scene){
         this.boxRect = new GameObjects.Rectangle(scene, this.x, this.y, this.boxWidth, this.boxHeight)
@@ -117,5 +119,9 @@ export class AliveEntity extends GameObjects.Sprite{
             (this.x >=this.pointToMove.x -2 && this.x <= this.pointToMove.x +2) &&
             (this.y >=this.pointToMove.y -2 && this.y <= this.pointToMove.y +2)
         );
+    }
+
+    update(delta:number){
+
     }
 }

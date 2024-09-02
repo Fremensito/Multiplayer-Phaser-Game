@@ -3,7 +3,7 @@ import { AbilitiesContainer } from "../UI/AbilitiesContainer";
 import { NETManager } from "../managers/NETManager";
 import { IAbility, UIShaders} from "../interfaces/Ability";
 import { UIAbility } from "../UI/UIAbility";
-import { Character } from "../objects/sctythe-girl/Character";
+import { Character } from "../objects/sctythe-girl/ScytheGirl";
 import { CombatAbility } from "../classes/combat/CombatAbility";
 
 const shader = `
@@ -49,28 +49,34 @@ const PI = Math.PI2/2;
 export class UI extends Scene{
 
     character: Character;
-    abilities = new Map<CombatAbility, UIAbility>();
+    abilities = new Map<string, UIAbility>();
     abilitiesContainer: AbilitiesContainer;
     abilityWidth = 32;
     abilityHeight = 32;
     text: GameObjects.Text;
     pingText: GameObjects.Text;
     actionText: GameObjects.Text;
+    resources = {
+        qSlot: "Q-slot",
+        qIcon: "Q-icon",
+        wSlot: "W-slot",
+        wIcon: "W-icon"
+    }
     
     constructor (abilities: Array<IAbility>, character:Character)
     {
         super({key: "UI", active: true});
-        this.abilities.set(character.abilities.get("Q")!, new UIAbility(abilities[0]))
-        this.abilities.set(character.abilities.get("W")!, new UIAbility(abilities[1]));
+        this.abilities.set("Q", new UIAbility(abilities[0]))
+        this.abilities.set("W", new UIAbility(abilities[1]));
         this.character = character;
     }
 
     preload(){
         this.load.setPath('assets');
-        this.load.image("ability", "ui/hability.png"); 
-        this.load.image("scythe ability", "ui/scythe_hability.png")
-        this.load.image("W-slot", "ui/W-slot.png"); 
-        this.load.image("W-icon", "ui/W-icon.png")
+        this.load.image(this.resources.qSlot, this.abilities.get("Q")!.UI.slotResource); 
+        this.load.image(this.resources.qIcon, this.abilities.get("Q")!.UI.iconResource);
+        this.load.image(this.resources.wSlot, this.abilities.get("W")!.UI.slotResource); 
+        this.load.image(this.resources.wIcon, this.abilities.get("W")!.UI.iconResource);
     }
 
     create(){
@@ -94,13 +100,13 @@ export class UI extends Scene{
             new Math.Vector2(this.game.config.width as number /2, this.game.config.height as number - this.abilityHeight)
         )
 
-        this.abilities.get(this.character.abilities.get("Q")!)!.addShaders(
-            this.makeAbilityShader("ability"), 
-            this.makeAbilityShader("scythe ability")
+        this.abilities.get("Q")!.addShaders(
+            this.makeAbilityShader(this.resources.qSlot), 
+            this.makeAbilityShader(this.resources.qIcon)
         )
-        this.abilities.get(this.character.abilities.get("W")!)!.addShaders(
-            this.makeAbilityShader("W-slot"), 
-            this.makeAbilityShader("W-icon")
+        this.abilities.get("W")!.addShaders(
+            this.makeAbilityShader(this.resources.wSlot), 
+            this.makeAbilityShader(this.resources.wIcon)
         )
 
         const shaders = new Array<UIShaders>
@@ -128,6 +134,6 @@ export class UI extends Scene{
         this.text.setText("FPS:" + (Math.RoundTo(1000/delta)).toString())
         this.pingText.setText("PING: " + Math.RoundTo(NETManager.ping).toString())
         this.actionText.setText("ACTION: " + NETManager.action)
-        this.character.abilities.forEach((a) => this.abilities.get(a)!.update(a.available, a.cooldown, a.cooldowntime))
+        this.character.abilities!.forEach((a, k) => this.abilities.get(k)!.update(a.available, a.cooldown, a.cooldowntime))
     }
 }

@@ -1,18 +1,17 @@
 import { Scene } from "phaser";
 import { IAbility } from "../../../interfaces/Ability";
 import { Enemy } from "../../../objects/Enemy";
-import { Character } from "../../../objects/sctythe-girl/Character";
 import { WorldManager } from "../../../managers/WorldManager";
 import { CombatAbility } from "../CombatAbility";
 import SAT from "sat";
 import { SCYTHE_GIRL } from "../../../utils/AssetsGlobals";
+import { AliveEntity } from "../../../objects/AliveEntity";
 
 export class WAbility extends CombatAbility{
 
     scene: Scene;
     enemiesHit = new Array<Enemy>()
     damage = 10
-    character: Character
 
     constructor(scene:Scene, ability: IAbility, x:number, y: number, texture: string){
         super(scene, ability, x, y, texture)
@@ -23,7 +22,7 @@ export class WAbility extends CombatAbility{
         this.enemiesHit = [];
     }
 
-    doDamage(character: Character){
+    doDamage(character: AliveEntity){
         WorldManager.enemies.forEach(e=>{
             if(!this.enemiesHit.includes(e) && (new SAT.Vector(character.x - e.x, character.y -e.y)).len() <= this.range){
                 e.getDamageClient(10)

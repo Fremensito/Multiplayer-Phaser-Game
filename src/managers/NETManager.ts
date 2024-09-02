@@ -1,5 +1,4 @@
 import { ICharacter } from "../interfaces/Character";
-import { Character } from "../objects/sctythe-girl/Character";
 import { Game } from "../scenes/Game";
 import { Math as PMath, Scenes } from "phaser";
 import { CharactersManager } from "./CharactersManager";
@@ -22,6 +21,17 @@ export class NETManager{
     static ping = 100;
     static action = "";
     static pingStart: number;
+
+    static async login(button:Element){
+        try {
+            const userdata = await this.client.auth.signInWithProvider('discord');
+            button.textContent = "REGISTERED!!!"
+            console.log(userdata);
+        
+        } catch (e: any) {
+            console.error(e.message);
+        }
+    }
     
     static async connect(){
         this.scene.time.addEvent({
@@ -30,7 +40,6 @@ export class NETManager{
             callbackScope: this,
             loop: true
         })
-
         this.room = await this.client.join("my_room");
         
         this.room.state.characters.onAdd((character, sessionID:string)=>{
@@ -56,8 +65,10 @@ export class NETManager{
                     let interpolationFactor = 0.7
                     let enemy = WorldManager.enemies.get(e.id)!
                     enemy.getDamage(e.health)
+                    enemy.saveLastPosition()
                     enemy.x = PMath.Linear(enemy.x, e.x, interpolationFactor)
                     enemy.y = PMath.Linear(enemy.y, e.y, interpolationFactor)
+                    enemy.updatePartition()
                 }
             })
         })

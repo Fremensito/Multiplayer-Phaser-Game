@@ -6,8 +6,11 @@ import { WAbility } from "../../classes/combat/scythe-girl/WAbility";
 import { CombatAbility } from "../../classes/combat/CombatAbility";
 import SAT from "sat";
 import { SCYTHE_GIRL } from "../../utils/AssetsGlobals";
+import { QSAbility } from "../../classes/combat/skeleton/QSAbility";
+import { PCControlsScytheGirl } from "./PCControlsScytheGirl";
+import { ScytheGirlManager } from "./ScytheGirlManager";
 
-export class Character extends AliveEntity{
+export class ScytheGirl extends AliveEntity{
     speed:number;
     idle: boolean;
     attacking: boolean;
@@ -18,9 +21,9 @@ export class Character extends AliveEntity{
     PI = Math.PI2/2;
     created = false
 
-    abilities?: Map<string, CombatAbility>;
     QAbility: QAbility;
     WAbility: WAbility;
+    QSAbility: QSAbility;
     attack_animations = ["basic front attack", "basic right attack", "basic left attack", "basic back attack"]
     //TO DO: ADD TEXTURES ANIMATIONS DEPENDING OF THE CHARACTAR CLASS NAME
     char_class: string;
@@ -35,8 +38,13 @@ export class Character extends AliveEntity{
 
     debugMode = false;
 
+    controls:PCControlsScytheGirl;
+    manager:ScytheGirlManager;
+
     constructor(scene: Scene, data:ICharacter){
         super(scene, data.x, data.y, "player", 0);
+        this.controls = new PCControlsScytheGirl();
+        this.manager = new ScytheGirlManager();
         this.setPartition()
         this.lastPosition.x = this.x;
         this.lastPosition.y = this.y;
@@ -51,7 +59,7 @@ export class Character extends AliveEntity{
 
         this.character = data;
         
-        if(!Character.animationsGenerated){
+        if(!ScytheGirl.animationsGenerated){
             this.generateAnimations("walk front", SCYTHE_GIRL.walking, 0, 5, 8);
             this.generateAnimations("walk right",   SCYTHE_GIRL.walking, 6, 11, 8);
             this.generateAnimations("walk left",   SCYTHE_GIRL.walking, 12, 17, 8);
@@ -68,7 +76,7 @@ export class Character extends AliveEntity{
             this.generateAnimations(this.attack_animations[3], SCYTHE_GIRL.Q, 21, 27, data.abilities[0].speed);
 
             this.generateAnimations("W", SCYTHE_GIRL.W, 0, 4, data.abilities[1].speed)
-            Character.animationsGenerated = true
+            ScytheGirl.animationsGenerated = true
         }
 
         //QAbility.createRight(this);
@@ -77,6 +85,8 @@ export class Character extends AliveEntity{
         this.QAbility = this.abilities.get("Q") as QAbility;
         this.abilities.set("W", new WAbility(scene, data.abilities[1], data.x, data.y, SCYTHE_GIRL.WVFX));
         this.WAbility = this.abilities.get("W") as WAbility;
+
+        this.QSAbility = new QSAbility(scene, this.x, this.y)
         
         this.WSound = scene.sound.add(SCYTHE_GIRL.WSound);
         this.WSound.volume = 0.5
@@ -91,8 +101,9 @@ export class Character extends AliveEntity{
 
 
     update(delta:number){
+        super.update(delta);
         this.saveLastPosition()
-        this.depth = this.y
+        this.controls.updateScytheGirl(this, this.manager)
         this.updateDirection();
         if(!this.idle && !this.attacking){
             this.x += this.speed*this.direction.x*delta
@@ -136,12 +147,14 @@ export class Character extends AliveEntity{
             this.updateMovement()
         else if(!this.anims.isPlaying)
             this.attacking = false;
-
-        this.QAbility.updatePosition(this);
-        this.QAbility.debug(this.x, this.y);
-        this.WAbility.updatePosition(this);
+        
+        this.depth = this.y
+        this.QAbility.updatePosition(this.x, this.y);
+        //this.QAbility.debug(this.x, this.y);
+        this.WAbility.updatePosition(this.x, this.y);
         this.QAbility.update(delta)
         this.WAbility.update(delta)
+        //this.QSAbility.debug(this.x, this.y);
         //this.WAbility.updateW(delta);
         // console.log("speed: " + this.speed)
         // console.log(this.x, this.y)

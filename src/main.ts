@@ -1,5 +1,6 @@
 import { Game as MainGame } from './scenes/Game';
 import { Game, Scale,Types } from 'phaser';
+import { Login } from './scenes/Login';
 
 //  Find out more information about the Game Config at:
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
@@ -7,6 +8,9 @@ const config: Types.Core.GameConfig = {
     type: Phaser.WEBGL,
     width: 1024,
     height: 768,
+    dom: {
+        createContainer: true
+    },
     physics: {
         default: "matter",
         matter:{
@@ -28,8 +32,11 @@ const config: Types.Core.GameConfig = {
     },
     scene: [
         MainGame
+        //Login
     ],
     pixelArt: true,
+    //backgroundColor: 0x05358e,
+    transparent:true
 };
 
 export default new Game(config);

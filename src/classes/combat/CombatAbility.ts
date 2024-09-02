@@ -53,10 +53,8 @@ export class CombatAbility extends GameObjects.Sprite{
         })
     }
 
-    updatePosition(aliveEntity: AliveEntity){
-        this.x = aliveEntity.x;
-        this.y = aliveEntity.y;
+    updatePosition(x:number, y:number){
+        this.x = x;
+        this.y = y;
     }
-
-    destroy(){}
 }

@@ -1,9 +1,8 @@
-import { ICharacter } from "../interfaces/Character";
+import { AliveEntity } from "../objects/AliveEntity";
 
 export class Player{
-    character: ICharacter
-
-    constructor(character: ICharacter){
+    character: AliveEntity;
+    constructor(character: AliveEntity){
         this.character = character;
     }
 }
