@@ -6,16 +6,22 @@ import { CombatAbility } from "../CombatAbility";
 import SAT from "sat";
 import { SCYTHE_GIRL } from "../../../utils/AssetsGlobals";
 import { AliveEntity } from "../../../objects/AliveEntity";
+import { CharacterAnimator } from "../../../utils/CharacterAnimator";
 
 export class WAbility extends CombatAbility{
 
     scene: Scene;
     enemiesHit = new Array<Enemy>()
     damage = 10
+    static animsCreated = false;
 
     constructor(scene:Scene, ability: IAbility, x:number, y: number, texture: string){
         super(scene, ability, x, y, texture)
-        this.generateAnimations(SCYTHE_GIRL.WVFX, SCYTHE_GIRL.WVFX, 0, 6, ability.speed)
+
+        if(!WAbility.animsCreated){
+            this.generateAnimations(SCYTHE_GIRL.WVFX, SCYTHE_GIRL.WVFX, 0, 6, ability.speed)
+            WAbility.animsCreated = true;
+        }
     }
 
     clear(){

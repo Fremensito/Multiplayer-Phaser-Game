@@ -19,6 +19,7 @@ export class AliveEntity extends GameObjects.Sprite{
     partition: string;
     lastPosition =  {x: 0, y:0}
     abilities?: Map<string, CombatAbility>;
+    mainPlayer = false;
 
     generateDebugRect(scene: Scene){
         this.boxRect = new GameObjects.Rectangle(scene, this.x, this.y, this.boxWidth, this.boxHeight)
@@ -55,17 +56,6 @@ export class AliveEntity extends GameObjects.Sprite{
         this.boxRect.x = this.x;
         this.boxRect.y = this.y;
         this.boxRect.depth = 3000;
-    }
-
-    generateAnimations(name: string, texture: string, start:number, end: number, frameRate: number){
-        this.scene.anims.create({
-            key: name,
-            frames: this.scene.anims.generateFrameNumbers(texture, {
-                start: start,
-                end: end
-            }),
-            frameRate: frameRate,
-        })
     }
 
     updateBasicAnimation(animations: Array<string>, repeat: number, startFrame: number){

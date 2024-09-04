@@ -5,27 +5,17 @@ import { NETManager } from "./NETManager";
 import SAT from "sat";
 import { Math as PMath} from "phaser";
 import { AliveEntity } from "../objects/AliveEntity";
+import { ScytheGirl } from "../objects/sctythe-girl/ScytheGirl";
 
 export class WorldManager{
 
     static width = 200
 
-    static categories ={
-        abilities: 1,
-        enemies: 2,
-        characters: 4,
-    }
-
-    static collideGroups = {
-        abilities: 1,
-        enemies: 2,
-        objects: 4
-    }
-
     static delta = 0;
 
     static mainPlayer: Player;
     static enemies = new Map<string, Enemy>();
+    static scytheGirls = new Map<string, ScytheGirl>();
     static aliveEntities = new Map<string, SAliveEntity>();
     static mapPartitions = new Map<string, Array<AliveEntity>>()
 
@@ -41,14 +31,13 @@ export class WorldManager{
     static checkCollisions(){
         let count = 0;
         if(NETManager.room){
-            let player = this.mainPlayer.character
-            console.log(player?.partition)
+            let player = this.mainPlayer?.character
+            //console.log(player?.partition)
             if(player){
                 //console.log(player.partition)
                 this.mapPartitions.get(player.partition)?.forEach(e=>{
                     if((e instanceof Enemy) && SAT.testPolygonPolygon(e.box.toPolygon(), player.box.toPolygon())){
                         count++;
-                        console.log( this.mapPartitions.get(player.partition))
                         player.saveLastPosition()
                         let new_direction = (new PMath.Vector2(player.x-e.x, player.y - e.y)).normalize();
                         player.x += new_direction.x * player.speed * this.delta

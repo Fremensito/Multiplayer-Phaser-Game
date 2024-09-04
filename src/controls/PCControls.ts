@@ -9,7 +9,8 @@ export class PCControls{
     Q: Input.Keyboard.Key;
     W: Input.Keyboard.Key;
 
-    constructor(){
+    constructor(input: Input.InputPlugin){
+        this.input = input;
         this.Q = this.input.keyboard!.addKey(Input.Keyboard.KeyCodes.Q)
         this.W = this.input.keyboard!.addKey(Input.Keyboard.KeyCodes.W)
     }

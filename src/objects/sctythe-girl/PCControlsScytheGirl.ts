@@ -7,8 +7,8 @@ import { ScytheGirlManager } from "./ScytheGirlManager";
 export class PCControlsScytheGirl extends PCControls{
     netManager:NETManager;
 
-    constructor(){
-        super()
+    constructor(input: Input.InputPlugin){
+        super(input)
     }
 
     updateScytheGirl(character:ScytheGirl, manager: ScytheGirlManager){

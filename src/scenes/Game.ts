@@ -63,7 +63,11 @@ export class Game extends Scene
         //     this.pcControls.update();
         //     //this.character.update(delta);
         // }
-        WorldManager.mainPlayer.character.update(delta)
+        WorldManager.mainPlayer?.character.update(delta)
+        WorldManager.scytheGirls.forEach(s=>{
+            if(s != WorldManager.mainPlayer.character)
+            s.update(delta)
+        })
         WorldManager.enemies.forEach(e => e.update(delta))
         // WorldManager.players.forEach(c =>{
         //     c!.update(delta)

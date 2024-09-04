@@ -3,8 +3,7 @@ import { AbilitiesContainer } from "../UI/AbilitiesContainer";
 import { NETManager } from "../managers/NETManager";
 import { IAbility, UIShaders} from "../interfaces/Ability";
 import { UIAbility } from "../UI/UIAbility";
-import { Character } from "../objects/sctythe-girl/ScytheGirl";
-import { CombatAbility } from "../classes/combat/CombatAbility";
+import { AliveEntity } from "../objects/AliveEntity";
 
 const shader = `
 precision mediump float;
@@ -48,7 +47,7 @@ const PI = Math.PI2/2;
 
 export class UI extends Scene{
 
-    character: Character;
+    character: AliveEntity;
     abilities = new Map<string, UIAbility>();
     abilitiesContainer: AbilitiesContainer;
     abilityWidth = 32;
@@ -63,7 +62,7 @@ export class UI extends Scene{
         wIcon: "W-icon"
     }
     
-    constructor (abilities: Array<IAbility>, character:Character)
+    constructor (abilities: Array<IAbility>, character:AliveEntity)
     {
         super({key: "UI", active: true});
         this.abilities.set("Q", new UIAbility(abilities[0]))

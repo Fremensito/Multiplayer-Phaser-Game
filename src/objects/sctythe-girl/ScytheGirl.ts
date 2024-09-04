@@ -9,6 +9,9 @@ import { SCYTHE_GIRL } from "../../utils/AssetsGlobals";
 import { QSAbility } from "../../classes/combat/skeleton/QSAbility";
 import { PCControlsScytheGirl } from "./PCControlsScytheGirl";
 import { ScytheGirlManager } from "./ScytheGirlManager";
+import { CharacterManagersProvider } from "../../providers/CharacterManagersProvider";
+import { PCControlsProvider } from "../../providers/PCControlsProvider";
+import { CharacterAnimator } from "../../utils/CharacterAnimator";
 
 export class ScytheGirl extends AliveEntity{
     speed:number;
@@ -24,8 +27,24 @@ export class ScytheGirl extends AliveEntity{
     QAbility: QAbility;
     WAbility: WAbility;
     QSAbility: QSAbility;
-    attack_animations = ["basic front attack", "basic right attack", "basic left attack", "basic back attack"]
-    //TO DO: ADD TEXTURES ANIMATIONS DEPENDING OF THE CHARACTAR CLASS NAME
+    attackAnimations = {
+        front: "sctyhe girl basic front attack", 
+        right: "scythe girl basic right attack", 
+        left: "scythe girl basic left attack", 
+        back: "scythe girl basic back attack"
+    }
+    walkingAnimations = {
+        front: "scythe girl walking front",
+        right: "scythe girl walking right",
+        left: "scythe girl walking left",
+        back: "scythe girl walking back"
+    }
+    idleAnimations = {
+        front: "scythe girl idle front",
+        right: "scythe girl idle right",
+        left: "scythe girl idle left",
+        back: "scythe girl idle back"
+    }
     char_class: string;
     character:ICharacter
     delta:number
@@ -38,13 +57,13 @@ export class ScytheGirl extends AliveEntity{
 
     debugMode = false;
 
-    controls:PCControlsScytheGirl;
+    controls:PCControlsScytheGirl|undefined;
     manager:ScytheGirlManager;
 
     constructor(scene: Scene, data:ICharacter){
         super(scene, data.x, data.y, "player", 0);
-        this.controls = new PCControlsScytheGirl();
-        this.manager = new ScytheGirlManager();
+        //this.controls = PCControlsProvider.getScytheGirlPcControls(scene.input);
+        this.manager = CharacterManagersProvider.getScytheGirlManager();
         this.setPartition()
         this.lastPosition.x = this.x;
         this.lastPosition.y = this.y;
@@ -58,27 +77,8 @@ export class ScytheGirl extends AliveEntity{
         this.direction = new Math.Vector2(0,0)
 
         this.character = data;
+        this.generateBasicAnimations(scene, data);
         
-        if(!ScytheGirl.animationsGenerated){
-            this.generateAnimations("walk front", SCYTHE_GIRL.walking, 0, 5, 8);
-            this.generateAnimations("walk right",   SCYTHE_GIRL.walking, 6, 11, 8);
-            this.generateAnimations("walk left",   SCYTHE_GIRL.walking, 12, 17, 8);
-            this.generateAnimations("walk back",   SCYTHE_GIRL.walking, 18, 23, 8);
-
-            this.generateAnimations("idle front", SCYTHE_GIRL.idle, 0, 1, 2);
-            this.generateAnimations("idle right", SCYTHE_GIRL.idle, 2, 3, 2);
-            this.generateAnimations("idle left", SCYTHE_GIRL.idle, 4 ,5 ,2);
-            this.generateAnimations("idle back", SCYTHE_GIRL.idle, 6, 7, 2);
-
-            this.generateAnimations(this.attack_animations[0], SCYTHE_GIRL.Q, 0, 6, data.abilities[0].speed);
-            this.generateAnimations(this.attack_animations[1], SCYTHE_GIRL.Q, 7, 13, data.abilities[0].speed);
-            this.generateAnimations(this.attack_animations[2], SCYTHE_GIRL.Q, 14, 20, data.abilities[0].speed);
-            this.generateAnimations(this.attack_animations[3], SCYTHE_GIRL.Q, 21, 27, data.abilities[0].speed);
-
-            this.generateAnimations("W", SCYTHE_GIRL.W, 0, 4, data.abilities[1].speed)
-            ScytheGirl.animationsGenerated = true
-        }
-
         //QAbility.createRight(this);
         this.abilities = new Map<string, CombatAbility>();
         this.abilities.set("Q", new QAbility(scene, data.abilities[0], data.x, data.y, SCYTHE_GIRL.QVFX));
@@ -99,15 +99,41 @@ export class ScytheGirl extends AliveEntity{
         this.generateDebugRect(scene);
     }
 
+    generateBasicAnimations(scene: Scene, data:ICharacter){
+
+        if(!ScytheGirl.animationsGenerated){
+            CharacterAnimator.generateAnimations(scene,this.walkingAnimations.front, SCYTHE_GIRL.walking, 0, 5, 8);
+            CharacterAnimator.generateAnimations(scene,this.walkingAnimations.right, SCYTHE_GIRL.walking, 6, 11, 8);
+            CharacterAnimator.generateAnimations(scene,this.walkingAnimations.left, SCYTHE_GIRL.walking, 12, 17, 8);
+            CharacterAnimator.generateAnimations(scene,this.walkingAnimations.back, SCYTHE_GIRL.walking, 18, 23, 8);
+
+            CharacterAnimator.generateAnimations(scene,this.idleAnimations.front, SCYTHE_GIRL.idle, 0, 1, 2);
+            CharacterAnimator.generateAnimations(scene,this.idleAnimations.right, SCYTHE_GIRL.idle, 2, 3, 2);
+            CharacterAnimator.generateAnimations(scene,this.idleAnimations.left, SCYTHE_GIRL.idle, 4 ,5 ,2);
+            CharacterAnimator.generateAnimations(scene,this.idleAnimations.back, SCYTHE_GIRL.idle, 6, 7, 2);
+
+            CharacterAnimator.generateAnimations(scene, this.attackAnimations.front, SCYTHE_GIRL.Q, 0, 6, data.abilities[0].speed);
+            CharacterAnimator.generateAnimations(scene, this.attackAnimations.right, SCYTHE_GIRL.Q, 7, 13, data.abilities[0].speed);
+            CharacterAnimator.generateAnimations(scene, this.attackAnimations.left, SCYTHE_GIRL.Q, 14, 20, data.abilities[0].speed);
+            CharacterAnimator.generateAnimations(scene, this.attackAnimations.back, SCYTHE_GIRL.Q, 21, 27, data.abilities[0].speed);
+
+            CharacterAnimator.generateAnimations(scene, "W", SCYTHE_GIRL.W, 0, 4, data.abilities[1].speed)
+            ScytheGirl.animationsGenerated = true
+        }
+    }
+
 
     update(delta:number){
         super.update(delta);
         this.saveLastPosition()
-        this.controls.updateScytheGirl(this, this.manager)
+        if(this.controls)
+            this.controls.updateScytheGirl(this, this.manager)
         this.updateDirection();
         if(!this.idle && !this.attacking){
-            this.x += this.speed*this.direction.x*delta
-            this.y += this.speed*this.direction.y*delta
+            if(this.mainPlayer){
+                this.x += this.speed*this.direction.x*delta
+                this.y += this.speed*this.direction.y*delta
+            }
             // this.speed = 40;
             // this.x += this.speed*this.direction.x*delta/1000
             // this.y += this.speed*this.direction.y*delta/1000
@@ -121,19 +147,21 @@ export class ScytheGirl extends AliveEntity{
                         this.attacking = false;
                     }
                     else if(!this.checkPositionGoal()){
-                        this.x += this.speed*this.direction.x*delta*3
-                        this.y += this.speed*this.direction.y*delta*3
+                        if(this.mainPlayer){
+                            this.x += this.speed*this.direction.x*delta*3
+                            this.y += this.speed*this.direction.y*delta*3
+                        }
                     }
 
-                    if(this.anims.isPlaying){
-                        this.WAbility.doDamage(this)
-                    }
+                    // if(this.anims.isPlaying){
+                    //     this.WAbility.doDamage(this)
+                    // }
                     
                     break;
-                case this.attack_animations[0]:
-                case this.attack_animations[1]:
-                case this.attack_animations[2]:
-                case this.attack_animations[3]: //this.setVelocity(0,0); break;
+                // case this.attackAnimations[0]:
+                // case this.attackAnimations[1]:
+                // case this.attackAnimations[2]:
+                // case this.attackAnimations[3]: //this.setVelocity(0,0); break;
             }
         }
         // else{
@@ -157,7 +185,7 @@ export class ScytheGirl extends AliveEntity{
         //this.QSAbility.debug(this.x, this.y);
         //this.WAbility.updateW(delta);
         // console.log("speed: " + this.speed)
-        // console.log(this.x, this.y)
+        //console.log(this.x, this.y)
         //console.log(this.scene.anims.get("W").duration, 1/12*5*1000)
         // console.log(this.direction)
         //NETManager.sendState(this.idle, this.direction)
@@ -168,10 +196,14 @@ export class ScytheGirl extends AliveEntity{
     }
 
     updateMovement(){
-        if(!this.idle)
-            this.updateBasicAnimation(["walk front", "walk left", "walk back", "walk right"], -1, 1);
-        else
-            this.updateBasicAnimation(["idle front", "idle left", "idle back", "idle right"], -1, 1)
+        if(!this.idle){
+            this.updateBasicAnimation([this.walkingAnimations.front, this.walkingAnimations.left, 
+                this.walkingAnimations.back, this.walkingAnimations.right], -1, 1);
+        }
+        else {
+            this.updateBasicAnimation([this.idleAnimations.front, this.idleAnimations.left, 
+                this.idleAnimations.back, this.idleAnimations.right], -1, 1)
+        }
     }
 
     changeDirectionAttack(vector: Math.Vector2): void {

@@ -23,10 +23,10 @@ export class ScytheGirlManager extends CharactersManager{
         this.selectQDirection(character)
         console.log(character.direction)
         character.updateBasicAnimation([
-            "basic front attack",
-            "basic left attack",
-            "basic back attack",
-            "basic right attack"
+            character.attackAnimations.front,
+            character.attackAnimations.left,
+            character.attackAnimations.back,
+            character.attackAnimations.right
         ], 0, 0)
     }
 

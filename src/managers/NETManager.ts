@@ -1,7 +1,6 @@
 import { ICharacter } from "../interfaces/Character";
 import { Game } from "../scenes/Game";
 import { Math as PMath, Scenes } from "phaser";
-import { CharactersManager } from "./CharactersManager";
 import { Vector2 } from "../interfaces/Vector2";
 import { IEnemy } from "../interfaces/Enemy";
 import { WorldManager } from "./WorldManager";
@@ -9,7 +8,10 @@ import { Enemy } from "../objects/Enemy";
 import { Client, Room } from "colyseus.js";
 import { SAliveEntity } from "../interfaces/SAliveEntity";
 import { RoomState } from "../schemas/RoomState";
-import { MainCharacter } from "../objects/MainCharacter";
+import { ScytheGirl } from "../objects/sctythe-girl/ScytheGirl";
+import { Player } from "../classes/Player";
+import { UI } from "../scenes/UI";
+import { PCControlsProvider } from "../providers/PCControlsProvider";
 
 export class NETManager{
 
@@ -18,7 +20,7 @@ export class NETManager{
     static numberOfPlayers = 0;
     static scene:Game;
     static blocked = false;
-    static ping = 100;
+    static ping = 0;
     static action = "";
     static pingStart: number;
 
@@ -43,11 +45,12 @@ export class NETManager{
         this.room = await this.client.join("my_room");
         
         this.room.state.characters.onAdd((character, sessionID:string)=>{
-            WorldManager.aliveEntities.set(character.id, character)
             character.onChange(()=>{
-                if(character.id != this.room.sessionId && WorldManager.players.get(character.id)){
-                    let interpolationFactor = 0.2
-                    let player = WorldManager.players.get(character.id)!;
+                if(character.id != this.room.sessionId){
+                    let interpolationFactor = 0.7
+                    let player = WorldManager.scytheGirls.get(character.id)!;
+                    player.idle = character.idle
+                    console.log(character.idle)
                     player.x = PMath.Linear(player.x, character.x, interpolationFactor)
                     player.y = PMath.Linear(player.y, character.y, interpolationFactor)
                     player.health = character.health;
@@ -78,7 +81,11 @@ export class NETManager{
             data.characters.forEach(c => {
                 this.addPlayer(c)
                 if(c.id == this.room.sessionId){
-                    this.scene.generateMainPlayer(WorldManager.players.get(c.id)!);
+                    let character = WorldManager.scytheGirls.get(this.room.sessionId)!
+                    character.controls = PCControlsProvider.getScytheGirlPcControls(this.scene.input)
+                    WorldManager.mainPlayer = new Player(character, true);
+                    this.scene.game.scene.add("UI", new UI(c.abilities, WorldManager.mainPlayer.character), true);
+                    this.scene.fixCamera(WorldManager.mainPlayer.character);
                 }
             })
             console.log(data.enemies)
@@ -110,7 +117,9 @@ export class NETManager{
             this.ping = this.scene.time.now-this.pingStart;
         })
 
-        this.numberOfPlayers++;
+        this.room.onMessage("ed", (id:string)=>{
+            WorldManager.enemies.get(id)!.getDamageClient(10)
+        })
     }
 
     static getPing(){
@@ -119,11 +128,8 @@ export class NETManager{
     }
 
     static addPlayer(character:ICharacter){
-        if(!WorldManager.players.get(character.id) && character.id != this.room.sessionId){
-            WorldManager.players.set(character.id, new Character(this.scene, character))
-        }
-        else if(!WorldManager.players.get(character.id) && character.id == this.room.sessionId){
-            WorldManager.players.set(character.id, new MainCharacter(this.scene, character))
+        if(!WorldManager.scytheGirls.get(character.id)){
+            WorldManager.scytheGirls.set(character.id, new ScytheGirl(this.scene, character))
         }
     }
     
@@ -146,8 +152,8 @@ export class NETManager{
     static deletePlayer(id:string){
         //console.log("hello")
         this.scene.events.once(Scenes.Events.POST_UPDATE, ()=>{
-            let player = WorldManager.players.get(id)
-            WorldManager.players.delete(id);
+            let player = WorldManager.scytheGirls.get(id)
+            WorldManager.scytheGirls.delete(id);
             WorldManager.aliveEntities.delete(id);
             player!.destroyAbilities();
             player!.destroy();
@@ -157,20 +163,20 @@ export class NETManager{
     private static receiveWalk(id: string, direction: PMath.Vector2){
         this.action = "Walk";
         if(id != this.room.sessionId)
-            CharactersManager.pointerDownMove(WorldManager.players.get(id)!, direction)
+            WorldManager.scytheGirls.get(id)!.manager.pointerDownMove(WorldManager.scytheGirls.get(id)!, direction)
     }
 
     private static receiveQ(id: string, direction: PMath.Vector2, weaponDirection: string){
         console.log(direction)
         this.action = "Q";
         if(id != this.room.sessionId)
-            CharactersManager.useQ(WorldManager.players.get(id)!, direction)
+            WorldManager.scytheGirls.get(id)!.manager.useQ(WorldManager.scytheGirls.get(id)!, direction)
     }
 
     private static receiveW(id: string, direction: PMath.Vector2){
         this.action = "W";
         if(id != this.room.sessionId)
-            CharactersManager.useW(WorldManager.players.get(id)!, direction)
+            WorldManager.scytheGirls.get(id)!.manager.useW(WorldManager.scytheGirls.get(id)!, direction)
     }
 
     private static receiveEnemyMovement(id:string, vector:PMath.Vector2){

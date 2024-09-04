@@ -6,6 +6,7 @@ import { WorldManager } from "../managers/WorldManager";
 import { DamageText } from "../classes/DamageText";
 import SAT from "sat";
 import { GHOST } from "../utils/AssetsGlobals";
+import { CharacterAnimator } from "../utils/CharacterAnimator";
 
 export class Enemy extends AliveEntity{
     static animationsGenerated = false;
@@ -36,15 +37,15 @@ export class Enemy extends AliveEntity{
         // this.setSensor(true)
 
         if(!Enemy.animationsGenerated){
-            this.generateAnimations("ghost walk front", "ghost", 0, 7, 8);
-            this.generateAnimations("ghost walk right",  "ghost", 8, 15, 8);
-            this.generateAnimations("ghost walk left",  "ghost", 16, 23, 8);
-            this.generateAnimations("ghost walk back",  "ghost", 24, 31, 8);
+            CharacterAnimator.generateAnimations(scene,"ghost walk front", "ghost", 0, 7, 8);
+            CharacterAnimator.generateAnimations(scene,"ghost walk right",  "ghost", 8, 15, 8);
+            CharacterAnimator.generateAnimations(scene,"ghost walk left",  "ghost", 16, 23, 8);
+            CharacterAnimator.generateAnimations(scene,"ghost walk back",  "ghost", 24, 31, 8);
 
-            this.generateAnimations(this.getHitAnims.front, GHOST.getHit, 0, 1, 6)
-            this.generateAnimations(this.getHitAnims.right,  GHOST.getHit, 2, 3, 6)
-            this.generateAnimations(this.getHitAnims.left, GHOST.getHit, 4,5, 6)
-            this.generateAnimations(this.getHitAnims.back, GHOST.getHit, 6, 6, 6)
+            CharacterAnimator.generateAnimations(scene,this.getHitAnims.front, GHOST.getHit, 0, 1, 6)
+            CharacterAnimator.generateAnimations(scene,this.getHitAnims.right,  GHOST.getHit, 2, 3, 6)
+            CharacterAnimator.generateAnimations(scene,this.getHitAnims.left, GHOST.getHit, 4,5, 6)
+            CharacterAnimator.generateAnimations(scene,this.getHitAnims.back, GHOST.getHit, 6, 6, 6)
             Enemy.animationsGenerated=true
         }
 
