@@ -1,6 +1,11 @@
 import { GameObjects, Math as PMath, Scene } from "phaser";
 import { WorldManager } from "../managers/WorldManager";
+import { ScytheGirl } from "./sctythe-girl/ScytheGirl";
 import { CombatAbility } from "../classes/combat/CombatAbility";
+import { drawLines } from "../utils/Debugger";
+import { NETManager } from "../managers/NETManager";
+import { Enemy } from "./Enemy";
+import { Game } from "../scenes/Game";
 
 export class AliveEntity extends GameObjects.Sprite{
     speed:number;
@@ -21,10 +26,10 @@ export class AliveEntity extends GameObjects.Sprite{
     abilities?: Map<string, CombatAbility>;
     mainPlayer = false;
 
-    generateDebugRect(scene: Scene){
-        this.boxRect = new GameObjects.Rectangle(scene, this.x, this.y, this.boxWidth, this.boxHeight)
-        this.boxRect.setStrokeStyle(1, 0xee0000);
-    }
+    // generateDebugRect(scene: Scene){
+    //     this.boxRect = new GameObjects.Rectangle(scene, this.x, this.y, this.boxWidth, this.boxHeight)
+    //     this.boxRect.setStrokeStyle(1, 0xee0000);
+    // }
 
     setPartition(){
         WorldManager.mapPartitions.get(Math.floor(this.x/WorldManager.width).toString() + "-" +  
@@ -46,16 +51,6 @@ export class AliveEntity extends GameObjects.Sprite{
         );
         entities?.splice(entities.indexOf(this), 1)
         this.setPartition();
-    }
-
-    debug(){
-        if(!this.debugMode){
-            this.scene.add.existing(this.boxRect)
-            this.debugMode = true;
-        }
-        this.boxRect.x = this.x;
-        this.boxRect.y = this.y;
-        this.boxRect.depth = 3000;
     }
 
     updateBasicAnimation(animations: Array<string>, repeat: number, startFrame: number){
@@ -112,6 +107,24 @@ export class AliveEntity extends GameObjects.Sprite{
     }
 
     update(delta:number){
-
     }
+
+    // debug(){
+    //     // if(!this.debugMode){
+    //     //     this.scene.add.existing(this.boxRect)
+    //     //     this.debugMode = true;
+    //     // }
+    //     // this.boxRect.x = this.x;
+    //     // this.boxRect.y = this.y;
+    //     // this.boxRect.depth = 3000;
+    //     if(NETManager.room){
+    //         Game.graphics.lineStyle(1, 0xff0909);
+    //         if(this instanceof Enemy)
+    //             drawLines(NETManager.room.state.enemies.get(this.id)!.box)
+    //         else if(this instanceof ScytheGirl){
+    //             drawLines(NETManager.room.state.scytheGirls.get(this.id)!.box)
+    //         }
+    //         Game.graphics.lineStyle(1, 0xff4c4a);
+    //     }
+    // }
 }

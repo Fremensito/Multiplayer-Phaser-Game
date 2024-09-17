@@ -1,6 +1,6 @@
+import { AliveEntity } from "../AliveEntity";
 import {Scene, Math, GameObjects} from "phaser";
 import { ICharacter } from "../../interfaces/Character";
-import { AliveEntity } from "../AliveEntity";
 import { QAbility } from "../../classes/combat/scythe-girl/QAbility";
 import { WAbility } from "../../classes/combat/scythe-girl/WAbility";
 import { CombatAbility } from "../../classes/combat/CombatAbility";
@@ -10,18 +10,12 @@ import { QSAbility } from "../../classes/combat/skeleton/QSAbility";
 import { PCControlsScytheGirl } from "./PCControlsScytheGirl";
 import { ScytheGirlManager } from "./ScytheGirlManager";
 import { CharacterManagersProvider } from "../../providers/CharacterManagersProvider";
-import { PCControlsProvider } from "../../providers/PCControlsProvider";
 import { CharacterAnimator } from "../../utils/CharacterAnimator";
+import { Game } from "../../scenes/Game";
+import { NETManager } from "../../managers/NETManager";
+import { drawLines } from "../../utils/Debugger";
 
 export class ScytheGirl extends AliveEntity{
-    speed:number;
-    idle: boolean;
-    attacking: boolean;
-    direction:Math.Vector2;
-    pointToMove: Math.Vector2;
-    boxRect: GameObjects.Rectangle;
-
-    PI = Math.PI2/2;
     created = false
 
     QAbility: QAbility;
@@ -55,7 +49,7 @@ export class ScytheGirl extends AliveEntity{
     WSound;
     QSound;
 
-    debugMode = false;
+    //debugMode = false;
 
     controls:PCControlsScytheGirl|undefined;
     manager:ScytheGirlManager;
@@ -96,7 +90,7 @@ export class ScytheGirl extends AliveEntity{
         this.boxHeight = 10;
         this.boxWidth = 10;
         this.box = new SAT.Box(new SAT.Vector(data.x - this.boxWidth/2, data.y - this.boxHeight/2), this.boxWidth, this.boxHeight)
-        this.generateDebugRect(scene);
+        //this.generateDebugRect(scene);
     }
 
     generateBasicAnimations(scene: Scene, data:ICharacter){
@@ -178,11 +172,18 @@ export class ScytheGirl extends AliveEntity{
         
         this.depth = this.y
         this.QAbility.updatePosition(this.x, this.y);
-        //this.QAbility.debug(this.x, this.y);
+        if(Game.debug){
+            this.QAbility.debug();
+            if(NETManager.room && NETManager.room.state.scytheGirls.get(this.id)){
+                Game.graphics.lineStyle(1, 0xff0909);
+                drawLines(NETManager.room.state.scytheGirls.get(this.id)!.box)
+                Game.graphics.lineStyle(1, 0x13e8e8);
+            }
+        }
         this.WAbility.updatePosition(this.x, this.y);
         this.QAbility.update(delta)
         this.WAbility.update(delta)
-        //this.QSAbility.debug(this.x, this.y);
+        //¡this.QSAbility.debug(this.x, this.y);
         //this.WAbility.updateW(delta);
         // console.log("speed: " + this.speed)
         //console.log(this.x, this.y)

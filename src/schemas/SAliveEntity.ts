@@ -1,4 +1,5 @@
-import {Schema, type} from "@colyseus/schema";
+import {Schema, ArraySchema, type} from "@colyseus/schema";
+import { SVector2 } from "./SVector2";
 
 export class SAliveEntity extends Schema{
     @type("string") id: string;
@@ -7,4 +8,5 @@ export class SAliveEntity extends Schema{
     @type("boolean") idle: boolean;
     @type("number") health: number;
     @type("string") type: string;
+    @type([SVector2]) box = new ArraySchema<SVector2>();
 }

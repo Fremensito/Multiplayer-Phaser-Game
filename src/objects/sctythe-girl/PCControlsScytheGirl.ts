@@ -3,6 +3,7 @@ import { ScytheGirl } from "./ScytheGirl";
 import { NETManager } from "../../managers/NETManager";
 import { PCControls } from "../../controls/PCControls";
 import { ScytheGirlManager } from "./ScytheGirlManager";
+import { ScytheGirlNetManager } from "./ScytheGirlNetManager";
 
 export class PCControlsScytheGirl extends PCControls{
     netManager:NETManager;
@@ -34,7 +35,7 @@ export class PCControlsScytheGirl extends PCControls{
                 )
             }
             else if(Input.Keyboard.JustDown(this.W) && character.abilities!.get("W")!.available){
-                NETManager.sendW({
+                ScytheGirlNetManager.sendW({
                     x: this.input.mousePointer.worldX,
                     y: this.input.mousePointer.worldY
                 })

@@ -7,11 +7,15 @@ import { WorldManager } from '../managers/WorldManager';
 import { MAP } from '../utils/AssetsGlobals';
 import { AssetsLoader } from '../utils/AssetsLoader';
 import { AliveEntity } from '../objects/AliveEntity';
+import { authenticate } from '../utils/Auth';
+import { colyseusSDK } from '../utils/Colyseus';
 //import { PhysicsManager } from '../managers/PhysicsManager';
 
 
 export class Game extends Scene
 {   
+    static debug = true;
+    static graphics: GameObjects.Graphics;
     character:AliveEntity;
     player: Player
     layer: Tilemaps.TilemapLayer;
@@ -29,7 +33,7 @@ export class Game extends Scene
 
     preload ()
     {   
-        this.load.setPath('assets');
+        this.load.setPath('/.proxy/assets');
 
         AssetsLoader.loadGeneral(this);
         AssetsLoader.loadMap(this)
@@ -39,14 +43,19 @@ export class Game extends Scene
 
     async create ()
     {   
+        Game.graphics = this.add.graphics();
+        Game.graphics.lineStyle(1, 0x13e8e8);
+        Game.graphics.depth = 5000;
         this.generateMap();
         WorldManager.segmentMap()
         //this.generatePlayer();
         this.input.setDefaultCursor("url(assets/cursor.png), pointer")
         document.addEventListener('contextmenu', event => event.preventDefault());
-
-        NETManager.scene = this;
-        await NETManager.connect();
+        
+        const authData = await authenticate(colyseusSDK);
+        colyseusSDK.auth.token = authData.token;
+        NETManager.scene = this;    
+        await NETManager.connect(colyseusSDK);
         
         //this.enemy = new Enemy(this, {x: 320, y: 320, speed: 0.4, id:"ghost"})
     } 
@@ -59,6 +68,7 @@ export class Game extends Scene
     }
 
     update(time:number, delta:number){
+        Game.graphics.clear()
         // if(this.pcControls && this.pcControls.input){
         //     this.pcControls.update();
         //     //this.character.update(delta);

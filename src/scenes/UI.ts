@@ -56,7 +56,7 @@ export class UI extends Scene{
     pingText: GameObjects.Text;
     actionText: GameObjects.Text;
     resources = {
-        qSlot: "Q-slot",
+        qSlot: "/Q-slot",
         qIcon: "Q-icon",
         wSlot: "W-slot",
         wIcon: "W-icon"
@@ -71,7 +71,7 @@ export class UI extends Scene{
     }
 
     preload(){
-        this.load.setPath('assets');
+        this.load.setPath('/.proxy/assets');
         this.load.image(this.resources.qSlot, this.abilities.get("Q")!.UI.slotResource); 
         this.load.image(this.resources.qIcon, this.abilities.get("Q")!.UI.iconResource);
         this.load.image(this.resources.wSlot, this.abilities.get("W")!.UI.slotResource); 

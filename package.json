@@ -14,7 +14,7 @@
     },
     "homepage": "https://github.com/phaserjs/template-vite-ts#readme",
     "scripts": {
-        "dev": "vite --config vite/config.dev.mjs",
+        "dev": "vite dev --config vite/config.dev.mjs",
         "build": "vite build --config vite/config.prod.mjs"
     },
     "devDependencies": {
@@ -23,8 +23,10 @@
         "vite": "^5.3.1"
     },
     "dependencies": {
+        "@discord/embedded-app-sdk": "^1.4.2",
+        "@robojs/patch": "^0.1.0",
         "@types/sat": "^0.0.35",
-        "colyseus.js": "^0.15.25",
+        "colyseus.js": "^0.15.26",
         "phaser": "^3.80.1",
         "sat": "^0.9.0"
     }

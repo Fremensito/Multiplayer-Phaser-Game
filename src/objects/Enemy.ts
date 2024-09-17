@@ -7,6 +7,9 @@ import { DamageText } from "../classes/DamageText";
 import SAT from "sat";
 import { GHOST } from "../utils/AssetsGlobals";
 import { CharacterAnimator } from "../utils/CharacterAnimator";
+import { Game } from "../scenes/Game";
+import { drawLines } from "../utils/Debugger";
+import { NETManager } from "../managers/NETManager";
 
 export class Enemy extends AliveEntity{
     static animationsGenerated = false;
@@ -55,7 +58,7 @@ export class Enemy extends AliveEntity{
         this.boxWidth = 5;
         this.boxHeight = 10;
         this.box = new SAT.Box(new SAT.Vector(data.x - this.boxWidth/2, data.y - this.boxHeight/2), this.boxWidth, this.boxHeight)
-        this.generateDebugRect(scene)
+        // this.generateDebugRect(scene)
         //this.preFX?.addShadow(1, 1, undefined, 10, 0xf10023);
         //this.postFX.addGlow(0xffffff, 3)
         //this.preFX?.addGlow(0xff4040, 6)
@@ -84,7 +87,13 @@ export class Enemy extends AliveEntity{
             // this.setVelocity(0,0);
         }
         this.healthBar.update(this.x, this.y - 13)
-        //this.debug();
+        if(Game.debug){
+            if(NETManager.room, NETManager.room.state.enemies.get(this.id)){
+                Game.graphics.lineStyle(1, 0xff0909);
+                drawLines(NETManager.room.state.enemies.get(this.id)!.box)
+                Game.graphics.lineStyle(1, 0x13e8e8);
+            }
+        }
         this.box.pos.x = (this.x - this.boxWidth/2)
         this.box.pos.y = (this.y - this.boxHeight/2)
         //this.updatePartition()
@@ -106,7 +115,7 @@ export class Enemy extends AliveEntity{
             callbackScope: this,
             callback: ()=>this.clearTint()
         })
-        new DamageText(this.scene, this.x, this.y, damage)
+        new DamageText(this.scene, this.x, this.y, Math.RoundTo(damage))
         this.getHit.play();
     }
 
@@ -118,15 +127,14 @@ export class Enemy extends AliveEntity{
     }
 
     die(){
-        this.scene.matter.world.remove(this)
         this.scene.time.addEvent({
             callback: ()=>{
                 this.healthBar.destroy();
-                console.log(WorldManager.enemies.delete(this.id))
+                //console.log(WorldManager.enemies.delete(this.id))
                 this.destroy()
-                this.boxRect.destroy();
                 let entities = WorldManager.mapPartitions.get(this.partition)
                 entities?.splice(entities.indexOf(this), 1)
+                WorldManager.enemies.delete(this.id)
             },
             loop: false,
             delay: 100,

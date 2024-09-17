@@ -1,7 +1,6 @@
 import { GameObjects, Scene } from "phaser";
 import { IAbility } from "../../interfaces/Ability";
 import { PI } from "../../utils/GameUtils";
-import { AliveEntity } from "../../objects/AliveEntity";
 
 export class CombatAbility extends GameObjects.Sprite{
     available: boolean;

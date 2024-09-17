@@ -1,10 +1,13 @@
 import { IAbility } from "../../../interfaces/Ability";
-import { WorldManager } from "../../../managers/WorldManager";
 import { CombatAbility } from "../CombatAbility";
 import SAT from "sat";
 import { GameObjects, Scene } from "phaser";
 import { SCYTHE_GIRL } from "../../../utils/AssetsGlobals";
-import { CharacterAnimator } from "../../../utils/CharacterAnimator";
+import { Game } from "../../../scenes/Game";
+import { NETManager } from "../../../managers/NETManager";
+import { SVector2 } from "../../../schemas/SVector2";
+import {ArraySchema} from "@colyseus/schema";
+import { drawLines } from "../../../utils/Debugger";
 
 export class QAbility extends CombatAbility{
 
@@ -86,46 +89,52 @@ export class QAbility extends CombatAbility{
         this.left.pos = new SAT.Vector(x - this.range, y - this.attackWidth/2)
     }
 
-    debug(x:number, y: number){
-        this.graphics.clear()
-        this.graphics.lineStyle(1, 0xff4c4a);
-
-        this.drawLines(this.up, this.up.toPolygon().points)
+    debug(){
+        if(NETManager.room){
+            NETManager.room.state.scytheGirls.forEach(v=>{
+                drawLines(v.qUp);
+                drawLines(v.qDown);
+                drawLines(v.qRight);
+                drawLines(v.qLeft);
+            })
+        }
+        // this.drawLines(this.up, this.up.toPolygon().points)
         
-        this.drawLines(this.down, this.down.toPolygon().points)
+        // this.drawLines(this.down, this.down.toPolygon().points)
 
-        this.drawLines(this.right, this.right.toPolygon().points)
+        // this.drawLines(this.right, this.right.toPolygon().points)
         
-        this.drawLines(this.left, this.left.toPolygon().points)
+        // this.drawLines(this.left, this.left.toPolygon().points)
     }
 
-    drawLines(hitbox:SAT.Box, points: SAT.Vector[]){
-        this.graphics.lineBetween(
-           hitbox.pos.x + points[0].x, 
-           hitbox.pos.y + points[0].y, 
-           hitbox.pos.x + points[1].x, 
-           hitbox.pos.y + points[1].y
-        );
+    // drawLines(hitbox: ArraySchema<SVector2>){
 
-        this.graphics.lineBetween(
-           hitbox.pos.x + points[1].x, 
-           hitbox.pos.y + points[1].y, 
-           hitbox.pos.x + points[2].x,
-           hitbox.pos.y + points[2].y
-        );
+    //     Game.graphics.lineBetween(
+    //         hitbox[0].x, 
+    //         hitbox[0].y, 
+    //         hitbox[1].x, 
+    //         hitbox[1].y
+    //     );
 
-        this.graphics.lineBetween(
-           hitbox.pos.x + points[2].x, 
-           hitbox.pos.y + points[2].y, 
-           hitbox.pos.x + points[3].x, 
-           hitbox.pos.y + points[3].y
-        );
+    //     Game.graphics.lineBetween(
+    //         hitbox[1].x, 
+    //         hitbox[1].y, 
+    //         hitbox[2].x,
+    //         hitbox[2].y
+    //     );
 
-        this.graphics.lineBetween(
-           hitbox.pos.x + points[3].x, 
-           hitbox.pos.y + points[3].y, 
-           hitbox.pos.x + points[0].x, 
-           hitbox.pos.y + points[0].y
-        );
-    }
+    //     Game.graphics.lineBetween(
+    //         hitbox[2].x, 
+    //         hitbox[2].y, 
+    //         hitbox[3].x, 
+    //         hitbox[3].y
+    //     );
+
+    //     Game.graphics.lineBetween(
+    //         hitbox[3].x, 
+    //         hitbox[3].y, 
+    //         hitbox[0].x, 
+    //         hitbox[0].y
+    //     );
+    // }
 }

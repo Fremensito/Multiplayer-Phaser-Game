@@ -8,14 +8,16 @@ import { Enemy } from "../objects/Enemy";
 import { Client, Room } from "colyseus.js";
 import { SAliveEntity } from "../interfaces/SAliveEntity";
 import { RoomState } from "../schemas/RoomState";
-import { ScytheGirl } from "../objects/sctythe-girl/ScytheGirl";
 import { Player } from "../classes/Player";
 import { UI } from "../scenes/UI";
 import { PCControlsProvider } from "../providers/PCControlsProvider";
+import { CharacterManagersProvider } from "../providers/CharacterManagersProvider";
+import { ScytheGirlNetManager } from "../objects/sctythe-girl/ScytheGirlNetManager";
+import { CharactersProvider } from "../providers/CharactersProvider";
 
 export class NETManager{
 
-    private static client = new Client("ws://localhost:2567");
+    //private static client = new Client("/.proxy/websocket");
     static room: Room<RoomState>;
     static numberOfPlayers = 0;
     static scene:Game;
@@ -24,33 +26,32 @@ export class NETManager{
     static action = "";
     static pingStart: number;
 
-    static async login(button:Element){
-        try {
-            const userdata = await this.client.auth.signInWithProvider('discord');
-            button.textContent = "REGISTERED!!!"
-            console.log(userdata);
+    // static async login(button:Element){
+    //     try {
+    //         const userdata = await this.client.auth.signInWithProvider('discord');
+    //         button.textContent = "REGISTERED!!!"
+    //         console.log(userdata);
         
-        } catch (e: any) {
-            console.error(e.message);
-        }
-    }
+    //     } catch (e: any) {
+    //         console.error(e.message);
+    //     }
+    // }
     
-    static async connect(){
+    static async connect(colyseusSDK:Client){
         this.scene.time.addEvent({
             delay: 1000,
             callback: this.getPing,
             callbackScope: this,
             loop: true
         })
-        this.room = await this.client.join("my_room");
+        this.room =  await colyseusSDK.join<RoomState>("my_room");
         
-        this.room.state.characters.onAdd((character, sessionID:string)=>{
+        this.room.state.scytheGirls.onAdd((character, sessionID:string)=>{
             character.onChange(()=>{
                 if(character.id != this.room.sessionId){
                     let interpolationFactor = 0.7
                     let player = WorldManager.scytheGirls.get(character.id)!;
                     player.idle = character.idle
-                    console.log(character.idle)
                     player.x = PMath.Linear(player.x, character.x, interpolationFactor)
                     player.y = PMath.Linear(player.y, character.y, interpolationFactor)
                     player.health = character.health;
@@ -58,7 +59,7 @@ export class NETManager{
             })
         })
 
-        this.room.state.characters.onRemove((player:SAliveEntity, sessionID: string)=>{
+        this.room.state.scytheGirls.onRemove((player:SAliveEntity, sessionID: string)=>{
             this.deletePlayer(sessionID)
         })
 
@@ -104,22 +105,17 @@ export class NETManager{
         this.room.onMessage("em", (data: {id: string, vector: PMath.Vector2})=>{
             this.receiveEnemyMovement(data.id, data.vector);
         });
-        
-        this.room.onMessage("q", (data: {id:string, direction: PMath.Vector2, weaponDirection:string})=>{
-            this.receiveQ(data.id, data.direction, data.weaponDirection)
-        });
-        
-        this.room.onMessage("w", (data: { id: string, direction: PMath.Vector2})=>{
-            this.receiveW(data.id, data.direction)
-        })
 
         this.room.onMessage("ping",()=>{
             this.ping = this.scene.time.now-this.pingStart;
         })
 
-        this.room.onMessage("ed", (id:string)=>{
-            WorldManager.enemies.get(id)!.getDamageClient(10)
+        this.room.onMessage("ed", (data: {id:string, damage:number})=>{
+            console.log(data)
+            WorldManager.enemies.get(data.id)!.getDamageClient(data.damage)
         })
+
+        ScytheGirlNetManager.set(this.room)
     }
 
     static getPing(){
@@ -128,8 +124,9 @@ export class NETManager{
     }
 
     static addPlayer(character:ICharacter){
+        console.log(CharactersProvider.callbacks[character.characterClass])
         if(!WorldManager.scytheGirls.get(character.id)){
-            WorldManager.scytheGirls.set(character.id, new ScytheGirl(this.scene, character))
+            WorldManager.scytheGirls.set(character.id, CharactersProvider.callbacks[character.characterClass](this.scene, character))
         }
     }
     
@@ -163,20 +160,7 @@ export class NETManager{
     private static receiveWalk(id: string, direction: PMath.Vector2){
         this.action = "Walk";
         if(id != this.room.sessionId)
-            WorldManager.scytheGirls.get(id)!.manager.pointerDownMove(WorldManager.scytheGirls.get(id)!, direction)
-    }
-
-    private static receiveQ(id: string, direction: PMath.Vector2, weaponDirection: string){
-        console.log(direction)
-        this.action = "Q";
-        if(id != this.room.sessionId)
-            WorldManager.scytheGirls.get(id)!.manager.useQ(WorldManager.scytheGirls.get(id)!, direction)
-    }
-
-    private static receiveW(id: string, direction: PMath.Vector2){
-        this.action = "W";
-        if(id != this.room.sessionId)
-            WorldManager.scytheGirls.get(id)!.manager.useW(WorldManager.scytheGirls.get(id)!, direction)
+           CharacterManagersProvider.getScytheGirlManager().pointerDownMove(WorldManager.scytheGirls.get(id)!, direction)
     }
 
     private static receiveEnemyMovement(id:string, vector:PMath.Vector2){
@@ -191,16 +175,7 @@ export class NETManager{
         if(!this.blocked){
             this.room.send("wk", direction);
             this.blocked = true;
-            this.scene.time.delayedCall(100, ()=>this.blocked=false)
+            this.scene.time.delayedCall(16, ()=>this.blocked=false)
         }
     }
-
-    static sendQ(direction: Vector2, weaponDirection: string){
-        this.room.send("q", {direction: direction, weaponDirection: weaponDirection})
-    }
-
-    static sendW(direction:Vector2){
-        this.room.send("w", direction)
-    }
-    
 }

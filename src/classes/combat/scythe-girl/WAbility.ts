@@ -6,7 +6,6 @@ import { CombatAbility } from "../CombatAbility";
 import SAT from "sat";
 import { SCYTHE_GIRL } from "../../../utils/AssetsGlobals";
 import { AliveEntity } from "../../../objects/AliveEntity";
-import { CharacterAnimator } from "../../../utils/CharacterAnimator";
 
 export class WAbility extends CombatAbility{
 
