@@ -1,12 +1,8 @@
-import { IAbility } from "../../../interfaces/Ability";
-import { CombatAbility } from "../CombatAbility";
-import SAT from "sat";
 import { GameObjects, Scene } from "phaser";
+import { CombatAbility } from "../CombatAbility";
+import { IAbility } from "../../../interfaces/Ability";
 import { SCYTHE_GIRL } from "../../../utils/AssetsGlobals";
-import { Game } from "../../../scenes/Game";
 import { NETManager } from "../../../managers/NETManager";
-import { SVector2 } from "../../../schemas/SVector2";
-import {ArraySchema} from "@colyseus/schema";
 import { drawLines } from "../../../utils/Debugger";
 
 export class QAbility extends CombatAbility{
@@ -20,10 +16,6 @@ export class QAbility extends CombatAbility{
     }
 
     attackWidth = 32
-    up: SAT.Box;
-    right: SAT.Box;
-    down: SAT.Box;
-    left: SAT.Box;
 
     graphics: GameObjects.Graphics;
 
@@ -36,105 +28,40 @@ export class QAbility extends CombatAbility{
             this.generateAnimations(this.directions.up, SCYTHE_GIRL.QVFX, 21, 27, ability.speed)
             QAbility.animsCreated = true;
         }
-
-        //this.graphics = scene.add.graphics();
-        this.up = new SAT.Box(new SAT.Vector(x - this.attackWidth/2, y-this.range), this.attackWidth, this.range)
-        this.down = new SAT.Box(new SAT.Vector(x- this.width/2, y), this.attackWidth, this.range)
-        this.right = new SAT.Box(new SAT.Vector(x, y - this.attackWidth/2), this.range, this.attackWidth)
-        this.left = new SAT.Box(new SAT.Vector(x-this.range, y - this.attackWidth/2), this.range, this.attackWidth)
-        // this.left = new SAT.Box(new SAT.Vector(x))
     }
 
     doDamage(direction:string){
         switch(direction){
             case this.directions.up:
                 this.play({key: this.directions.up, repeat: 0, startFrame: 0})
-                // WorldManager.enemies.forEach(e=>{
-                //     if(SAT.testPolygonPolygon(this.up.toPolygon(), e.box.toPolygon()))
-                //         e.getDamageClient(10);
-                // })
                 break;
             
             case this.directions.right:
                 this.play({key: this.directions.right, repeat: 0, startFrame: 0})
-                // WorldManager.enemies.forEach(e=>{
-                //     if(SAT.testPolygonPolygon(this.right.toPolygon(), e.box.toPolygon()))
-                //         e.getDamageClient(10);
-                // })
                 break;
             
             case this.directions.down:
                 this.play({key: this.directions.down, repeat: 0, startFrame: 0})
-                // WorldManager.enemies.forEach(e=>{
-                //     if(SAT.testPolygonPolygon(this.down.toPolygon(), e.box.toPolygon()))
-                //         e.getDamageClient(10);
-                // })
                 break;
             
             case this.directions.left:
                 this.play({key: this.directions.left, repeat: 0, startFrame: 0})
-                // WorldManager.enemies.forEach(e=>{
-                //     if(SAT.testPolygonPolygon(this.left.toPolygon(), e.box.toPolygon()))
-                //         e.getDamageClient(10);
-                // })
                 break;
         }
     }
 
     updatePosition(x:number, y:number){
         super.updatePosition(x, y)
-        this.up.pos = new SAT.Vector(x - this.attackWidth/2, y-this.range)
-        this.down.pos = new SAT.Vector(x - this.attackWidth/2, y)
-        this.right.pos = new SAT.Vector(x, y - this.attackWidth/2)
-        this.left.pos = new SAT.Vector(x - this.range, y - this.attackWidth/2)
     }
 
     debug(){
         if(NETManager.room){
             NETManager.room.state.scytheGirls.forEach(v=>{
-                drawLines(v.qUp);
-                drawLines(v.qDown);
-                drawLines(v.qRight);
-                drawLines(v.qLeft);
+                drawLines(v.q.up);
+                drawLines(v.q.down);
+                drawLines(v.q.right);
+                drawLines(v.q.left);
             })
         }
-        // this.drawLines(this.up, this.up.toPolygon().points)
-        
-        // this.drawLines(this.down, this.down.toPolygon().points)
-
-        // this.drawLines(this.right, this.right.toPolygon().points)
-        
-        // this.drawLines(this.left, this.left.toPolygon().points)
     }
-
-    // drawLines(hitbox: ArraySchema<SVector2>){
-
-    //     Game.graphics.lineBetween(
-    //         hitbox[0].x, 
-    //         hitbox[0].y, 
-    //         hitbox[1].x, 
-    //         hitbox[1].y
-    //     );
-
-    //     Game.graphics.lineBetween(
-    //         hitbox[1].x, 
-    //         hitbox[1].y, 
-    //         hitbox[2].x,
-    //         hitbox[2].y
-    //     );
-
-    //     Game.graphics.lineBetween(
-    //         hitbox[2].x, 
-    //         hitbox[2].y, 
-    //         hitbox[3].x, 
-    //         hitbox[3].y
-    //     );
-
-    //     Game.graphics.lineBetween(
-    //         hitbox[3].x, 
-    //         hitbox[3].y, 
-    //         hitbox[0].x, 
-    //         hitbox[0].y
-    //     );
-    // }
 }

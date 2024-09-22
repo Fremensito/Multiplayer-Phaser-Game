@@ -1,11 +1,7 @@
-import { GameObjects, Math as PMath, Scene } from "phaser";
+import { GameObjects, Math as PMath} from "phaser";
 import { WorldManager } from "../managers/WorldManager";
-import { ScytheGirl } from "./sctythe-girl/ScytheGirl";
 import { CombatAbility } from "../classes/combat/CombatAbility";
-import { drawLines } from "../utils/Debugger";
-import { NETManager } from "../managers/NETManager";
-import { Enemy } from "./Enemy";
-import { Game } from "../scenes/Game";
+import SAT from "sat";
 
 export class AliveEntity extends GameObjects.Sprite{
     speed:number;
@@ -16,9 +12,12 @@ export class AliveEntity extends GameObjects.Sprite{
     PI = PMath.PI2/2;
     health: number;
     id:string;
+
+    //For client collision prediction
     boxHeight: number;
     boxWidth: number;
     boxRect: GameObjects.Rectangle;
+
     debugMode = false;
     box: SAT.Box;
     partition: string;
@@ -26,10 +25,11 @@ export class AliveEntity extends GameObjects.Sprite{
     abilities?: Map<string, CombatAbility>;
     mainPlayer = false;
 
-    // generateDebugRect(scene: Scene){
-    //     this.boxRect = new GameObjects.Rectangle(scene, this.x, this.y, this.boxWidth, this.boxHeight)
-    //     this.boxRect.setStrokeStyle(1, 0xee0000);
-    // }
+    generateCollider(x:number, y:number, width: number, height: number){
+        this.boxHeight = width;
+        this.boxWidth = height;
+        this.box = new SAT.Box(new SAT.Vector(x, y), this.boxWidth, this.boxHeight)
+    }
 
     setPartition(){
         WorldManager.mapPartitions.get(Math.floor(this.x/WorldManager.width).toString() + "-" +  
@@ -93,7 +93,7 @@ export class AliveEntity extends GameObjects.Sprite{
     }
 
      //Updates the direction to the last point indicated by cursor
-     updateDirection(){
+    updateDirection(){
         const direction = new PMath.Vector2(this.pointToMove.x - this.getCenter().x, this.pointToMove.y - this.getCenter().y);
         this.direction = direction.normalize();
     }
@@ -109,22 +109,7 @@ export class AliveEntity extends GameObjects.Sprite{
     update(delta:number){
     }
 
-    // debug(){
-    //     // if(!this.debugMode){
-    //     //     this.scene.add.existing(this.boxRect)
-    //     //     this.debugMode = true;
-    //     // }
-    //     // this.boxRect.x = this.x;
-    //     // this.boxRect.y = this.y;
-    //     // this.boxRect.depth = 3000;
-    //     if(NETManager.room){
-    //         Game.graphics.lineStyle(1, 0xff0909);
-    //         if(this instanceof Enemy)
-    //             drawLines(NETManager.room.state.enemies.get(this.id)!.box)
-    //         else if(this instanceof ScytheGirl){
-    //             drawLines(NETManager.room.state.scytheGirls.get(this.id)!.box)
-    //         }
-    //         Game.graphics.lineStyle(1, 0xff4c4a);
-    //     }
-    // }
+    getDamageClient(damage:number){}
+
+    getDamage(health:number){}
 }

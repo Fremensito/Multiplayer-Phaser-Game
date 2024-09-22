@@ -1,23 +1,29 @@
 import { Math, Scene} from "phaser";
-import { AliveEntity } from "./AliveEntity";
-import { IEnemy } from "../interfaces/Enemy";
-import { HealthBar } from "../classes/HealthBar";
-import { WorldManager } from "../managers/WorldManager";
-import { DamageText } from "../classes/DamageText";
+import { AliveEntity } from "../AliveEntity";
+import { IEnemy } from "../../interfaces/Enemy";
+import { HealthBar } from "../../classes/HealthBar";
+import { WorldManager } from "../../managers/WorldManager";
+import { DamageText } from "../../classes/DamageText";
 import SAT from "sat";
-import { GHOST } from "../utils/AssetsGlobals";
-import { CharacterAnimator } from "../utils/CharacterAnimator";
-import { Game } from "../scenes/Game";
-import { drawLines } from "../utils/Debugger";
-import { NETManager } from "../managers/NETManager";
+import { GHOST } from "../../utils/AssetsGlobals";
+import { CharacterAnimator } from "../../utils/CharacterAnimator";
+import { Game } from "../../scenes/Game";
+import { drawLines } from "../../utils/Debugger";
+import { NETManager } from "../../managers/NETManager";
 
-export class Enemy extends AliveEntity{
+export class Ghost extends AliveEntity{
     static animationsGenerated = false;
-    getHitAnims = {
-        front: "ghost get hit front",
-        right: "ghost get hit right",
-        left: "ghost get hit left",
-        back: "ghost get hit back"
+    // getHitAnims = {
+    //     front: "ghost get hit front",
+    //     right: "ghost get hit right",
+    //     left: "ghost get hit left",
+    //     back: "ghost get hit back"
+    // }
+    attackAnims = {
+        front: "ghost attack front",
+        right: "ghost attack right",
+        left: "ghost attack left",
+        back: "ghost attack back"
     }
     getHit
     healthBar: HealthBar
@@ -39,25 +45,25 @@ export class Enemy extends AliveEntity{
         this.healthBar = new HealthBar(scene, data.x, data.y - 13, data.health);
         // this.setSensor(true)
 
-        if(!Enemy.animationsGenerated){
+        if(!Ghost.animationsGenerated){
             CharacterAnimator.generateAnimations(scene,"ghost walk front", "ghost", 0, 7, 8);
             CharacterAnimator.generateAnimations(scene,"ghost walk right",  "ghost", 8, 15, 8);
             CharacterAnimator.generateAnimations(scene,"ghost walk left",  "ghost", 16, 23, 8);
             CharacterAnimator.generateAnimations(scene,"ghost walk back",  "ghost", 24, 31, 8);
 
-            CharacterAnimator.generateAnimations(scene,this.getHitAnims.front, GHOST.getHit, 0, 1, 6)
-            CharacterAnimator.generateAnimations(scene,this.getHitAnims.right,  GHOST.getHit, 2, 3, 6)
-            CharacterAnimator.generateAnimations(scene,this.getHitAnims.left, GHOST.getHit, 4,5, 6)
-            CharacterAnimator.generateAnimations(scene,this.getHitAnims.back, GHOST.getHit, 6, 6, 6)
-            Enemy.animationsGenerated=true
+            // CharacterAnimator.generateAnimations(scene,this.getHitAnims.front, GHOST.getHit, 0, 1, 6)
+            // CharacterAnimator.generateAnimations(scene,this.getHitAnims.right,  GHOST.getHit, 2, 3, 6)
+            // CharacterAnimator.generateAnimations(scene,this.getHitAnims.left, GHOST.getHit, 4,5, 6)
+            // CharacterAnimator.generateAnimations(scene,this.getHitAnims.back, GHOST.getHit, 6, 6, 6)
+            Ghost.animationsGenerated=true
         }
 
         this.getHit = scene.sound.add(GHOST.getHit);
         this.getHit.volume = 0.5
-        
-        this.boxWidth = 5;
-        this.boxHeight = 10;
-        this.box = new SAT.Box(new SAT.Vector(data.x - this.boxWidth/2, data.y - this.boxHeight/2), this.boxWidth, this.boxHeight)
+
+        //TO DO: quit magic numbers 5, 10 (server side)
+        this.generateCollider(data.x - this.boxWidth/2, data.y - this.boxHeight/2, 5, 10)
+
         // this.generateDebugRect(scene)
         //this.preFX?.addShadow(1, 1, undefined, 10, 0xf10023);
         //this.postFX.addGlow(0xffffff, 3)
@@ -75,17 +81,17 @@ export class Enemy extends AliveEntity{
         }else if(!this.anims.isPlaying)
             this.updateBasicAnimation(["ghost walk front", "ghost walk left", "ghost walk back", "ghost walk right"], -1, 1);
         this.updateDirection();
-        if(!this.idle && !this.attacking){
-            // this.x += this.speed*this.direction.x*delta
-            // this.y += this.speed*this.direction.y*delta
-        }
+        // if(!this.idle && !this.attacking){
+        //     // this.x += this.speed*this.direction.x*delta
+        //     // this.y += this.speed*this.direction.y*delta
+        // }
         // else{
         //     this.setVelocity(0,0)
         // }
-        if(this.checkPositionGoal()){
-            this.idle = true;
-            // this.setVelocity(0,0);
-        }
+        // if(this.checkPositionGoal()){
+        //     this.idle = true;
+        //     // this.setVelocity(0,0);
+        // }
         this.healthBar.update(this.x, this.y - 13)
         if(Game.debug){
             if(NETManager.room, NETManager.room.state.enemies.get(this.id)){

@@ -1,6 +1,6 @@
 import { Scene } from "phaser";
 import { IAbility } from "../../../interfaces/Ability";
-import { Enemy } from "../../../objects/Enemy";
+import { Ghost } from "../../../objects/enemies/Ghost";
 import { WorldManager } from "../../../managers/WorldManager";
 import { CombatAbility } from "../CombatAbility";
 import SAT from "sat";
@@ -10,7 +10,7 @@ import { AliveEntity } from "../../../objects/AliveEntity";
 export class WAbility extends CombatAbility{
 
     scene: Scene;
-    enemiesHit = new Array<Enemy>()
+    enemiesHit = new Array<Ghost>()
     damage = 10
     static animsCreated = false;
 

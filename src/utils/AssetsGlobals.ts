@@ -22,5 +22,7 @@ export const MAP = {
 export const GHOST = {
     loaded: false,
     idle: "ghost",
-    getHit: "ghost get hit"
+    getHit: "ghost get hit",
+    attack: "ghost attack",
+    attackVFX: "ghost attack vfx",
 }

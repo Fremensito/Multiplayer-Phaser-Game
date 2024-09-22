@@ -1,10 +1,8 @@
 import { AliveEntity } from "../AliveEntity";
-import {Scene, Math, GameObjects} from "phaser";
+import {Scene, Math} from "phaser";
 import { ICharacter } from "../../interfaces/Character";
-import { QAbility } from "../../classes/combat/scythe-girl/QAbility";
 import { WAbility } from "../../classes/combat/scythe-girl/WAbility";
 import { CombatAbility } from "../../classes/combat/CombatAbility";
-import SAT from "sat";
 import { SCYTHE_GIRL } from "../../utils/AssetsGlobals";
 import { QSAbility } from "../../classes/combat/skeleton/QSAbility";
 import { PCControlsScytheGirl } from "./PCControlsScytheGirl";
@@ -14,6 +12,7 @@ import { CharacterAnimator } from "../../utils/CharacterAnimator";
 import { Game } from "../../scenes/Game";
 import { NETManager } from "../../managers/NETManager";
 import { drawLines } from "../../utils/Debugger";
+import { QAbility } from "../../classes/combat/scythe-girl/QAbility";
 
 export class ScytheGirl extends AliveEntity{
     created = false
@@ -87,9 +86,8 @@ export class ScytheGirl extends AliveEntity{
         this.QSound = scene.sound.add(SCYTHE_GIRL.QSound)
         this.QSound.volume = 0.5
 
-        this.boxHeight = 10;
-        this.boxWidth = 10;
-        this.box = new SAT.Box(new SAT.Vector(data.x - this.boxWidth/2, data.y - this.boxHeight/2), this.boxWidth, this.boxHeight)
+        //TO DO: quit magic numbers 10, 10 (server side)
+        this.generateCollider(data.x - this.boxWidth/2, data.y - this.boxHeight/2, 10, 10)
         //this.generateDebugRect(scene);
     }
 

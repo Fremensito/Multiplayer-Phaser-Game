@@ -2,9 +2,9 @@ import { Math } from "phaser";
 import { CharactersManager } from "../../managers/CharactersManager";
 import { ScytheGirl } from "./ScytheGirl";
 import { NETManager } from "../../managers/NETManager";
-import { QAbility } from "../../classes/combat/scythe-girl/QAbility";
 import { SCYTHE_GIRL } from "../../utils/AssetsGlobals";
 import { ScytheGirlNetManager } from "./ScytheGirlNetManager";
+import { QAbility } from "../../classes/combat/scythe-girl/QAbility";
 
 export class ScytheGirlManager extends CharactersManager{
     useQ(character:ScytheGirl, vector:Math.Vector2){

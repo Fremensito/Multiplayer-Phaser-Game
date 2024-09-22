@@ -30,6 +30,8 @@ export class AssetsLoader{
     static loadGhost(scene: Scene){
         scene.load.spritesheet(GHOST.idle, `${this.ghostURL}ghost-idle.png`, {frameWidth:64, frameHeight: 64})
         scene.load.spritesheet(GHOST.getHit, `${this.ghostURL}ghost-get-hit.png`,  {frameWidth:64, frameHeight: 64})
+        scene.load.spritesheet(GHOST.attack, `${this.ghostURL}ghost-attack.png`, {frameWidth:64, frameHeight: 64})
+        scene.load.spritesheet(GHOST.attackVFX, `${this.ghostURL}ghost-attack-vfx.png`, {frameWidth: 64, frameHeight: 64})
         scene.load.audio(GHOST.getHit, `${this.generalSounds}get-hit2.wav`)
     }
 }

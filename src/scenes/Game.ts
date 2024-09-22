@@ -2,7 +2,7 @@ import { GameObjects, Scene, Tilemaps} from 'phaser';
 import { Math } from 'phaser';
 import { Player } from '../classes/Player';
 import { NETManager } from '../managers/NETManager';
-import { Enemy } from '../objects/Enemy';
+import { Ghost } from '../objects/enemies/Ghost';
 import { WorldManager } from '../managers/WorldManager';
 import { MAP } from '../utils/AssetsGlobals';
 import { AssetsLoader } from '../utils/AssetsLoader';
@@ -14,7 +14,7 @@ import { colyseusSDK } from '../utils/Colyseus';
 
 export class Game extends Scene
 {   
-    static debug = true;
+    static debug = false;
     static graphics: GameObjects.Graphics;
     character:AliveEntity;
     player: Player
@@ -22,7 +22,7 @@ export class Game extends Scene
     backgroundLoop: number;
     delta:number;
     timeElapsed = 0;
-    enemy:Enemy
+    enemy:Ghost
     created = false;
     partitionWidth = 200;
 

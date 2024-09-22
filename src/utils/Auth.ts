@@ -1,5 +1,4 @@
 import { Client } from "colyseus.js";
-import { colyseusSDK } from "./Colyseus.js";
 import { DISCORD_CLIENT_ID, discordSDK } from "./DiscordSDK.js";
 
 export async function authenticate(colyseusSDK: Client) {

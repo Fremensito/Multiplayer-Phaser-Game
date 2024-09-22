@@ -4,7 +4,7 @@ import { Math as PMath, Scenes } from "phaser";
 import { Vector2 } from "../interfaces/Vector2";
 import { IEnemy } from "../interfaces/Enemy";
 import { WorldManager } from "./WorldManager";
-import { Enemy } from "../objects/Enemy";
+import { Ghost } from "../objects/enemies/Ghost";
 import { Client, Room } from "colyseus.js";
 import { SAliveEntity } from "../interfaces/SAliveEntity";
 import { RoomState } from "../schemas/RoomState";
@@ -72,6 +72,7 @@ export class NETManager{
                     enemy.saveLastPosition()
                     enemy.x = PMath.Linear(enemy.x, e.x, interpolationFactor)
                     enemy.y = PMath.Linear(enemy.y, e.y, interpolationFactor)
+                    enemy.idle = e.idle;
                     enemy.updatePartition()
                 }
             })
@@ -102,6 +103,7 @@ export class NETManager{
             this.receiveWalk(data.id, data.direction);
         });
         
+        //Needed to update the direction of the enemy
         this.room.onMessage("em", (data: {id: string, vector: PMath.Vector2})=>{
             this.receiveEnemyMovement(data.id, data.vector);
         });
@@ -132,7 +134,7 @@ export class NETManager{
     
     static addEnemy(enemy:IEnemy){
         if(!WorldManager.enemies.get(enemy.id)){
-            let worldEnemy = new Enemy(this.scene, enemy)
+            let worldEnemy = new Ghost(this.scene, enemy)
             WorldManager.enemies.set(enemy.id, worldEnemy)
             // console.log(WorldManager.mapParitions.get(
             //     {
@@ -164,7 +166,7 @@ export class NETManager{
     }
 
     private static receiveEnemyMovement(id:string, vector:PMath.Vector2){
-        if(WorldManager.enemies.get(id) != undefined){
+        if(WorldManager.enemies.has(id)){
             WorldManager.enemies.get(id)!.idle = false;
             WorldManager.enemies.get(id)!.changeDirectionInput(vector);
             WorldManager.enemies.get(id)!.update(this.scene.delta)

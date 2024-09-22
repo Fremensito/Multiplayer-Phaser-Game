@@ -1,6 +1,6 @@
 import { Player } from "../classes/Player";
 import { SAliveEntity } from "../interfaces/SAliveEntity";
-import { Enemy } from "../objects/Enemy";
+import { Ghost } from "../objects/enemies/Ghost";
 import { NETManager } from "./NETManager";
 import SAT from "sat";
 import { Math as PMath} from "phaser";
@@ -14,7 +14,7 @@ export class WorldManager{
     static delta = 0;
 
     static mainPlayer: Player;
-    static enemies = new Map<string, Enemy>();
+    static enemies = new Map<string, AliveEntity>();
     static scytheGirls = new Map<string, ScytheGirl>();
     static aliveEntities = new Map<string, SAliveEntity>();
     static mapPartitions = new Map<string, Array<AliveEntity>>()
@@ -36,7 +36,7 @@ export class WorldManager{
             if(player){
                 //console.log(player.partition)
                 this.mapPartitions.get(player.partition)?.forEach(e=>{
-                    if((e instanceof Enemy) && SAT.testPolygonPolygon(e.box.toPolygon(), player.box.toPolygon())){
+                    if((e instanceof Ghost) && SAT.testPolygonPolygon(e.box.toPolygon(), player.box.toPolygon())){
                         count++;
                         player.saveLastPosition()
                         let new_direction = (new PMath.Vector2(player.x-e.x, player.y - e.y)).normalize();
