@@ -63,7 +63,7 @@ export class NETManager{
             this.deletePlayer(sessionID)
         })
 
-        this.room.state.enemies.onAdd(e=>{
+        this.room.state.basicMeleeEnemies.onAdd(e=>{
             e.onChange(()=>{
                 if(WorldManager.enemies.get(e.id)){
                     let interpolationFactor = 0.7
@@ -113,7 +113,7 @@ export class NETManager{
         })
 
         this.room.onMessage("ed", (data: {id:string, damage:number})=>{
-            console.log(data)
+            //console.log(data)
             WorldManager.enemies.get(data.id)!.getDamageClient(data.damage)
         })
 
@@ -126,7 +126,7 @@ export class NETManager{
     }
 
     static addPlayer(character:ICharacter){
-        console.log(CharactersProvider.callbacks[character.characterClass])
+        //console.log(CharactersProvider.callbacks[character.characterClass])
         if(!WorldManager.scytheGirls.get(character.id)){
             WorldManager.scytheGirls.set(character.id, CharactersProvider.callbacks[character.characterClass](this.scene, character))
         }

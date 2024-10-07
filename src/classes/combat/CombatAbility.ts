@@ -1,6 +1,7 @@
 import { GameObjects, Scene } from "phaser";
 import { IAbility } from "../../interfaces/Ability";
 import { PI } from "../../utils/GameUtils";
+import { AliveEntity } from "../../objects/AliveEntity";
 
 export class CombatAbility extends GameObjects.Sprite{
     available: boolean;
@@ -22,7 +23,7 @@ export class CombatAbility extends GameObjects.Sprite{
         scene.add.existing(this)
     }
 
-    update(delta: number){
+    update(delta: number, entity:AliveEntity){
         if(!this.available){
             this.cooldowntime += delta;
             if(this.cooldowntime/this.cooldown*2*PI > PI*2){

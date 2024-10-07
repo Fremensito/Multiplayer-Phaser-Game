@@ -4,6 +4,8 @@ import { IAbility } from "../../../interfaces/Ability";
 import { SCYTHE_GIRL } from "../../../utils/AssetsGlobals";
 import { NETManager } from "../../../managers/NETManager";
 import { drawLines } from "../../../utils/Debugger";
+import { Game } from "../../../scenes/Game";
+import { AliveEntity } from "../../../objects/AliveEntity";
 
 export class QAbility extends CombatAbility{
 
@@ -54,14 +56,21 @@ export class QAbility extends CombatAbility{
         super.updatePosition(x, y)
     }
 
-    debug(){
+    update(delta:number, entity: AliveEntity){
+        super.update(delta, entity)
+        if(Game.debug)
+            this.debug(entity.id)
+    }
+
+    debug(id:string){
         if(NETManager.room){
-            NETManager.room.state.scytheGirls.forEach(v=>{
-                drawLines(v.q.up);
-                drawLines(v.q.down);
-                drawLines(v.q.right);
-                drawLines(v.q.left);
-            })
+            let character = NETManager.room.state.scytheGirls.get(id)!
+            if(character){
+                drawLines(character.q.up);
+                drawLines(character.q.down);
+                drawLines(character.q.right);
+                drawLines(character.q.left);
+            }
         }
     }
 }

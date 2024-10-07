@@ -10,6 +10,7 @@ import { CharacterAnimator } from "../../utils/CharacterAnimator";
 import { Game } from "../../scenes/Game";
 import { drawLines } from "../../utils/Debugger";
 import { NETManager } from "../../managers/NETManager";
+import { EnemyStraightAttack } from "../../classes/combat/basic-enemies/EnemyStraightAttack";
 
 export class Ghost extends AliveEntity{
     static animationsGenerated = false;
@@ -30,6 +31,7 @@ export class Ghost extends AliveEntity{
     name = "ghost"
     destroyed = false;
     box: SAT.Box;
+    bassicAttack: EnemyStraightAttack;
     
     constructor(scene:Scene, data:IEnemy){
         super(scene, data.x, data.y, "ghost", 0)
@@ -71,6 +73,7 @@ export class Ghost extends AliveEntity{
         //this.postFX.addGlow(0xff4040, 6)
         this.box.pos.x = (this.x - this.boxWidth/2)
         this.box.pos.y = (this.y - this.boxHeight/2)
+        this.bassicAttack = new EnemyStraightAttack();
     }
 
     update(delta: number){
@@ -94,12 +97,13 @@ export class Ghost extends AliveEntity{
         // }
         this.healthBar.update(this.x, this.y - 13)
         if(Game.debug){
-            if(NETManager.room, NETManager.room.state.enemies.get(this.id)){
+            if(NETManager.room, NETManager.room.state.basicMeleeEnemies.get(this.id)){
                 Game.graphics.lineStyle(1, 0xff0909);
-                drawLines(NETManager.room.state.enemies.get(this.id)!.box)
+                drawLines(NETManager.room.state.basicMeleeEnemies.get(this.id)!.box)
                 Game.graphics.lineStyle(1, 0x13e8e8);
             }
         }
+        this.bassicAttack.update(this)
         this.box.pos.x = (this.x - this.boxWidth/2)
         this.box.pos.y = (this.y - this.boxHeight/2)
         //this.updatePartition()

@@ -14,7 +14,7 @@ import { colyseusSDK } from '../utils/Colyseus';
 
 export class Game extends Scene
 {   
-    static debug = false;
+    static debug = true;
     static graphics: GameObjects.Graphics;
     character:AliveEntity;
     player: Player
@@ -104,8 +104,8 @@ export class Game extends Scene
         this.layer.x = 0;
         this.layer.y = 0;
         this.layer.scale = 1;
-        this.layer.setSkipCull(true);
-        this.partition()
+        //this.layer.setSkipCull(true);
+        //this.partition()
     }
 
     partition(){

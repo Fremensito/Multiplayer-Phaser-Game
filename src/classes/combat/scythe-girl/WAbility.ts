@@ -27,12 +27,12 @@ export class WAbility extends CombatAbility{
         this.enemiesHit = [];
     }
 
-    doDamage(character: AliveEntity){
-        WorldManager.enemies.forEach(e=>{
-            if(!this.enemiesHit.includes(e) && (new SAT.Vector(character.x - e.x, character.y -e.y)).len() <= this.range){
-                e.getDamageClient(10)
-                this.enemiesHit.push(e);
-            }
-        })
-    }
+    // doDamage(character: AliveEntity){
+    //     WorldManager.enemies.forEach(e=>{
+    //         if(!this.enemiesHit.includes(e) && (new SAT.Vector(character.x - e.x, character.y -e.y)).len() <= this.range){
+    //             e.getDamageClient(10)
+    //             this.enemiesHit.push(e);
+    //         }
+    //     })
+    // }
 }

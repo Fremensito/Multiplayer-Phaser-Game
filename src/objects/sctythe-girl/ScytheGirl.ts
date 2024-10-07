@@ -171,24 +171,16 @@ export class ScytheGirl extends AliveEntity{
         this.depth = this.y
         this.QAbility.updatePosition(this.x, this.y);
         if(Game.debug){
-            this.QAbility.debug();
             if(NETManager.room && NETManager.room.state.scytheGirls.get(this.id)){
                 Game.graphics.lineStyle(1, 0xff0909);
                 drawLines(NETManager.room.state.scytheGirls.get(this.id)!.box)
                 Game.graphics.lineStyle(1, 0x13e8e8);
             }
+            //this.QAbility.debug();
         }
         this.WAbility.updatePosition(this.x, this.y);
-        this.QAbility.update(delta)
-        this.WAbility.update(delta)
-        //¡this.QSAbility.debug(this.x, this.y);
-        //this.WAbility.updateW(delta);
-        // console.log("speed: " + this.speed)
-        //console.log(this.x, this.y)
-        //console.log(this.scene.anims.get("W").duration, 1/12*5*1000)
-        // console.log(this.direction)
-        //NETManager.sendState(this.idle, this.direction)
-        //this.debug();
+        this.QAbility.update(delta, this)
+        this.WAbility.update(delta, this)
         this.updatePartition()
         this.box.pos.x = (this.x - this.boxWidth/2)
         this.box.pos.y = (this.y - this.boxHeight/2)
