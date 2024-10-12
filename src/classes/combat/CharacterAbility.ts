@@ -3,7 +3,7 @@ import { IAbility } from "../../interfaces/Ability";
 import { PI } from "../../utils/GameUtils";
 import { AliveEntity } from "../../objects/AliveEntity";
 
-export class CombatAbility extends GameObjects.Sprite{
+export class CharacterAbility extends GameObjects.Sprite{
     available: boolean;
     cooldown: number;
     cooldowntime: number;
@@ -38,19 +38,6 @@ export class CombatAbility extends GameObjects.Sprite{
             this.available = false;
             this.cooldowntime = 0;
         }
-    }
-
-    generateAnimations(name: string, texture: string, start:number, end: number, speed: number){
-        this.scene.anims.create({
-            key: name,
-            frames: this.scene.anims.generateFrameNumbers(texture, {
-                start: start,
-                end: end
-            }),
-            frameRate: speed,
-            showOnStart: true,
-            hideOnComplete: true,
-        })
     }
 
     updatePosition(x:number, y:number){

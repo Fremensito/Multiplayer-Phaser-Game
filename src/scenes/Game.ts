@@ -14,7 +14,7 @@ import { colyseusSDK } from '../utils/Colyseus';
 
 export class Game extends Scene
 {   
-    static debug = true;
+    static debug = false;
     static graphics: GameObjects.Graphics;
     character:AliveEntity;
     player: Player
@@ -33,7 +33,7 @@ export class Game extends Scene
 
     preload ()
     {   
-        this.load.setPath('/.proxy/assets');
+        this.load.setPath('/assets');
 
         AssetsLoader.loadGeneral(this);
         AssetsLoader.loadMap(this)

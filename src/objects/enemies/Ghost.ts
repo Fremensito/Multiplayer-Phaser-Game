@@ -6,26 +6,33 @@ import { WorldManager } from "../../managers/WorldManager";
 import { DamageText } from "../../classes/DamageText";
 import SAT from "sat";
 import { GHOST } from "../../utils/AssetsGlobals";
-import { CharacterAnimator } from "../../utils/CharacterAnimator";
+import { Animator } from "../../utils/Animator";
 import { Game } from "../../scenes/Game";
 import { drawLines } from "../../utils/Debugger";
 import { NETManager } from "../../managers/NETManager";
 import { EnemyStraightAttack } from "../../classes/combat/basic-enemies/EnemyStraightAttack";
 
 export class Ghost extends AliveEntity{
-    static animationsGenerated = false;
     // getHitAnims = {
     //     front: "ghost get hit front",
     //     right: "ghost get hit right",
     //     left: "ghost get hit left",
     //     back: "ghost get hit back"
     // }
+    walkingAnims = {
+        front: "ghost walk front",
+        right: "ghost walk right",
+        left: "ghost walk left",
+        back: "ghost walk back"
+    }
+
     attackAnims = {
         front: "ghost attack front",
         right: "ghost attack right",
         left: "ghost attack left",
         back: "ghost attack back"
     }
+
     getHit
     healthBar: HealthBar
     name = "ghost"
@@ -48,15 +55,15 @@ export class Ghost extends AliveEntity{
         // this.setSensor(true)
 
         if(!Ghost.animationsGenerated){
-            CharacterAnimator.generateAnimations(scene,"ghost walk front", "ghost", 0, 7, 8);
-            CharacterAnimator.generateAnimations(scene,"ghost walk right",  "ghost", 8, 15, 8);
-            CharacterAnimator.generateAnimations(scene,"ghost walk left",  "ghost", 16, 23, 8);
-            CharacterAnimator.generateAnimations(scene,"ghost walk back",  "ghost", 24, 31, 8);
+            Animator.generateCharacterAnimations(scene,this.walkingAnims.front, "ghost", 0, 7, 8);
+            Animator.generateCharacterAnimations(scene,this.walkingAnims.right,  "ghost", 8, 15, 8);
+            Animator.generateCharacterAnimations(scene,this.walkingAnims.left,  "ghost", 16, 23, 8);
+            Animator.generateCharacterAnimations(scene,this.walkingAnims.back,  "ghost", 24, 31, 8);
 
-            // CharacterAnimator.generateAnimations(scene,this.getHitAnims.front, GHOST.getHit, 0, 1, 6)
-            // CharacterAnimator.generateAnimations(scene,this.getHitAnims.right,  GHOST.getHit, 2, 3, 6)
-            // CharacterAnimator.generateAnimations(scene,this.getHitAnims.left, GHOST.getHit, 4,5, 6)
-            // CharacterAnimator.generateAnimations(scene,this.getHitAnims.back, GHOST.getHit, 6, 6, 6)
+            Animator.generateCharacterAnimations(scene,this.attackAnims.front, GHOST.attack, 0, 6, data.abilities[0].speed)
+            Animator.generateCharacterAnimations(scene,this.attackAnims.right,  GHOST.attack, 7, 13, data.abilities[0].speed)
+            Animator.generateCharacterAnimations(scene,this.attackAnims.left, GHOST.attack, 14,20, data.abilities[0].speed)
+            Animator.generateCharacterAnimations(scene,this.attackAnims.back, GHOST.attack, 21, 27, data.abilities[0].speed)
             Ghost.animationsGenerated=true
         }
 
@@ -73,28 +80,29 @@ export class Ghost extends AliveEntity{
         //this.postFX.addGlow(0xff4040, 6)
         this.box.pos.x = (this.x - this.boxWidth/2)
         this.box.pos.y = (this.y - this.boxHeight/2)
-        this.bassicAttack = new EnemyStraightAttack();
+        this.bassicAttack = new EnemyStraightAttack(scene, data.abilities[0], this.x, this.y, GHOST.attackVFX, 
+            {
+                up: "GhostUp",
+                right: "GhostRight",
+                down: "GhostDown",
+                left: "GhostLeft"
+            });
     }
 
     update(delta: number){
         //this.saveLastPosition();
         this.depth = this.y
-        if(!this.anims.getName().includes("ghost get hit")){
-            this.updateBasicAnimation(["ghost walk front", "ghost walk left", "ghost walk back", "ghost walk right"], -1, 1);
-        }else if(!this.anims.isPlaying)
-            this.updateBasicAnimation(["ghost walk front", "ghost walk left", "ghost walk back", "ghost walk right"], -1, 1);
+        if(!this.attacking)
+            this.updateBasicAnimation([this.walkingAnims.front, this.walkingAnims.left, 
+            this.walkingAnims.back, this.walkingAnims.right], -1, 1);
+        // else
+        //     this.updateBasicAnimation([this.attackAnims.front, this.attackAnims.left, this.attackAnims.back, this.attackAnims.right],
+        //     0, 0)
+        
+        if(this.attacking && !this.anims.isPlaying)
+            this.attacking = false;
+        
         this.updateDirection();
-        // if(!this.idle && !this.attacking){
-        //     // this.x += this.speed*this.direction.x*delta
-        //     // this.y += this.speed*this.direction.y*delta
-        // }
-        // else{
-        //     this.setVelocity(0,0)
-        // }
-        // if(this.checkPositionGoal()){
-        //     this.idle = true;
-        //     // this.setVelocity(0,0);
-        // }
         this.healthBar.update(this.x, this.y - 13)
         if(Game.debug){
             if(NETManager.room, NETManager.room.state.basicMeleeEnemies.get(this.id)){
@@ -110,15 +118,6 @@ export class Ghost extends AliveEntity{
     }
 
     getDamageClient(damage:number){
-        //console.log("got damage")
-        // this.updateBasicAnimation([
-        //     this.getHitAnims.front, 
-        //     this.getHitAnims.left, 
-        //     this.getHitAnims.back, 
-        //     this.getHitAnims.right],
-        //     0,
-        //     0
-        // )
         this.setTintFill(0xfafafa);
         this.scene.time.addEvent({
             delay: 100,
@@ -150,14 +149,5 @@ export class Ghost extends AliveEntity{
             delay: 100,
             callbackScope:this
         })
-    }
-
-    randomMovement(){
-        if(Math.Between(1, 10) > 2){
-            this.idle = false
-            let x = Math.Between(280, 400)
-            let y = Math.Between(280, 400)
-            this.changeDirectionInput(new Math.Vector2(x,y))
-        }
     }
 }

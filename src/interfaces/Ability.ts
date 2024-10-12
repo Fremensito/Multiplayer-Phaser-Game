@@ -22,3 +22,10 @@ export interface UIShaders{
     icon: GameObjects.Shader;
     slot: GameObjects.Shader;
 }
+
+export interface StraighAttackDirections{
+    down:string;
+    right:string;
+    left:string;
+    up:string;
+}

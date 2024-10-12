@@ -18,7 +18,7 @@ export class ScytheGirlManager extends CharactersManager{
             character.changeDirectionAttack(vector);
         else{
             character.direction = new Math.Vector2(vector.x, vector.y)
-            console.log(character.direction)
+            //console.log(character.direction)
         }
 
         this.selectQDirection(character)
@@ -38,22 +38,22 @@ export class ScytheGirlManager extends CharactersManager{
             // but the attack button is still being pressed
             if(character.id == NETManager.room.sessionId)
                 ScytheGirlNetManager.sendQ(character.direction, q.directions.down);
-            q.doDamage(q.directions.down);
+            q.attack(q.directions.down);
         }else
         if(character.direction.angle() >= 3*this.PI/4 && character.direction.angle() < 5*this.PI/4 ){
             if(character.id == NETManager.room.sessionId)
                 ScytheGirlNetManager.sendQ(character.direction, q.directions.left);
-            q.doDamage(q.directions.left);
+            q.attack(q.directions.left);
         }else
         if(character.direction.angle() >= 5*this.PI/4 && character.direction.angle() < 7*this.PI/4){
             if(character.id == NETManager.room.sessionId)
                 ScytheGirlNetManager.sendQ(character.direction, q.directions.up);
-            q.doDamage(q.directions.up);
+            q.attack(q.directions.up);
         }else
         if(character.direction.angle() >= 7*this.PI/4 || character.direction.angle() < this.PI/4){
             if(character.id == NETManager.room.sessionId)
                 ScytheGirlNetManager.sendQ(character.direction, q.directions.right);
-            q.doDamage(q.directions.right);
+            q.attack(q.directions.right);
         }
     }
 

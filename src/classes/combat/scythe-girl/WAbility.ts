@@ -1,15 +1,12 @@
 import { Scene } from "phaser";
 import { IAbility } from "../../../interfaces/Ability";
 import { Ghost } from "../../../objects/enemies/Ghost";
-import { WorldManager } from "../../../managers/WorldManager";
-import { CombatAbility } from "../CombatAbility";
-import SAT from "sat";
+import { CharacterAbility } from "../CharacterAbility";
 import { SCYTHE_GIRL } from "../../../utils/AssetsGlobals";
-import { AliveEntity } from "../../../objects/AliveEntity";
+import { Animator } from "../../../utils/Animator";
 
-export class WAbility extends CombatAbility{
+export class WAbility extends CharacterAbility{
 
-    scene: Scene;
     enemiesHit = new Array<Ghost>()
     damage = 10
     static animsCreated = false;
@@ -18,7 +15,7 @@ export class WAbility extends CombatAbility{
         super(scene, ability, x, y, texture)
 
         if(!WAbility.animsCreated){
-            this.generateAnimations(SCYTHE_GIRL.WVFX, SCYTHE_GIRL.WVFX, 0, 6, ability.speed)
+            Animator.generateAbilityAnimations(this.scene, SCYTHE_GIRL.WVFX, SCYTHE_GIRL.WVFX, 0, 6, ability.speed)
             WAbility.animsCreated = true;
         }
     }

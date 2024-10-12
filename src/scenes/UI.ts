@@ -4,6 +4,8 @@ import { NETManager } from "../managers/NETManager";
 import { IAbility, UIShaders} from "../interfaces/Ability";
 import { UIAbility } from "../UI/UIAbility";
 import { AliveEntity } from "../objects/AliveEntity";
+import { ICharacter } from "../interfaces/Character";
+import { Profile } from "../UI/Profile";
 
 const shader = `
 precision mediump float;
@@ -48,6 +50,7 @@ const PI = Math.PI2/2;
 export class UI extends Scene{
 
     character: AliveEntity;
+    iCharacter: ICharacter
     abilities = new Map<string, UIAbility>();
     abilitiesContainer: AbilitiesContainer;
     abilityWidth = 32;
@@ -59,23 +62,30 @@ export class UI extends Scene{
         qSlot: "/Q-slot",
         qIcon: "Q-icon",
         wSlot: "W-slot",
-        wIcon: "W-icon"
+        wIcon: "W-icon",
+        profile: "profile",
+        health: "health"
     }
+
+    profile: Profile
     
-    constructor (abilities: Array<IAbility>, character:AliveEntity)
+    constructor (abilities: Array<IAbility>, character:AliveEntity, iCharacter:ICharacter)
     {
         super({key: "UI", active: true});
         this.abilities.set("Q", new UIAbility(abilities[0]))
         this.abilities.set("W", new UIAbility(abilities[1]));
         this.character = character;
+        this.iCharacter = iCharacter
     }
 
     preload(){
-        this.load.setPath('/.proxy/assets');
+        this.load.setPath('/assets');
         this.load.image(this.resources.qSlot, this.abilities.get("Q")!.UI.slotResource); 
         this.load.image(this.resources.qIcon, this.abilities.get("Q")!.UI.iconResource);
         this.load.image(this.resources.wSlot, this.abilities.get("W")!.UI.slotResource); 
         this.load.image(this.resources.wIcon, this.abilities.get("W")!.UI.iconResource);
+        this.load.image(this.resources.profile, this.iCharacter.profile)
+        this.load.spritesheet(this.resources.health, "/ui/health.png", {frameWidth:62, frameHeight:5})
     }
 
     create(){
@@ -112,6 +122,8 @@ export class UI extends Scene{
         this.abilities.forEach(a => shaders.push(a.shaders))
 
         this.abilitiesContainer.addElements(shaders)
+
+        this.profile = new Profile(this,0,0, this.resources.profile, this.resources.health, this.character.health)
     }
 
     makeAbilityShader(texture: string):GameObjects.Shader{
@@ -134,5 +146,6 @@ export class UI extends Scene{
         this.pingText.setText("PING: " + Math.RoundTo(NETManager.ping).toString())
         this.actionText.setText("ACTION: " + NETManager.action)
         this.character.abilities!.forEach((a, k) => this.abilities.get(k)!.update(a.available, a.cooldown, a.cooldowntime))
+        this.profile.health.update(delta, this.character.health)
     }
 }

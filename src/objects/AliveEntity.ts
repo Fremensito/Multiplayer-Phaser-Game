@@ -1,9 +1,12 @@
 import { GameObjects, Math as PMath} from "phaser";
 import { WorldManager } from "../managers/WorldManager";
-import { CombatAbility } from "../classes/combat/CombatAbility";
+import { CharacterAbility } from "../classes/combat/CharacterAbility";
 import SAT from "sat";
+import { DamageText } from "../classes/DamageText";
 
 export class AliveEntity extends GameObjects.Sprite{
+    static animationsGenerated = false;
+
     speed:number;
     idle: boolean;
     attacking: boolean;
@@ -22,8 +25,10 @@ export class AliveEntity extends GameObjects.Sprite{
     box: SAT.Box;
     partition: string;
     lastPosition =  {x: 0, y:0}
-    abilities?: Map<string, CombatAbility>;
+    abilities?: Map<string, CharacterAbility>;
     mainPlayer = false;
+
+    getHit:Phaser.Sound.NoAudioSound | Phaser.Sound.HTML5AudioSound | Phaser.Sound.WebAudioSound
 
     generateCollider(x:number, y:number, width: number, height: number){
         this.boxHeight = width;
@@ -107,9 +112,19 @@ export class AliveEntity extends GameObjects.Sprite{
     }
 
     update(delta:number){
+        
     }
 
-    getDamageClient(damage:number){}
+    getDamageClient(damage:number){
+        this.setTintFill(0xfafafa);
+        this.scene.time.addEvent({
+            delay: 100,
+            callbackScope: this,
+            callback: ()=>this.clearTint()
+        })
+        new DamageText(this.scene, this.x, this.y, PMath.RoundTo(damage))
+        this.getHit.play();
+    }
 
     getDamage(health:number){}
 }

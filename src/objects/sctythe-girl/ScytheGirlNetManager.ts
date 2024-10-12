@@ -12,6 +12,7 @@ export class ScytheGirlNetManager{
         generate: "gsg",
         q: "sgq",
         w: "sgw",
+        getDamage: "scythe girl got damage"
     }
 
     static set(room:Room<RoomState>){
@@ -21,6 +22,10 @@ export class ScytheGirlNetManager{
         
         room.onMessage(this.commands.w, (data: { id: string, direction: PMath.Vector2})=>{
             this.receiveW(data.id, data.direction)
+        })
+
+        room.onMessage(this.commands.getDamage, (data: {id:string, damage:number})=>{
+            this.receiveDamage(data.id, data.damage)
         })
     }
 
@@ -43,4 +48,11 @@ export class ScytheGirlNetManager{
     static sendW(direction:Vector2){
         NETManager.room.send(this.commands.w, direction)
     } 
+
+    private static receiveDamage(id:string, damage:number){
+        const character = WorldManager.scytheGirls.get(id)
+        if(character){
+            character.getDamageClient(damage)
+        }
+    }
 }

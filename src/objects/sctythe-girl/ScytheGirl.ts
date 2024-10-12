@@ -2,13 +2,13 @@ import { AliveEntity } from "../AliveEntity";
 import {Scene, Math} from "phaser";
 import { ICharacter } from "../../interfaces/Character";
 import { WAbility } from "../../classes/combat/scythe-girl/WAbility";
-import { CombatAbility } from "../../classes/combat/CombatAbility";
-import { SCYTHE_GIRL } from "../../utils/AssetsGlobals";
+import { CharacterAbility } from "../../classes/combat/CharacterAbility";
+import { GHOST, SCYTHE_GIRL } from "../../utils/AssetsGlobals";
 import { QSAbility } from "../../classes/combat/skeleton/QSAbility";
 import { PCControlsScytheGirl } from "./PCControlsScytheGirl";
 import { ScytheGirlManager } from "./ScytheGirlManager";
 import { CharacterManagersProvider } from "../../providers/CharacterManagersProvider";
-import { CharacterAnimator } from "../../utils/CharacterAnimator";
+import { Animator } from "../../utils/Animator";
 import { Game } from "../../scenes/Game";
 import { NETManager } from "../../managers/NETManager";
 import { drawLines } from "../../utils/Debugger";
@@ -42,14 +42,12 @@ export class ScytheGirl extends AliveEntity{
     character:ICharacter
     delta:number
     name = "character"
-    static animationsGenerated = false;
     //rectangle: GameObjects.Rectangle
 
     WSound;
     QSound;
 
     //debugMode = false;
-
     controls:PCControlsScytheGirl|undefined;
     manager:ScytheGirlManager;
 
@@ -63,6 +61,7 @@ export class ScytheGirl extends AliveEntity{
         this.speed =  data.speed
         this.idle = true;
         this.attacking = false;
+        this.health = data.health;
         scene.add.existing(this)
         this.id = data.id;
 
@@ -73,7 +72,7 @@ export class ScytheGirl extends AliveEntity{
         this.generateBasicAnimations(scene, data);
         
         //QAbility.createRight(this);
-        this.abilities = new Map<string, CombatAbility>();
+        this.abilities = new Map<string, CharacterAbility>();
         this.abilities.set("Q", new QAbility(scene, data.abilities[0], data.x, data.y, SCYTHE_GIRL.QVFX));
         this.QAbility = this.abilities.get("Q") as QAbility;
         this.abilities.set("W", new WAbility(scene, data.abilities[1], data.x, data.y, SCYTHE_GIRL.WVFX));
@@ -85,6 +84,8 @@ export class ScytheGirl extends AliveEntity{
         this.WSound.volume = 0.5
         this.QSound = scene.sound.add(SCYTHE_GIRL.QSound)
         this.QSound.volume = 0.5
+        this.getHit = scene.sound.add(GHOST.getHit);
+        this.getHit.volume = 0.5
 
         //TO DO: quit magic numbers 10, 10 (server side)
         this.generateCollider(data.x - this.boxWidth/2, data.y - this.boxHeight/2, 10, 10)
@@ -94,22 +95,22 @@ export class ScytheGirl extends AliveEntity{
     generateBasicAnimations(scene: Scene, data:ICharacter){
 
         if(!ScytheGirl.animationsGenerated){
-            CharacterAnimator.generateAnimations(scene,this.walkingAnimations.front, SCYTHE_GIRL.walking, 0, 5, 8);
-            CharacterAnimator.generateAnimations(scene,this.walkingAnimations.right, SCYTHE_GIRL.walking, 6, 11, 8);
-            CharacterAnimator.generateAnimations(scene,this.walkingAnimations.left, SCYTHE_GIRL.walking, 12, 17, 8);
-            CharacterAnimator.generateAnimations(scene,this.walkingAnimations.back, SCYTHE_GIRL.walking, 18, 23, 8);
+            Animator.generateCharacterAnimations(scene,this.walkingAnimations.front, SCYTHE_GIRL.walking, 0, 5, 8);
+            Animator.generateCharacterAnimations(scene,this.walkingAnimations.right, SCYTHE_GIRL.walking, 6, 11, 8);
+            Animator.generateCharacterAnimations(scene,this.walkingAnimations.left, SCYTHE_GIRL.walking, 12, 17, 8);
+            Animator.generateCharacterAnimations(scene,this.walkingAnimations.back, SCYTHE_GIRL.walking, 18, 23, 8);
 
-            CharacterAnimator.generateAnimations(scene,this.idleAnimations.front, SCYTHE_GIRL.idle, 0, 1, 2);
-            CharacterAnimator.generateAnimations(scene,this.idleAnimations.right, SCYTHE_GIRL.idle, 2, 3, 2);
-            CharacterAnimator.generateAnimations(scene,this.idleAnimations.left, SCYTHE_GIRL.idle, 4 ,5 ,2);
-            CharacterAnimator.generateAnimations(scene,this.idleAnimations.back, SCYTHE_GIRL.idle, 6, 7, 2);
+            Animator.generateCharacterAnimations(scene,this.idleAnimations.front, SCYTHE_GIRL.idle, 0, 1, 2);
+            Animator.generateCharacterAnimations(scene,this.idleAnimations.right, SCYTHE_GIRL.idle, 2, 3, 2);
+            Animator.generateCharacterAnimations(scene,this.idleAnimations.left, SCYTHE_GIRL.idle, 4 ,5 ,2);
+            Animator.generateCharacterAnimations(scene,this.idleAnimations.back, SCYTHE_GIRL.idle, 6, 7, 2);
 
-            CharacterAnimator.generateAnimations(scene, this.attackAnimations.front, SCYTHE_GIRL.Q, 0, 6, data.abilities[0].speed);
-            CharacterAnimator.generateAnimations(scene, this.attackAnimations.right, SCYTHE_GIRL.Q, 7, 13, data.abilities[0].speed);
-            CharacterAnimator.generateAnimations(scene, this.attackAnimations.left, SCYTHE_GIRL.Q, 14, 20, data.abilities[0].speed);
-            CharacterAnimator.generateAnimations(scene, this.attackAnimations.back, SCYTHE_GIRL.Q, 21, 27, data.abilities[0].speed);
+            Animator.generateCharacterAnimations(scene, this.attackAnimations.front, SCYTHE_GIRL.Q, 0, 6, data.abilities[0].speed);
+            Animator.generateCharacterAnimations(scene, this.attackAnimations.right, SCYTHE_GIRL.Q, 7, 13, data.abilities[0].speed);
+            Animator.generateCharacterAnimations(scene, this.attackAnimations.left, SCYTHE_GIRL.Q, 14, 20, data.abilities[0].speed);
+            Animator.generateCharacterAnimations(scene, this.attackAnimations.back, SCYTHE_GIRL.Q, 21, 27, data.abilities[0].speed);
 
-            CharacterAnimator.generateAnimations(scene, "W", SCYTHE_GIRL.W, 0, 4, data.abilities[1].speed)
+            Animator.generateCharacterAnimations(scene, "W", SCYTHE_GIRL.W, 0, 4, data.abilities[1].speed)
             ScytheGirl.animationsGenerated = true
         }
     }

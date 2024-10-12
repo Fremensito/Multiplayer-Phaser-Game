@@ -1,3 +1,5 @@
+import { IAbility } from "./Ability";
+
 export interface IEnemy{
     speed: number;
     x:number;
@@ -9,5 +11,6 @@ export interface IEnemy{
     velocityX:number;
     velocityY:number;
     health: number;
+    abilities: Array<IAbility>;
     id: string;
 }

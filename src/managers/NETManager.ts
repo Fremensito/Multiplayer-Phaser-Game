@@ -14,6 +14,7 @@ import { PCControlsProvider } from "../providers/PCControlsProvider";
 import { CharacterManagersProvider } from "../providers/CharacterManagersProvider";
 import { ScytheGirlNetManager } from "../objects/sctythe-girl/ScytheGirlNetManager";
 import { CharactersProvider } from "../providers/CharactersProvider";
+import { BasicMeleeEnemyNetManager } from "../objects/enemies/BasicMeleeEnemyNetManager";
 
 export class NETManager{
 
@@ -48,12 +49,14 @@ export class NETManager{
         
         this.room.state.scytheGirls.onAdd((character, sessionID:string)=>{
             character.onChange(()=>{
-                if(character.id != this.room.sessionId){
-                    let interpolationFactor = 0.7
-                    let player = WorldManager.scytheGirls.get(character.id)!;
-                    player.idle = character.idle
-                    player.x = PMath.Linear(player.x, character.x, interpolationFactor)
-                    player.y = PMath.Linear(player.y, character.y, interpolationFactor)
+                let player = WorldManager.scytheGirls.get(character.id)!;
+                if(player){
+                    if(character.id != this.room.sessionId){
+                        let interpolationFactor = 0.7
+                        player.idle = character.idle
+                        player.x = PMath.Linear(player.x, character.x, interpolationFactor)
+                        player.y = PMath.Linear(player.y, character.y, interpolationFactor)
+                    }
                     player.health = character.health;
                 }
             })
@@ -86,7 +89,7 @@ export class NETManager{
                     let character = WorldManager.scytheGirls.get(this.room.sessionId)!
                     character.controls = PCControlsProvider.getScytheGirlPcControls(this.scene.input)
                     WorldManager.mainPlayer = new Player(character, true);
-                    this.scene.game.scene.add("UI", new UI(c.abilities, WorldManager.mainPlayer.character), true);
+                    this.scene.game.scene.add("UI", new UI(c.abilities, WorldManager.mainPlayer.character, c), true);
                     this.scene.fixCamera(WorldManager.mainPlayer.character);
                 }
             })
@@ -118,6 +121,7 @@ export class NETManager{
         })
 
         ScytheGirlNetManager.set(this.room)
+        BasicMeleeEnemyNetManager.set(this.room)
     }
 
     static getPing(){
@@ -127,13 +131,13 @@ export class NETManager{
 
     static addPlayer(character:ICharacter){
         //console.log(CharactersProvider.callbacks[character.characterClass])
-        if(!WorldManager.scytheGirls.get(character.id)){
+        if(!WorldManager.scytheGirls.has(character.id)){
             WorldManager.scytheGirls.set(character.id, CharactersProvider.callbacks[character.characterClass](this.scene, character))
         }
     }
     
     static addEnemy(enemy:IEnemy){
-        if(!WorldManager.enemies.get(enemy.id)){
+        if(!WorldManager.enemies.has(enemy.id)){
             let worldEnemy = new Ghost(this.scene, enemy)
             WorldManager.enemies.set(enemy.id, worldEnemy)
             // console.log(WorldManager.mapParitions.get(
