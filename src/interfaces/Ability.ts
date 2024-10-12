@@ -23,7 +23,7 @@ export interface UIShaders{
     slot: GameObjects.Shader;
 }
 
-export interface StraighAttackDirections{
+export interface StraightAttackDirections{
     down:string;
     right:string;
     left:string;

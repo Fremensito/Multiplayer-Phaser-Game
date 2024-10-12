@@ -1,4 +1,4 @@
-import { GameObjects, Scene } from "phaser";
+import { Scene } from "phaser";
 import { CharacterAbility } from "../CharacterAbility";
 import { IAbility } from "../../../interfaces/Ability";
 import { SCYTHE_GIRL } from "../../../utils/AssetsGlobals";
@@ -6,7 +6,7 @@ import { NETManager } from "../../../managers/NETManager";
 import { drawLines } from "../../../utils/Debugger";
 import { Game } from "../../../scenes/Game";
 import { AliveEntity } from "../../../objects/AliveEntity";
-import { Animator } from "../../../utils/Animator";
+import { StraightDirectionAttacks } from "../utils/StraightDirectionAttacks";
 
 export class QAbility extends CharacterAbility{
 
@@ -19,38 +19,18 @@ export class QAbility extends CharacterAbility{
     }
 
     attackWidth = 32
-
-    graphics: GameObjects.Graphics;
+    frames = 7
 
     constructor(scene:Scene, ability: IAbility, x:number, y: number, texture: string){
         super(scene, ability, x, y, texture)
         if(!QAbility.animsCreated){
-            Animator.generateAbilityAnimations(this.scene, this.directions.down, SCYTHE_GIRL.QVFX, 0, 6, ability.speed)
-            Animator.generateAbilityAnimations(this.scene, this.directions.right, SCYTHE_GIRL.QVFX, 7, 13, ability.speed)
-            Animator.generateAbilityAnimations(this.scene, this.directions.left, SCYTHE_GIRL.QVFX, 14, 20, ability.speed)
-            Animator.generateAbilityAnimations(this.scene, this.directions.up, SCYTHE_GIRL.QVFX, 21, 27, ability.speed)
+            StraightDirectionAttacks.generateAnimations(this.scene, this.directions, SCYTHE_GIRL.QVFX, this.frames, ability)
             QAbility.animsCreated = true;
         }
     }
 
     attack(direction:string){
-        switch(direction){
-            case this.directions.up:
-                this.play({key: this.directions.up, repeat: 0, startFrame: 0})
-                break;
-            
-            case this.directions.right:
-                this.play({key: this.directions.right, repeat: 0, startFrame: 0})
-                break;
-            
-            case this.directions.down:
-                this.play({key: this.directions.down, repeat: 0, startFrame: 0})
-                break;
-            
-            case this.directions.left:
-                this.play({key: this.directions.left, repeat: 0, startFrame: 0})
-                break;
-        }
+        StraightDirectionAttacks.attack(direction, this.directions, this)
     }
 
     updatePosition(x:number, y:number){

@@ -80,7 +80,7 @@ export class Ghost extends AliveEntity{
         //this.postFX.addGlow(0xff4040, 6)
         this.box.pos.x = (this.x - this.boxWidth/2)
         this.box.pos.y = (this.y - this.boxHeight/2)
-        this.bassicAttack = new EnemyStraightAttack(scene, data.abilities[0], this.x, this.y, GHOST.attackVFX, 
+        this.bassicAttack = new EnemyStraightAttack(scene, data.abilities[0], this.x, this.y, GHOST.attackVFX, 7,
             {
                 up: "GhostUp",
                 right: "GhostRight",
@@ -139,11 +139,12 @@ export class Ghost extends AliveEntity{
         this.scene.time.addEvent({
             callback: ()=>{
                 this.healthBar.destroy();
+                this.bassicAttack.destroy();
                 //console.log(WorldManager.enemies.delete(this.id))
-                this.destroy()
                 let entities = WorldManager.mapPartitions.get(this.partition)
                 entities?.splice(entities.indexOf(this), 1)
                 WorldManager.enemies.delete(this.id)
+                this.destroy()
             },
             loop: false,
             delay: 100,
