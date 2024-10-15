@@ -1,5 +1,6 @@
 export const GENERAL={
-    getHit: "get-hit"
+    getHit: "get-hit",
+    runeInfo: "rune-info"
 }
 
 export const SCYTHE_GIRL ={

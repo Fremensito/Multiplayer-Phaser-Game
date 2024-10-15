@@ -6,6 +6,8 @@ import { UIAbility } from "../UI/UIAbility";
 import { AliveEntity } from "../objects/AliveEntity";
 import { ICharacter } from "../interfaces/Character";
 import { Profile } from "../UI/Profile";
+import { UIRune } from "../UI/UIRune";
+import { GENERAL } from "../utils/AssetsGlobals";
 
 const shader = `
 precision mediump float;
@@ -68,6 +70,7 @@ export class UI extends Scene{
     }
 
     profile: Profile
+    runeCard: UIRune
     
     constructor (abilities: Array<IAbility>, character:AliveEntity, iCharacter:ICharacter)
     {
@@ -79,7 +82,7 @@ export class UI extends Scene{
     }
 
     preload(){
-        this.load.setPath('/assets');
+        this.load.setPath('assets');
         this.load.image(this.resources.qSlot, this.abilities.get("Q")!.UI.slotResource); 
         this.load.image(this.resources.qIcon, this.abilities.get("Q")!.UI.iconResource);
         this.load.image(this.resources.wSlot, this.abilities.get("W")!.UI.slotResource); 
@@ -124,6 +127,7 @@ export class UI extends Scene{
         this.abilitiesContainer.addElements(shaders)
 
         this.profile = new Profile(this,0,0, this.resources.profile, this.resources.health, this.character.health)
+        this.runeCard = new UIRune(this.scene.scene, 300, 300, GENERAL.runeInfo)
     }
 
     makeAbilityShader(texture: string):GameObjects.Shader{

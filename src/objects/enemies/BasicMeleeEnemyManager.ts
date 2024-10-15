@@ -3,7 +3,7 @@ import { Ghost } from "./Ghost";
 
 export class BasicMeleeEnemyManager{
     static attack(id:string, direction:string){
-        console.log(direction)
+        //console.log(direction)
         const enemy = WorldManager.enemies.get(id)! as Ghost
         enemy.attacking = true;
         switch(direction){

@@ -3,7 +3,7 @@ import { GameObjects, Scene } from "phaser"
 export class DamageText extends GameObjects.Text{
     constructor(scene:Scene, x: number, y: number, damage:number){
         super(scene, x-3.5, y-10, damage.toString(), { 
-            fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' ,
+            fontFamily: 'InTheDarkness, "Goudy Bookletter 1911", Times, serif' ,
             color: "#fbf236",
             fontSize: 7
         })

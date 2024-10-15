@@ -6,9 +6,11 @@ export class AssetsLoader{
     private static mapURL = "map/"
     private static ghostURL = "enemies/ghost/"
     private static generalSounds = "sounds/"
+    private static generalUI = "ui/"
 
     static loadGeneral(scene: Scene){
         scene.load.audio(GENERAL.getHit, `${this.generalSounds}get-hit2.wav`)
+        scene.load.image(GENERAL.runeInfo, `${this.generalUI}rune-card.png`)
     }
 
     static loadScythe(scene: Scene){

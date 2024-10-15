@@ -33,7 +33,7 @@ export class Game extends Scene
 
     preload ()
     {   
-        this.load.setPath('/assets');
+        this.load.setPath('assets');
 
         AssetsLoader.loadGeneral(this);
         AssetsLoader.loadMap(this)

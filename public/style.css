@@ -16,3 +16,8 @@ body {
     align-items: center;
 }
 
+@font-face {
+    font-family: "InTheDarkness";
+    src: url("assets/fonts/inthedarkness.ttf");
+}
+
