@@ -17,7 +17,7 @@ export class UIRune extends GameObjects.Image{
         super(scene, x, y, texture)
         this.scale = this.scaleFactor;
         scene.add.existing(this)
-        this.generateText(scene, "Dragons Breath", "DMG: + 3\n\n Buenoh diah Ludociel")
+        this.generateText(scene, "Dragons Breath", "DMG: + 3")
     }
 
     generateText(scene: Scene, name:string, description:string){

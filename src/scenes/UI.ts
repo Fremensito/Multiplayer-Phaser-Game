@@ -1,5 +1,5 @@
 import { Display, GameObjects, Math, Scene, Textures } from "phaser";
-import { AbilitiesContainer } from "../UI/AbilitiesContainer";
+import { HorizontalContainer } from "../UI/HorizontalContainer";
 import { NETManager } from "../managers/NETManager";
 import { IAbility, UIShaders} from "../interfaces/Ability";
 import { UIAbility } from "../UI/UIAbility";
@@ -7,66 +7,41 @@ import { AliveEntity } from "../objects/AliveEntity";
 import { ICharacter } from "../interfaces/Character";
 import { Profile } from "../UI/Profile";
 import { UIRune } from "../UI/UIRune";
-import { GENERAL } from "../utils/AssetsGlobals";
+import { Misc } from "../UI/UIMisc";
 
-const shader = `
-precision mediump float;
-
-varying vec2 outTexCoord;
-uniform sampler2D uTexture;
-uniform float testing;
-uniform float cooldown_time;
-
-float angleBetweenPoints(vec2 p1, vec2 p2) {
-
-    vec2 v1 = p2 - p1;
-    vec2 v2 = normalize(v1); // Normalize the vector
-    float dotProduct = dot(v2, vec2(0.0, 1.0)); // Dot product with the y-axis
-    float angle = acos(dotProduct);
-    if(p2.x >= 0.5){
-        return angle;
-    }
-    else{
-        return 3.14 * 2.0 - angle;
-    }
-}
-
-void main() {
-    vec4 color = texture2D(uTexture, vec2(outTexCoord.x, 1.0 - outTexCoord.y));
-    if(cooldown_time >= 0.0){
-        vec4 cooldown_color = vec4(color.r*0.5, color.g*0.5, color.b*0.9, color.a);
-        float angle = angleBetweenPoints(vec2(0.5,0.5), vec2(outTexCoord.x, outTexCoord.y));
-        if(angle < cooldown_time){
-            gl_FragColor = color;
-        }
-        else{
-            gl_FragColor = cooldown_color;
-        }
-    }
-    else
-        gl_FragColor = color;
-}
-`
 const PI = Math.PI2/2;
 
 export class UI extends Scene{
-
+    static UIItemFocus = false
     character: AliveEntity;
-    iCharacter: ICharacter
+    iCharacter: ICharacter;
     abilities = new Map<string, UIAbility>();
-    abilitiesContainer: AbilitiesContainer;
+    abilitiesContainer: HorizontalContainer;
+    miscs = new Map<string, Misc>();
+    miscsDictionary = {
+        runes: "runes",
+        inventory: "inventory"
+    }
+    miscContainer: HorizontalContainer;
     abilityWidth = 32;
     abilityHeight = 32;
+    miscWidth = 64;
+    miscInContainerWidth = 36;
     text: GameObjects.Text;
     pingText: GameObjects.Text;
     actionText: GameObjects.Text;
     resources = {
-        qSlot: "/Q-slot",
+        brightness: "brightness",
+        ability: "ability-shader",
+        qSlot: "Q-slot",
         qIcon: "Q-icon",
         wSlot: "W-slot",
         wIcon: "W-icon",
         profile: "profile",
-        health: "health"
+        health: "health",
+        runesSlot: "runes-slot",
+        runesIcon: "runes-icon",
+        inventoryIcon: "inventory-icon"
     }
 
     profile: Profile
@@ -76,8 +51,10 @@ export class UI extends Scene{
     {
         super({key: "UI", active: true});
         this.abilities.set("Q", new UIAbility(abilities[0]))
-        this.abilities.set("W", new UIAbility(abilities[1]));
-        this.character = character;
+        this.abilities.set("W", new UIAbility(abilities[1]))
+        this.miscs.set(this.miscsDictionary.inventory, new Misc())
+        this.miscs.set(this.miscsDictionary.runes, new Misc())
+        this.character = character
         this.iCharacter = iCharacter
     }
 
@@ -87,59 +64,92 @@ export class UI extends Scene{
         this.load.image(this.resources.qIcon, this.abilities.get("Q")!.UI.iconResource);
         this.load.image(this.resources.wSlot, this.abilities.get("W")!.UI.slotResource); 
         this.load.image(this.resources.wIcon, this.abilities.get("W")!.UI.iconResource);
+
         this.load.image(this.resources.profile, this.iCharacter.profile)
         this.load.spritesheet(this.resources.health, "/ui/health.png", {frameWidth:62, frameHeight:5})
+
+        this.load.image(this.resources.runesIcon, "ui/runes.png")
+        this.load.image(this.resources.inventoryIcon, "ui/inventory.png")
+        this.load.image(this.resources.runesSlot, "ui/runes-slot.png")
+
+        this.load.glsl("cooldown", "shaders/cooldown.glsl", "fragment")
+        this.load.glsl("slotshine", "shaders/slotshine.glsl", "fragment")
     }
 
     create(){
-        this.text = new GameObjects.Text(this, 20, 20, "0", { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' });
-        this.text.setSize(5,5);
+        console.log(this.cache.shader.get("slotshine"))
+        // this.add.existing(new GameObjects.Image(this, 200, 200, this.resources.runesSlot))
+        this.text = new GameObjects.Text(this, 850, 20, "0", { fontFamily: 'InTheDarkness' });
         this.add.existing(this.text);
 
-        this.pingText = new GameObjects.Text(this, 20, 40, NETManager.ping.toString(), { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' })
-        this.pingText.setSize(5,5)
+        this.pingText = new GameObjects.Text(this, 850, 40, NETManager.ping.toString(), { fontFamily: 'InTheDarkness' })
         this.add.existing(this.pingText)
 
-        this.actionText = new GameObjects.Text(this, 20, 60, NETManager.action, { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' })
-        this.actionText.setSize(5,5)
+        this.actionText = new GameObjects.Text(this, 850, 60, NETManager.action, { fontFamily: 'InTheDarkness' })
         this.add.existing(this.actionText)
 
-        this.cache.shader.add("ability shader", new Display.BaseShader("ability shader", shader, undefined, { cooldown_time: { type: "1f", value: -1.0 } }))
+        this.addAbilities();
 
-        this.abilitiesContainer = new AbilitiesContainer(
+        this.addMiscs();
+
+        this.profile = new Profile(this,0,0, this.resources.profile, this.resources.health, this.character.health)
+        //this.runeCard = new UIRune(this.scene.scene, 300, 300, GENERAL.runeInfo)
+    }
+
+    addAbilities(){
+        this.cache.shader.add(this.resources.ability, new Display.BaseShader(this.resources.ability, this.cache.shader.get("cooldown").fragmentSrc, undefined, { cooldown_time: { type: "1f", value: -1.0 } }))
+
+        this.abilitiesContainer = new HorizontalContainer(
             this.abilityWidth * 4, 
             this.abilityHeight,
             new Math.Vector2(this.game.config.width as number /2, this.game.config.height as number - this.abilityHeight)
         )
-
         this.abilities.get("Q")!.addShaders(
-            this.makeAbilityShader(this.resources.qSlot), 
-            this.makeAbilityShader(this.resources.qIcon)
+            this.makeShader(this.resources.qSlot, this.resources.ability, this.abilityWidth, this.abilityHeight), 
+            this.makeShader(this.resources.qIcon, this.resources.ability, this.abilityWidth, this.abilityHeight)
         )
         this.abilities.get("W")!.addShaders(
-            this.makeAbilityShader(this.resources.wSlot), 
-            this.makeAbilityShader(this.resources.wIcon)
+            this.makeShader(this.resources.wSlot, this.resources.ability, this.abilityWidth, this.abilityHeight), 
+            this.makeShader(this.resources.wIcon, this.resources.ability, this.abilityWidth, this.abilityHeight)
         )
 
-        const shaders = new Array<UIShaders>
+        const shaders = new Array<UIShaders>()
         this.abilities.forEach(a => shaders.push(a.shaders))
 
         this.abilitiesContainer.addElements(shaders)
-
-        this.profile = new Profile(this,0,0, this.resources.profile, this.resources.health, this.character.health)
-        this.runeCard = new UIRune(this.scene.scene, 300, 300, GENERAL.runeInfo)
     }
 
-    makeAbilityShader(texture: string):GameObjects.Shader{
-        const shader = this.add.shader(
-            "ability shader", 
-            0, 
-            0, 
-            this.abilityWidth, 
-            this.abilityHeight, 
-            [texture],
-        )
+    addMiscs(){
+        this.cache.shader.add(this.resources.brightness, new Display.BaseShader(this.resources.brightness, this.cache.shader.get("slotshine").fragmentSrc, undefined, { brightness: { type: "1f", value: 1.0 } }))
 
+        this.miscContainer = new HorizontalContainer(
+            this.miscInContainerWidth * 4,
+            this.miscInContainerWidth,
+            new Math.Vector2((this.game.config.width as number) - (this.game.config.width as number)/4,
+            this.game.config.height as number - this.miscInContainerWidth
+            )
+        )
+                
+        this.miscs.get(this.miscsDictionary.inventory)!.setAssets(this.scene.scene, 
+            this.makeShader(this.resources.runesSlot, this.resources.brightness, this.miscWidth, this.miscWidth), 
+            this.resources.runesIcon)
+        this.miscs.get(this.miscsDictionary.runes)!.setAssets(this.scene.scene, 
+            this.makeShader(this.resources.runesSlot, this.resources.brightness, this.miscWidth, this.miscWidth), 
+            this.resources.inventoryIcon)
+        const miscs = new Array<Misc>()
+        this.miscs.forEach(m => miscs.push(m))
+        this.miscContainer.addElements(miscs)
+    }
+
+    makeShader(texture: string, shaderKey:string, width:number, height:number,):GameObjects.Shader{
+        const shader = this.add.shader(
+            shaderKey, 
+            0, 
+            0, 
+            width, 
+            height, 
+            [texture]
+        )
         this.textures.get(texture).setFilter(Textures.FilterMode.NEAREST);
         shader.scale = 2;
         return shader;
