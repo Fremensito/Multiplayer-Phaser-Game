@@ -1,12 +1,13 @@
 import { Math } from "phaser";
 import { UIShaders } from "../interfaces/Ability";
 import { Misc } from "./UIMisc";
+import { UIAbility } from "./UIAbility";
 
 export class HorizontalContainer{
     width: number;
     height: number;
     private center: Math.Vector2;
-    private elements: Array<UIShaders>|Array<Misc>
+    private elements: Array<UIAbility>|Array<Misc>
 
     constructor(width:number, height: number, center: Math.Vector2){
         this.width = width;
@@ -14,9 +15,9 @@ export class HorizontalContainer{
         this.center = center;
     }
 
-    addElements(elements: Array<UIShaders>|Array<Misc>){
+    addElements(elements: Array<UIAbility>|Array<Misc>){
         this.elements = elements;
-        let element:UIShaders|Misc;
+        let element:UIAbility|Misc;
         for(let i:number = 0; i < elements.length; i++){
             element = this.elements[i]
 

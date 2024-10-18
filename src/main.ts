@@ -1,3 +1,4 @@
+import { SlotShine } from './pipelines/SlotShine';
 import { Game as MainGame } from './scenes/Game';
 import { Game, Scale,Types } from 'phaser';
 
@@ -26,7 +27,7 @@ import { Game, Scale,Types } from 'phaser';
         ],
         pixelArt: true,
         //backgroundColor: 0x05358e,
-        transparent:true
+        transparent:true,
     };
     new Game(config);
 })();

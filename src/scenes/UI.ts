@@ -1,4 +1,4 @@
-import { Display, GameObjects, Math, Scene, Textures } from "phaser";
+import { Display, GameObjects, Math, Renderer, Scene, Textures } from "phaser";
 import { HorizontalContainer } from "../UI/HorizontalContainer";
 import { NETManager } from "../managers/NETManager";
 import { IAbility, UIShaders} from "../interfaces/Ability";
@@ -8,6 +8,9 @@ import { ICharacter } from "../interfaces/Character";
 import { Profile } from "../UI/Profile";
 import { UIRune } from "../UI/UIRune";
 import { Misc } from "../UI/UIMisc";
+import { SlotShine } from "../pipelines/SlotShine";
+import { Cooldown } from "../pipelines/Cooldown";
+import { TestPipline } from "../pipelines/TestPipeline";
 
 const PI = Math.PI2/2;
 
@@ -23,9 +26,9 @@ export class UI extends Scene{
         inventory: "inventory"
     }
     miscContainer: HorizontalContainer;
+    slotShine:SlotShine
     abilityWidth = 32;
     abilityHeight = 32;
-    miscWidth = 64;
     miscInContainerWidth = 36;
     text: GameObjects.Text;
     pingText: GameObjects.Text;
@@ -72,12 +75,13 @@ export class UI extends Scene{
         this.load.image(this.resources.inventoryIcon, "ui/inventory.png")
         this.load.image(this.resources.runesSlot, "ui/runes-slot.png")
 
-        this.load.glsl("cooldown", "shaders/cooldown.glsl", "fragment")
-        this.load.glsl("slotshine", "shaders/slotshine.glsl", "fragment")
+        this.load.glsl("cooldown", "shaders/cooldown.fx", "fragment")
+        this.load.glsl("slotshine", "shaders/slotshine.fx", "fragment")
+        this.load.glsl("testPipe", "shaders/test.fx", "fragment")
     }
 
     create(){
-        console.log(this.cache.shader.get("slotshine"))
+        // console.log(this.cache.shader.get("slotshine"))
         // this.add.existing(new GameObjects.Image(this, 200, 200, this.resources.runesSlot))
         this.text = new GameObjects.Text(this, 850, 20, "0", { fontFamily: 'InTheDarkness' });
         this.add.existing(this.text);
@@ -88,39 +92,41 @@ export class UI extends Scene{
         this.actionText = new GameObjects.Text(this, 850, 60, NETManager.action, { fontFamily: 'InTheDarkness' })
         this.add.existing(this.actionText)
 
-        this.addAbilities();
+        Cooldown.shader = this.cache.shader.get("cooldown").fragmentSrc;
+        (this.renderer as Renderer.WebGL.WebGLRenderer).pipelines.addPostPipeline("testing2", Cooldown)
 
-        this.addMiscs();
+        SlotShine.shader = this.cache.shader.get("slotshine").fragmentSrc;
+        (this.renderer as Renderer.WebGL.WebGLRenderer).pipelines.addPostPipeline("testing", SlotShine);
+
+        TestPipline.shader = this.cache.shader.get("testPipe").fragmentSrc;
+        (this.renderer as Renderer.WebGL.WebGLRenderer).pipelines.addPostPipeline("testPipe", TestPipline);
+
+        this.addAbilities()
+        this.addMiscs()
+        this.test()
 
         this.profile = new Profile(this,0,0, this.resources.profile, this.resources.health, this.character.health)
+
         //this.runeCard = new UIRune(this.scene.scene, 300, 300, GENERAL.runeInfo)
     }
 
     addAbilities(){
-        this.cache.shader.add(this.resources.ability, new Display.BaseShader(this.resources.ability, this.cache.shader.get("cooldown").fragmentSrc, undefined, { cooldown_time: { type: "1f", value: -1.0 } }))
-
         this.abilitiesContainer = new HorizontalContainer(
             this.abilityWidth * 4, 
             this.abilityHeight,
             new Math.Vector2(this.game.config.width as number /2, this.game.config.height as number - this.abilityHeight)
         )
-        this.abilities.get("Q")!.addShaders(
-            this.makeShader(this.resources.qSlot, this.resources.ability, this.abilityWidth, this.abilityHeight), 
-            this.makeShader(this.resources.qIcon, this.resources.ability, this.abilityWidth, this.abilityHeight)
-        )
-        this.abilities.get("W")!.addShaders(
-            this.makeShader(this.resources.wSlot, this.resources.ability, this.abilityWidth, this.abilityHeight), 
-            this.makeShader(this.resources.wIcon, this.resources.ability, this.abilityWidth, this.abilityHeight)
-        )
+        this.abilities.get("Q")!.addShaders(this.scene.scene, this.resources.qSlot, this.resources.qIcon)
+        this.abilities.get("W")!.addShaders(this.scene.scene, this.resources.wSlot, this.resources.wIcon)
 
-        const shaders = new Array<UIShaders>()
-        this.abilities.forEach(a => shaders.push(a.shaders))
+        const abilities = new Array<UIAbility>()
+        this.abilities.forEach(a => abilities.push(a))
 
-        this.abilitiesContainer.addElements(shaders)
+        this.abilitiesContainer.addElements(abilities)
     }
 
     addMiscs(){
-        this.cache.shader.add(this.resources.brightness, new Display.BaseShader(this.resources.brightness, this.cache.shader.get("slotshine").fragmentSrc, undefined, { brightness: { type: "1f", value: 1.0 } }))
+        // this.cache.shader.add(this.resources.brightness, new Display.BaseShader(this.resources.brightness, this.cache.shader.get("slotshine").fragmentSrc, undefined, { brightness: { type: "1f", value: 1.0 } }))
 
         this.miscContainer = new HorizontalContainer(
             this.miscInContainerWidth * 4,
@@ -131,29 +137,36 @@ export class UI extends Scene{
         )
                 
         this.miscs.get(this.miscsDictionary.inventory)!.setAssets(this.scene.scene, 
-            this.makeShader(this.resources.runesSlot, this.resources.brightness, this.miscWidth, this.miscWidth), 
+            this.resources.runesSlot, 
             this.resources.runesIcon)
         this.miscs.get(this.miscsDictionary.runes)!.setAssets(this.scene.scene, 
-            this.makeShader(this.resources.runesSlot, this.resources.brightness, this.miscWidth, this.miscWidth), 
+            this.resources.runesSlot, 
             this.resources.inventoryIcon)
         const miscs = new Array<Misc>()
         this.miscs.forEach(m => miscs.push(m))
         this.miscContainer.addElements(miscs)
     }
 
-    makeShader(texture: string, shaderKey:string, width:number, height:number,):GameObjects.Shader{
-        const shader = this.add.shader(
-            shaderKey, 
-            0, 
-            0, 
-            width, 
-            height, 
-            [texture]
-        )
-        this.textures.get(texture).setFilter(Textures.FilterMode.NEAREST);
-        shader.scale = 2;
-        return shader;
+    test(){
+        const container = new GameObjects.Container(this.scene.scene, 200, 200)
+        container.add(new GameObjects.Image(this.scene.scene, 0,0, this.resources.runesSlot))
+        container.setPostPipeline(TestPipline)
+        this.add.existing(container)
     }
+
+    // makeShader(texture: string, shaderKey:string, width:number, height:number,):GameObjects.Shader{
+    //     const shader = this.add.shader(
+    //         shaderKey, 
+    //         0, 
+    //         0, 
+    //         width, 
+    //         height, 
+    //         [texture]
+    //     )
+    //     this.textures.get(texture).setFilter(Textures.FilterMode.NEAREST);
+    //     shader.scale = 2;
+    //     return shader;
+    // }
 
     update(time:number, delta: number){
         this.text.setText("FPS:" + (Math.RoundTo(1000/delta)).toString())
