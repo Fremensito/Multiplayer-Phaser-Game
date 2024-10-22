@@ -63,6 +63,7 @@ export class UI extends Scene{
     create(){
         // console.log(this.cache.shader.get("slotshine"))
         // this.add.existing(new GameObjects.Image(this, 200, 200, UIAssets.runesSlot))
+        // this.game.domContainer.style.pointerEvents = "none";
         this.text = new GameObjects.Text(this, 850, 20, "0", { fontFamily: 'InTheDarkness' });
         this.add.existing(this.text);
 
