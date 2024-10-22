@@ -1,6 +1,6 @@
 import { GameObjects } from "phaser";
 
 export class SlotIcon{
-    icon: GameObjects.Image;
-    slot: GameObjects.Image
+    icon: GameObjects.Image|null;
+    slot: GameObjects.Image;
 }
