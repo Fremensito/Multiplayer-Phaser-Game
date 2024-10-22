@@ -1,6 +1,21 @@
 export const GENERAL={
     getHit: "get-hit",
-    runeInfo: "rune-info"
+    runes: "runes"
+}
+
+export const UI = {
+    brightness: "brightness",
+    ability: "ability-shader",
+    qSlot: "Q-slot",
+    qIcon: "Q-icon",
+    wSlot: "W-slot",
+    wIcon: "W-icon",
+    profile: "profile",
+    health: "health",
+    runesSlot: "runes-slot",
+    runesIcon: "runes-icon",
+    runeInfo: "rune-info",
+    inventoryIcon: "inventory-icon"
 }
 
 export const SCYTHE_GIRL ={

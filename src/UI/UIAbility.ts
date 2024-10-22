@@ -2,14 +2,14 @@ import { GameObjects, Scene} from "phaser";
 import { IAbility, IUIAbility} from "../interfaces/Ability";
 import { PI } from "../utils/GameUtils";
 import { Cooldown } from "../pipelines/Cooldown";
+import { SlotIcon } from "./SlotIcon";
 
-export class UIAbility{
+export class UIAbility extends SlotIcon{
 
     UI: IUIAbility;
-    icon: GameObjects.Image;
-    slot: GameObjects.Image
 
     constructor(ability: IAbility){
+        super();
         this.UI = ability.UI;
     }
 

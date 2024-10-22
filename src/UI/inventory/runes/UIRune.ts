@@ -1,5 +1,5 @@
 import { GameObjects, Scene } from "phaser";
-import { InformationText } from "./InformationText";
+import { InformationText } from "../../InformationText";
 
 export class UIRune extends GameObjects.Image{
     scaleFactor = 4;

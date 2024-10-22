@@ -1,5 +1,7 @@
 import { Scene } from "phaser";
-import { GENERAL, GHOST, MAP, SCYTHE_GIRL } from "./AssetsGlobals";
+import { GENERAL, GHOST, MAP, SCYTHE_GIRL, UI } from "./AssetsGlobals";
+import { UIAbility } from "../UI/UIAbility";
+import { ICharacter } from "../interfaces/Character";
 
 export class AssetsLoader{
     private static scytheURL = "classes/scythe-girl/"
@@ -7,10 +9,33 @@ export class AssetsLoader{
     private static ghostURL = "enemies/ghost/"
     private static generalSounds = "sounds/"
     private static generalUI = "ui/"
+    private static runes = "runes/"
 
     static loadGeneral(scene: Scene){
         scene.load.audio(GENERAL.getHit, `${this.generalSounds}get-hit2.wav`)
-        scene.load.image(GENERAL.runeInfo, `${this.generalUI}rune-card.png`)
+        scene.load.image(UI.runeInfo, `${this.generalUI}rune-card.png`)
+    }
+
+    static loadUIElements(scene: Scene, abilities:Map<string, UIAbility>, iCharacter:ICharacter){
+
+        scene.load.image(UI.qSlot, abilities.get("Q")!.UI.slotResource); 
+        scene.load.image(UI.qIcon, abilities.get("Q")!.UI.iconResource);
+        scene.load.image(UI.wSlot, abilities.get("W")!.UI.slotResource); 
+        scene.load.image(UI.wIcon, abilities.get("W")!.UI.iconResource);
+
+        scene.load.image(UI.profile, iCharacter.profile)
+
+        scene.load.spritesheet(UI.health, "/ui/health.png", {frameWidth:62, frameHeight:5})
+
+        scene.load.image(UI.runesIcon, "ui/runes.png")
+        scene.load.image(UI.inventoryIcon, "ui/inventory.png")
+        scene.load.image(UI.runesSlot, "ui/runes-slot.png")
+        
+    }
+
+    static loadUIShaders(scene:Scene){
+        scene.load.glsl(UI.ability, "shaders/cooldown.fx", "fragment")
+        scene.load.glsl(UI.brightness, "shaders/slotshine.fx", "fragment")
     }
 
     static loadScythe(scene: Scene){
@@ -35,5 +60,9 @@ export class AssetsLoader{
         scene.load.spritesheet(GHOST.attack, `${this.ghostURL}ghost-attack.png`, {frameWidth:64, frameHeight: 64})
         scene.load.spritesheet(GHOST.attackVFX, `${this.ghostURL}ghost-attack-vfx.png`, {frameWidth: 64, frameHeight: 64})
         scene.load.audio(GHOST.getHit, `${this.generalSounds}get-hit2.wav`)
+    }
+
+    static loadRunes(scene:Scene){
+        scene.load.spritesheet(GENERAL.runes, `${this.runes}runes.png`, {frameWidth:32, frameHeight:32})
     }
 }
